@@ -1,0 +1,262 @@
+// ─────────────────────────────────────────────
+//  DineFlow — Digital Menu SaaS
+//  Prisma Schema
+// ─────────────────────────────────────────────
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// ─────────────────────────────────────────────
+//  USER  (admin login per venue)
+// ─────────────────────────────────────────────
+
+model User {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  password  String
+  role      Role     @default(ADMIN)
+  venueId   Int
+  venue     Venue    @relation(fields: [venueId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([venueId])
+}
+
+enum Role {
+  SUPER_ADMIN  // platform owner
+  ADMIN        // hotel/restaurant owner
+}
+
+// ─────────────────────────────────────────────
+//  VENUE  (each hotel / cafe / restaurant)
+// ─────────────────────────────────────────────
+
+model Venue {
+  id          Int       @id @default(autoincrement())
+  slug        String    @unique   // used in QR url  e.g. /menu/noora-hotel
+  name        String
+  tagline     String?
+  description String?   @db.Text  // "About us" story
+  logo        String?   // image url
+  coverPhoto  String?   // hero image url
+  phone       String?
+  email       String?
+  address     String?
+  city        String?
+  country     String?
+  latitude    Float?
+  longitude   Float?
+  currency    String    @default("ETB")
+  language    String    @default("en")
+  isActive    Boolean   @default(true)
+
+  // Business hours (stored as JSON)
+  // e.g. { mon: { open: "08:00", close: "22:00" }, ... }
+  businessHours Json?
+
+  // Social links
+  facebook    String?
+  instagram   String?
+  twitter     String?
+  tiktok      String?
+  website     String?
+
+  // Relations
+  users       User[]
+  theme       Theme?
+  categories  Category[]
+  menuItems   MenuItem[]
+  amenities   Amenity[]
+  reviews     Review[]
+  qrCodes     QRCode[]
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+// ─────────────────────────────────────────────
+//  THEME  (branding per venue — 1 to 1)
+// ─────────────────────────────────────────────
+
+model Theme {
+  id           Int     @id @default(autoincrement())
+  venueId      Int     @unique
+  venue        Venue   @relation(fields: [venueId], references: [id], onDelete: Cascade)
+
+  // Colors
+  bgColor      String  @default("#0d1f1a")   // page background
+  accentColor  String  @default("#c9a84c")   // gold / brand color
+  cardColor    String  @default("#122219")   // item card background
+  textColor    String  @default("#e8e0d0")   // main text
+
+  // Typography
+  fontDisplay  String  @default("'Cormorant Garamond', serif")  // headings
+  fontBody     String  @default("'DM Sans', sans-serif")        // body text
+
+  // Shape
+  borderRadius Int     @default(8)     // card corner radius in px
+  cardPadding  Int     @default(8)     // card inner padding in px
+  itemGap      Int     @default(6)     // gap between cards in px
+
+  // Feature toggles
+  showImages   Boolean @default(true)
+  showPrice    Boolean @default(true)
+  showMealTabs Boolean @default(true)
+  showDesc     Boolean @default(true)
+
+  updatedAt    DateTime @updatedAt
+}
+
+// ─────────────────────────────────────────────
+//  AMENITY  (wifi, parking, AC, pool …)
+// ─────────────────────────────────────────────
+
+model Amenity {
+  id       Int    @id @default(autoincrement())
+  venueId  Int
+  venue    Venue  @relation(fields: [venueId], references: [id], onDelete: Cascade)
+  name     String // "Free WiFi"
+  icon     String // lucide icon name e.g. "wifi"
+  sortOrder Int   @default(0)
+
+  @@index([venueId])
+}
+
+// ─────────────────────────────────────────────
+//  CATEGORY  (Burgers, Pizza, Hot Drinks …)
+// ─────────────────────────────────────────────
+
+model Category {
+  id        Int          @id @default(autoincrement())
+  venueId   Int
+  venue     Venue        @relation(fields: [venueId], references: [id], onDelete: Cascade)
+  name      String
+  type      CategoryType @default(FOOD)
+  icon      String?      // emoji or lucide icon name
+  image     String?      // optional category image
+  sortOrder Int          @default(0)
+  isActive  Boolean      @default(true)
+  items     MenuItem[]
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  @@index([venueId])
+}
+
+enum CategoryType {
+  FOOD
+  DRINK
+}
+
+// ─────────────────────────────────────────────
+//  MENU ITEM  (each dish / drink)
+// ─────────────────────────────────────────────
+
+model MenuItem {
+  id           Int        @id @default(autoincrement())
+  venueId      Int
+  venue        Venue      @relation(fields: [venueId], references: [id], onDelete: Cascade)
+  categoryId   Int
+  category     Category   @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  name         String
+  description  String?    @db.Text
+  image        String?
+
+  // Ingredients stored as JSON array
+  // e.g. ["Eggs", "Berbere", "Tomato", "Onion"]
+  ingredients  Json?
+
+  // Allergens stored as JSON array
+  // e.g. ["Gluten", "Dairy"]
+  allergens    Json?
+
+  // Tags e.g. ["Vegetarian", "Spicy", "Chef's Pick"]
+  tags         Json?
+
+  isAvailable  Boolean    @default(true)
+  isFeatured   Boolean    @default(false)
+  sortOrder    Int        @default(0)
+
+  variants     Variant[]
+
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  @@index([venueId])
+  @@index([categoryId])
+}
+
+// ─────────────────────────────────────────────
+//  VARIANT  (Full 350 ETB / Half 200 ETB …)
+// ─────────────────────────────────────────────
+
+model Variant {
+  id         Int      @id @default(autoincrement())
+  menuItemId Int
+  menuItem   MenuItem @relation(fields: [menuItemId], references: [id], onDelete: Cascade)
+  label      String   // "Full Plate", "Half", "Bottle", "Special"
+  price      Float
+  isDefault  Boolean  @default(false)
+  isAvailable Boolean @default(true)
+  sortOrder  Int      @default(0)
+
+  @@index([menuItemId])
+}
+
+// ─────────────────────────────────────────────
+//  REVIEW  (hotel, food, or service rating)
+// ─────────────────────────────────────────────
+
+model Review {
+  id          Int          @id @default(autoincrement())
+  venueId     Int
+  venue       Venue        @relation(fields: [venueId], references: [id], onDelete: Cascade)
+  type        ReviewType   @default(HOTEL)
+  rating      Int          // 1 – 5
+  guestName   String?      // optional
+  comment     String?      @db.Text
+  isVisible   Boolean      @default(true)   // admin can hide
+  createdAt   DateTime     @default(now())
+
+  @@index([venueId])
+}
+
+enum ReviewType {
+  HOTEL
+  FOOD
+  SERVICE
+}
+
+// ─────────────────────────────────────────────
+//  QR CODE  (per table / room / bar)
+// ─────────────────────────────────────────────
+
+model QRCode {
+  id        Int        @id @default(autoincrement())
+  venueId   Int
+  venue     Venue      @relation(fields: [venueId], references: [id], onDelete: Cascade)
+  label     String     // "Table 1", "Room 204", "Bar"
+  type      QRType     @default(TABLE)
+  url       String     // full guest menu url
+  scanCount Int        @default(0)   // analytics: how many times scanned
+  isActive  Boolean    @default(true)
+  createdAt DateTime   @default(now())
+
+  @@index([venueId])
+}
+
+enum QRType {
+  TABLE
+  ROOM
+  BAR
+  TAKEAWAY
+  OTHER
+}

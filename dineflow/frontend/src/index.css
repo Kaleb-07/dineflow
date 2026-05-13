@@ -1,0 +1,77 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600&family=DM+Sans:wght@300;400;500&family=Playfair+Display:wght@400;600&family=Plus+Jakarta+Sans:wght@400;500&family=Outfit:wght@300;400;500&display=swap');
+@import "tailwindcss";
+
+/* ── Brand CSS Variables (overridden by useTheme hook) ── */
+:root {
+  --brand-bg:           #0d1f1a;
+  --brand-accent:       #c9a84c;
+  --brand-card:         #122219;
+  --brand-text:         #e8e0d0;
+  --brand-font-display: 'Cormorant Garamond', serif;
+  --brand-font-body:    'DM Sans', sans-serif;
+  --brand-radius:       8px;
+  --brand-padding:      8px;
+  --brand-gap:          6px;
+}
+
+/* ── Guest menu uses brand vars ── */
+.guest-bg           { background: var(--brand-bg); color: var(--brand-text); font-family: var(--brand-font-body) }
+.guest-accent       { color: var(--brand-accent) }
+.guest-card         { background: var(--brand-card); border-radius: var(--brand-radius); padding: var(--brand-padding) }
+.guest-heading      { font-family: var(--brand-font-display) }
+.guest-border       { border-color: color-mix(in srgb, var(--brand-accent) 20%, transparent) }
+
+/* ── Feature flag toggles ── */
+[data-show-images="false"]   .item-image  { display: none }
+[data-show-price="false"]    .item-price  { display: none }
+[data-show-desc="false"]     .item-desc   { display: none }
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar       { width: 4px }
+::-webkit-scrollbar-track { background: transparent }
+::-webkit-scrollbar-thumb { background: var(--brand-accent); border-radius: 2px; opacity: .4 }
+
+/* ── Admin styles ── */
+.btn-primary {
+  background-color: #2563eb;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  transition: background-color 0.2s;
+}
+
+.btn-primary:hover {
+  background-color: #1d4ed8;
+}
+
+.btn-secondary {
+  background-color: #e5e7eb;
+  color: #1f2937;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  transition: background-color 0.2s;
+}
+
+.btn-secondary:hover {
+  background-color: #d1d5db;
+}
+
+.input-field {
+  width: 100%;
+  padding: 0.5rem 1rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  outline: none;
+}
+
+.input-field:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+.card {
+  background-color: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
+}
