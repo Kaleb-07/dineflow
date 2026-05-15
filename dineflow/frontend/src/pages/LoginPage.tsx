@@ -50,7 +50,7 @@ export default function LoginPage({ mode = 'login' }: Props) {
     <div className="min-h-screen bg-gray-950 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         
-        {/* Logo */}
+        {/* Logo section */}
         <div className="text-center mb-8">
           <div className="text-3xl font-bold text-amber-400 mb-1">DineFlow</div>
           <div className="text-gray-400 text-sm tracking-widest uppercase">
