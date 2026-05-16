@@ -84,4 +84,45 @@ const updateMedia = async (req, res) => {
   }
 };
 
-module.exports = { getSettings, updateSettings, updateTheme, updateMedia };
+// PATCH /api/settings/account — update user account
+const updateAccount = async (req, res) => {
+  try {
+    const { name, email, currentPassword, newPassword } = req.body;
+    const user = await prisma.user.findUnique({ where: { id: req.user.id } });
+
+    // If changing password, verify current one first
+    if (newPassword) {
+      const bcrypt = require('bcryptjs');
+      const match = await bcrypt.compare(currentPassword, user.password);
+      if (!match) return res.status(400).json({ error: 'Current password is incorrect' });
+      const hashed = await bcrypt.hash(newPassword, 10);
+      await prisma.user.update({
+        where: { id: req.user.id },
+        data: { name, email, password: hashed }
+      });
+    } else {
+      await prisma.user.update({
+        where: { id: req.user.id },
+        data: { name, email }
+      });
+    }
+    res.json({ message: 'Account updated' });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to update account' });
+  }
+};
+
+// DELETE /api/settings/venue — delete entire venue
+const deleteVenue = async (req, res) => {
+  try {
+    await prisma.venue.delete({ where: { id: req.user.venueId } });
+    res.json({ message: 'Venue deleted' });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to delete venue' });
+  }
+};
+
+module.exports = {
+  getSettings, updateSettings, updateTheme,
+  updateMedia, updateAccount, deleteVenue
+};

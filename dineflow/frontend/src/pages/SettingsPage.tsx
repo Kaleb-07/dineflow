@@ -1,189 +1,215 @@
-import { useState, useEffect } from 'react';
-import { Plus, Pencil, Trash2, GripVertical } from 'lucide-react';
+import { useState } from 'react';
+import { useStore } from '../store/useStore';
+import { useNavigate } from 'react-router-dom';
+import { LogOut, Copy, Check, ExternalLink } from 'lucide-react';
 import api from '../lib/axios';
-import type { Amenity } from '../types';
 
 export default function SettingsPage() {
-  const [amenities, setAmenities] = useState<Amenity[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [modal, setModal] = useState(false);
-  const [editAmenity, setEditAmenity] = useState<Amenity | null>(null);
+  const { user, venue, clearAuth } = useStore();
+  const navigate = useNavigate();
+  const [tab, setTab] = useState<'account' | 'venue' | 'danger'>('account');
+  const [copied, setCopied] = useState(false);
 
-  useEffect(() => {
-    loadAmenities();
-  }, []);
+  // Account form
+  const [name,     setName]     = useState(user?.name     || '');
+  const [email,    setEmail]    = useState(user?.email    || '');
+  const [password, setPassword] = useState('');
+  const [newPass,  setNewPass]  = useState('');
+  const [saving,   setSaving]   = useState(false);
+  const [saved,    setSaved]    = useState(false);
+  const [error,    setError]    = useState('');
 
-  const loadAmenities = async () => {
-    try {
-      const { data } = await api.get('/amenities');
-      setAmenities(data);
-    } finally {
-      setLoading(false);
-    }
-  };
+  // Venue settings
+  const [currency, setCurrency] = useState(venue?.currency || 'ETB');
+  const [language, setLanguage] = useState('en');
 
-  const deleteAmenity = async (id: number) => {
-    if (!confirm('Delete this amenity?')) return;
-    await api.delete(`/amenities/${id}`);
-    setAmenities(p => p.filter(a => a.id !== id));
-  };
-
-  return (
-    <div className="max-w-2xl mx-auto">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-xl font-semibold text-white">Settings</h1>
-          <p className="text-gray-400 text-sm mt-0.5">Manage amenities and features</p>
-        </div>
-        <button
-          onClick={() => { setEditAmenity(null); setModal(true); }}
-          className="flex items-center gap-1.5 px-3 py-2 bg-amber-500 hover:bg-amber-400 text-gray-900 text-sm font-medium rounded-lg transition-colors"
-        >
-          <Plus size={15} /> Add amenity
-        </button>
-      </div>
-
-      {loading ? (
-        <div className="text-gray-500 text-center py-12">Loading…</div>
-      ) : (
-        <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
-          <div className="px-5 py-3 border-b border-gray-800">
-            <h3 className="text-xs text-gray-400 uppercase tracking-widest">Amenities</h3>
-          </div>
-          
-          {amenities.length === 0 ? (
-            <div className="text-center py-12">
-              <div className="text-gray-500 mb-3">No amenities yet</div>
-              <button
-                onClick={() => setModal(true)}
-                className="text-amber-400 text-sm hover:text-amber-300"
-              >
-                + Add your first amenity
-              </button>
-            </div>
-          ) : (
-            <div className="divide-y divide-gray-800">
-              {amenities.map(amenity => (
-                <div
-                  key={amenity.id}
-                  className="flex items-center gap-3 px-5 py-3 hover:bg-gray-800/50 transition-colors"
-                >
-                  <GripVertical size={14} className="text-gray-600 flex-shrink-0" />
-                  <span className="text-xl flex-shrink-0">{amenity.icon}</span>
-                  <span className="text-white text-sm flex-1">{amenity.name}</span>
-                  <div className="flex gap-1 flex-shrink-0">
-                    <button
-                      onClick={() => { setEditAmenity(amenity); setModal(true); }}
-                      className="p-1.5 hover:bg-gray-700 rounded-lg text-gray-500 hover:text-white transition-colors"
-                    >
-                      <Pencil size={14} />
-                    </button>
-                    <button
-                      onClick={() => deleteAmenity(amenity.id)}
-                      className="p-1.5 hover:bg-red-500/10 rounded-lg text-gray-500 hover:text-red-400 transition-colors"
-                    >
-                      <Trash2 size={14} />
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
-
-      {modal && (
-        <AmenityModal
-          amenity={editAmenity}
-          onClose={() => setModal(false)}
-          onSave={(amenity) => {
-            setAmenities(p =>
-              editAmenity
-                ? p.map(a => (a.id === amenity.id ? amenity : a))
-                : [...p, amenity]
-            );
-            setModal(false);
-          }}
-        />
-      )}
-    </div>
-  );
-}
-
-function AmenityModal({
-  amenity,
-  onClose,
-  onSave,
-}: {
-  amenity: Amenity | null;
-  onClose: () => void;
-  onSave: (amenity: Amenity) => void;
-}) {
-  const [form, setForm] = useState({
-    name: amenity?.name || '',
-    icon: amenity?.icon || '',
-  });
-  const [saving, setSaving] = useState(false);
-
-  const save = async () => {
+  const saveAccount = async () => {
     setSaving(true);
+    setError('');
     try {
-      const { data } = amenity
-        ? await api.patch(`/amenities/${amenity.id}`, form)
-        : await api.post('/amenities', form);
-      onSave(data);
+      await api.patch('/settings/account', {
+        name, email,
+        ...(newPass ? { currentPassword: password, newPassword: newPass } : {})
+      });
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2500);
+    } catch (err: any) {
+      setError(err.response?.data?.error || 'Failed to save');
     } finally {
       setSaving(false);
     }
   };
 
+  const saveVenue = async () => {
+    setSaving(true);
+    try {
+      await api.patch('/settings', { currency, language });
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2500);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const copyLink = () => {
+    navigator.clipboard.writeText(`${window.location.origin}/menu/${venue?.slug}`);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const logout = () => { clearAuth(); navigate('/login'); };
+
+  const deleteVenue = async () => {
+    const confirm1 = window.confirm(
+      'Are you sure? This will permanently delete all your menu items, QR codes, and reviews.'
+    );
+    if (!confirm1) return;
+    const typed = window.prompt(`Type your venue name "${venue?.name}" to confirm:`);
+    if (typed !== venue?.name) return alert('Name did not match. Cancelled.');
+    await api.delete('/settings/venue');
+    clearAuth();
+    navigate('/login');
+  };
+
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
-      <div className="absolute inset-0 bg-black/60" onClick={onClose} />
-      <div className="relative bg-gray-900 border border-gray-800 rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md">
-        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-800">
-          <h3 className="text-white font-medium">
-            {amenity ? 'Edit amenity' : 'New amenity'}
-          </h3>
-          <button
-            onClick={onClose}
-            className="text-gray-500 hover:text-white text-xl leading-none"
-          >
-            ×
-          </button>
-        </div>
-        <div className="p-5 space-y-4">
-          <div>
-            <label className="text-xs text-gray-400 uppercase tracking-wider mb-1 block">
-              Amenity name
-            </label>
-            <input
-              className="w-full bg-gray-800 border border-gray-700 text-white text-sm rounded-lg px-3 py-2 outline-none focus:border-amber-500 transition-colors"
-              value={form.name}
-              onChange={e => setForm(p => ({ ...p, name: e.target.value }))}
-              placeholder="e.g., Free WiFi"
-            />
-          </div>
-          <div>
-            <label className="text-xs text-gray-400 uppercase tracking-wider mb-1 block">
-              Icon (emoji)
-            </label>
-            <input
-              className="w-full bg-gray-800 border border-gray-700 text-white text-sm rounded-lg px-3 py-2 outline-none focus:border-amber-500 transition-colors"
-              value={form.icon}
-              onChange={e => setForm(p => ({ ...p, icon: e.target.value }))}
-              placeholder="📶"
-            />
-          </div>
-          <button
-            onClick={save}
-            disabled={saving}
-            className="w-full bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-gray-900 font-semibold py-2.5 rounded-lg transition-colors"
-          >
-            {saving ? 'Saving…' : amenity ? 'Save changes' : 'Create amenity'}
-          </button>
-        </div>
+    <div className="max-w-xl mx-auto">
+      <div className="mb-6">
+        <h1 className="text-xl font-semibold text-white">Settings</h1>
+        <p className="text-gray-400 text-sm mt-0.5">Account and venue configuration</p>
       </div>
+
+      {/* Tabs */}
+      <div className="flex gap-1 mb-5 bg-gray-900 border border-gray-800 rounded-lg p-1 w-fit">
+        {(['account','venue','danger'] as const).map(t => (
+          <button key={t} onClick={() => setTab(t)}
+            className={`px-4 py-1.5 rounded-md text-sm capitalize transition-colors ${
+              tab === t
+                ? 'bg-gray-800 text-white'
+                : 'text-gray-500 hover:text-white'
+            }`}>
+            {t === 'danger' ? '⚠ Danger zone' : t}
+          </button>
+        ))}
+      </div>
+
+      {/* ── Account ── */}
+      {tab === 'account' && (
+        <div className="bg-gray-900 border border-gray-800 rounded-xl p-5 space-y-4">
+          {error && (
+            <div className="bg-red-500/10 border border-red-500/20 text-red-400 text-sm rounded-lg px-3 py-2">
+              {error}
+            </div>
+          )}
+          <Field label="Display name">
+            <input className={inp} value={name} onChange={e => setName(e.target.value)} />
+          </Field>
+          <Field label="Email">
+            <input className={inp} type="email" value={email} onChange={e => setEmail(e.target.value)} />
+          </Field>
+          <div className="border-t border-gray-800 pt-4">
+            <div className="text-xs text-gray-500 uppercase tracking-wider mb-3">Change password</div>
+            <div className="space-y-3">
+              <Field label="Current password">
+                <input className={inp} type="password" value={password}
+                  onChange={e => setPassword(e.target.value)} placeholder="Leave blank to keep current" />
+              </Field>
+              <Field label="New password">
+                <input className={inp} type="password" value={newPass}
+                  onChange={e => setNewPass(e.target.value)} placeholder="Min 6 characters" />
+              </Field>
+            </div>
+          </div>
+          <button onClick={saveAccount} disabled={saving}
+            className="w-full py-2.5 bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-gray-900 text-sm font-semibold rounded-lg transition-colors">
+            {saved ? '✓ Saved!' : saving ? 'Saving…' : 'Save changes'}
+          </button>
+          <button onClick={logout}
+            className="w-full flex items-center justify-center gap-2 py-2 text-gray-500 hover:text-red-400 text-sm transition-colors">
+            <LogOut size={15} /> Sign out
+          </button>
+        </div>
+      )}
+
+      {/* ── Venue settings ── */}
+      {tab === 'venue' && (
+        <div className="space-y-4">
+          {/* Menu link */}
+          <div className="bg-gray-900 border border-gray-800 rounded-xl p-5">
+            <div className="text-xs text-gray-400 uppercase tracking-wider mb-3">Your guest menu link</div>
+            <div className="flex items-center gap-2 bg-gray-800 border border-gray-700 rounded-lg px-3 py-2">
+              <code className="text-amber-300 text-sm flex-1 truncate">
+                {window.location.origin}/menu/{venue?.slug}
+              </code>
+              <button onClick={copyLink} className="text-gray-400 hover:text-white transition-colors flex-shrink-0">
+                {copied ? <Check size={15} className="text-green-400" /> : <Copy size={15} />}
+              </button>
+              <a href={`/menu/${venue?.slug}`} target="_blank" rel="noreferrer"
+                className="text-gray-400 hover:text-white transition-colors flex-shrink-0">
+                <ExternalLink size={15} />
+              </a>
+            </div>
+          </div>
+
+          {/* Currency + language */}
+          <div className="bg-gray-900 border border-gray-800 rounded-xl p-5 space-y-4">
+            <Field label="Currency">
+              <select className={inp} value={currency} onChange={e => setCurrency(e.target.value)}>
+                <option value="ETB">ETB — Ethiopian Birr</option>
+                <option value="USD">USD — US Dollar</option>
+                <option value="EUR">EUR — Euro</option>
+                <option value="GBP">GBP — British Pound</option>
+                <option value="KES">KES — Kenyan Shilling</option>
+                <option value="UGX">UGX — Ugandan Shilling</option>
+                <option value="TZS">TZS — Tanzanian Shilling</option>
+                <option value="ZAR">ZAR — South African Rand</option>
+                <option value="NGN">NGN — Nigerian Naira</option>
+                <option value="SAR">SAR — Saudi Riyal</option>
+                <option value="AED">AED — UAE Dirham</option>
+              </select>
+            </Field>
+            <Field label="Default language">
+              <select className={inp} value={language} onChange={e => setLanguage(e.target.value)}>
+                <option value="en">English</option>
+                <option value="am">Amharic</option>
+                <option value="ar">Arabic</option>
+                <option value="fr">French</option>
+                <option value="sw">Swahili</option>
+              </select>
+            </Field>
+            <button onClick={saveVenue} disabled={saving}
+              className="w-full py-2.5 bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-gray-900 text-sm font-semibold rounded-lg transition-colors">
+              {saved ? '✓ Saved!' : saving ? 'Saving…' : 'Save settings'}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ── Danger zone ── */}
+      {tab === 'danger' && (
+        <div className="bg-gray-900 border border-red-500/20 rounded-xl p-5 space-y-4">
+          <div className="text-red-400 text-sm font-medium">Danger zone</div>
+          <p className="text-gray-500 text-sm leading-relaxed">
+            Deleting your venue is permanent and cannot be undone. All menu items, QR codes, reviews, and branding will be deleted immediately.
+          </p>
+          <div className="border-t border-gray-800 pt-4">
+            <button onClick={deleteVenue}
+              className="w-full py-2.5 bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-400 text-sm font-medium rounded-lg transition-colors">
+              Delete venue permanently
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+const inp = 'w-full bg-gray-800 border border-gray-700 text-white text-sm rounded-lg px-3 py-2 outline-none focus:border-amber-500 transition-colors';
+
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div>
+      <label className="text-xs text-gray-400 uppercase tracking-wider mb-1 block">{label}</label>
+      {children}
     </div>
   );
 }
