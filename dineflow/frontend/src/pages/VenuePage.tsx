@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Plus, Trash2, Save } from 'lucide-react';
 import api from '../lib/axios';
+import { Button } from '../components/ui/button';
+import { Input } from '../components/ui/input';
 
 const AMENITY_ICONS = [
   { label: 'WiFi',        value: 'wifi'        },
@@ -105,22 +107,24 @@ export default function VenuePage() {
           <h1 className="text-xl font-semibold text-white">Venue</h1>
           <p className="text-gray-400 text-sm mt-0.5">Hotel / restaurant profile</p>
         </div>
-        <button onClick={save} disabled={saving}
-          className="flex items-center gap-2 px-4 py-2 bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-gray-900 text-sm font-semibold rounded-lg transition-colors">
+        <Button onClick={save} disabled={saving}>
           <Save size={15} />
           {saved ? 'Saved!' : saving ? 'Saving…' : 'Save all'}
-        </button>
+        </Button>
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 mb-5 bg-gray-900 border border-gray-800 rounded-lg p-1 overflow-x-auto">
+      <div className="flex gap-2 mb-5 overflow-x-auto">
         {(['info','hours','amenities','social'] as const).map(t => (
-          <button key={t} onClick={() => setTab(t)}
-            className={`px-4 py-1.5 rounded-md text-sm capitalize whitespace-nowrap transition-colors flex-shrink-0 ${
-              tab === t ? 'bg-gray-800 text-white' : 'text-gray-500 hover:text-white'
-            }`}>
+          <Button
+            key={t}
+            onClick={() => setTab(t)}
+            variant={tab === t ? 'default' : 'outline'}
+            size="sm"
+            className="capitalize whitespace-nowrap"
+          >
             {t === 'info' ? 'Basic info' : t === 'hours' ? 'Business hours' : t}
-          </button>
+          </Button>
         ))}
       </div>
 
@@ -157,36 +161,36 @@ export default function VenuePage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Field label="Venue name" span={2}>
-              <input className={inp} value={info.name}
+              <Input value={info.name}
                 onChange={e => setInfo(p => ({ ...p, name: e.target.value }))} />
             </Field>
             <Field label="Tagline" span={2}>
-              <input className={inp} value={info.tagline} placeholder="e.g. Fine Dining · Addis Ababa"
+              <Input value={info.tagline} placeholder="e.g. Fine Dining · Addis Ababa"
                 onChange={e => setInfo(p => ({ ...p, tagline: e.target.value }))} />
             </Field>
             <Field label="About us" span={2}>
-              <textarea className={`${inp} h-24 resize-none`} value={info.description}
+              <textarea className="w-full bg-gray-800 border border-gray-700 text-white text-sm rounded-lg px-3 py-2 outline-none focus:border-amber-500 transition-colors h-24 resize-none" value={info.description}
                 placeholder="Tell guests about your venue…"
                 onChange={e => setInfo(p => ({ ...p, description: e.target.value }))} />
             </Field>
             <Field label="Phone">
-              <input className={inp} value={info.phone} placeholder="+251 911 234 567"
+              <Input value={info.phone} placeholder="+251 911 234 567"
                 onChange={e => setInfo(p => ({ ...p, phone: e.target.value }))} />
             </Field>
             <Field label="Email">
-              <input className={inp} value={info.email} placeholder="info@venue.com"
+              <Input value={info.email} placeholder="info@venue.com"
                 onChange={e => setInfo(p => ({ ...p, email: e.target.value }))} />
             </Field>
             <Field label="Address" span={2}>
-              <input className={inp} value={info.address} placeholder="123 Culinary Avenue"
+              <Input value={info.address} placeholder="123 Culinary Avenue"
                 onChange={e => setInfo(p => ({ ...p, address: e.target.value }))} />
             </Field>
             <Field label="City">
-              <input className={inp} value={info.city} placeholder="Addis Ababa"
+              <Input value={info.city} placeholder="Addis Ababa"
                 onChange={e => setInfo(p => ({ ...p, city: e.target.value }))} />
             </Field>
             <Field label="Country">
-              <input className={inp} value={info.country} placeholder="Ethiopia"
+              <Input value={info.country} placeholder="Ethiopia"
                 onChange={e => setInfo(p => ({ ...p, country: e.target.value }))} />
             </Field>
           </div>
@@ -245,22 +249,25 @@ export default function VenuePage() {
                   <option key={ic.value} value={ic.value}>{ic.label}</option>
                 ))}
               </select>
-              <input
-                className="flex-1 bg-gray-800 border border-gray-700 text-white text-sm rounded-lg px-3 py-1.5 outline-none focus:border-amber-500"
+              <Input
+                className="flex-1"
                 placeholder="Amenity name e.g. Free WiFi"
                 value={a.name}
                 onChange={e => setAmenities(p => p.map((x, j) => j === i ? { ...x, name: e.target.value } : x))}
               />
-              <button onClick={() => removeAmenity(i)}
-                className="text-gray-600 hover:text-red-400 transition-colors">
+              <Button
+                onClick={() => removeAmenity(i)}
+                variant="ghost"
+                size="sm"
+                className="text-red-400 hover:text-red-300"
+              >
                 <Trash2 size={15} />
-              </button>
+              </Button>
             </div>
           ))}
-          <button onClick={addAmenity}
-            className="flex items-center gap-2 text-amber-400 hover:text-amber-300 text-sm transition-colors">
+          <Button onClick={addAmenity} variant="ghost" size="sm" className="w-fit">
             <Plus size={15} /> Add amenity
-          </button>
+          </Button>
         </div>
       )}
 
@@ -275,7 +282,7 @@ export default function VenuePage() {
             { label: 'Website',   key: 'website',   placeholder: 'https://yourwebsite.com'        },
           ].map(({ label, key, placeholder }) => (
             <Field key={key} label={label}>
-              <input className={inp} value={(social as any)[key]} placeholder={placeholder}
+              <Input value={(social as any)[key]} placeholder={placeholder}
                 onChange={e => setSocial(p => ({ ...p, [key]: e.target.value }))} />
             </Field>
           ))}

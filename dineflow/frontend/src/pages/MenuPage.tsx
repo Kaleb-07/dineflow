@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
-import { Plus, Pencil, Trash2, Image } from 'lucide-react';
+import { Plus, Pencil, Trash2, Image, FileSpreadsheet } from 'lucide-react';
 import api from '../lib/axios';
 import type { Category, MenuItem, Variant } from '../types';
+import BulkUploadModal from '../components/BulkUploadModal';
 
 export default function MenuPage() {
   const [categories, setCategories] = useState<Category[]>([]);
@@ -14,6 +15,7 @@ export default function MenuPage() {
   const [editItem,   setEditItem]   = useState<MenuItem | null>(null);
   const [catModal,   setCatModal]   = useState(false);
   const [editCat,    setEditCat]    = useState<Category | null>(null);
+  const [bulkModal,  setBulkModal]  = useState(false);
 
   const load = async () => {
     const [c, i] = await Promise.all([api.get('/categories'), api.get('/items')]);
@@ -41,6 +43,10 @@ export default function MenuPage() {
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-xl font-semibold text-white">Menu</h1>
         <div className="flex gap-2">
+          <button onClick={() => setBulkModal(true)}
+            className="flex items-center gap-1.5 px-3 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 text-sm rounded-lg transition-colors">
+            <FileSpreadsheet size={15} /> Bulk upload
+          </button>
           <button onClick={() => { setEditCat(null); setCatModal(true); }}
             className="flex items-center gap-1.5 px-3 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 text-sm rounded-lg transition-colors">
             <Plus size={15} /> Category
@@ -195,6 +201,12 @@ export default function MenuPage() {
             );
             setCatModal(false);
           }}
+        />
+      )}
+      {bulkModal && (
+        <BulkUploadModal
+          onClose={() => setBulkModal(false)}
+          onDone={() => { load(); setBulkModal(false); }}
         />
       )}
     </div>

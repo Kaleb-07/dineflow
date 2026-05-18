@@ -3,6 +3,8 @@ import { useStore } from '../store/useStore';
 import { Plus, Download, Trash2, QrCode } from 'lucide-react';
 import QRCode from 'qrcode';
 import api from '../lib/axios';
+import { Button } from '../components/ui/button';
+import { Input } from '../components/ui/input';
 
 interface QR {
   id: number;
@@ -93,14 +95,12 @@ export default function QRPage() {
           <p className="text-gray-400 text-sm mt-0.5">{qrCodes.length} codes · scan to open guest menu</p>
         </div>
         <div className="flex gap-2">
-          <button onClick={bulk}
-            className="px-3 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 text-sm rounded-lg transition-colors">
+          <Button onClick={bulk} variant="outline">
             Bulk tables
-          </button>
-          <button onClick={() => setModal(true)}
-            className="flex items-center gap-1.5 px-3 py-2 bg-amber-500 hover:bg-amber-400 text-gray-900 text-sm font-medium rounded-lg transition-colors">
+          </Button>
+          <Button onClick={() => setModal(true)}>
             <Plus size={15} /> New QR
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -149,14 +149,22 @@ export default function QRPage() {
               </div>
               {/* Actions */}
               <div className="flex gap-2 w-full">
-                <button onClick={() => download(qr.id, qr.label)}
-                  className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 text-xs rounded-lg transition-colors">
+                <Button
+                  onClick={() => download(qr.id, qr.label)}
+                  variant="outline"
+                  size="sm"
+                  className="flex-1"
+                >
                   <Download size={13} /> Download
-                </button>
-                <button onClick={() => remove(qr.id)}
-                  className="p-2 hover:bg-red-500/10 text-gray-600 hover:text-red-400 rounded-lg transition-colors">
+                </Button>
+                <Button
+                  onClick={() => remove(qr.id)}
+                  variant="ghost"
+                  size="sm"
+                  className="text-red-400 hover:text-red-300"
+                >
                   <Trash2 size={13} />
-                </button>
+                </Button>
               </div>
             </div>
           ))}
@@ -172,8 +180,7 @@ export default function QRPage() {
             <div className="space-y-3">
               <div>
                 <label className="text-xs text-gray-400 uppercase tracking-wider mb-1 block">Label</label>
-                <input
-                  className="w-full bg-gray-800 border border-gray-700 text-white text-sm rounded-lg px-3 py-2 outline-none focus:border-amber-500"
+                <Input
                   placeholder="e.g. Table 1, Room 204, Bar"
                   value={form.label}
                   onChange={e => setForm(p => ({ ...p, label: e.target.value }))}
@@ -184,21 +191,25 @@ export default function QRPage() {
                 <label className="text-xs text-gray-400 uppercase tracking-wider mb-1 block">Type</label>
                 <div className="flex flex-wrap gap-2">
                   {TYPES.map(t => (
-                    <button key={t} onClick={() => setForm(p => ({ ...p, type: t }))}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors capitalize ${
-                        form.type === t
-                          ? 'bg-amber-500/15 border-amber-500/40 text-amber-400'
-                          : 'bg-gray-800 border-gray-700 text-gray-400 hover:text-white'
-                      }`}>
+                    <Button
+                      key={t}
+                      onClick={() => setForm(p => ({ ...p, type: t }))}
+                      variant={form.type === t ? 'default' : 'outline'}
+                      size="sm"
+                      className="capitalize"
+                    >
                       {t.toLowerCase()}
-                    </button>
+                    </Button>
                   ))}
                 </div>
               </div>
-              <button onClick={create} disabled={saving || !form.label.trim()}
-                className="w-full py-2.5 bg-amber-500 hover:bg-amber-400 disabled:opacity-50 text-gray-900 text-sm font-semibold rounded-lg transition-colors mt-2">
+              <Button
+                onClick={create}
+                disabled={saving || !form.label.trim()}
+                className="w-full mt-2"
+              >
                 {saving ? 'Creating…' : 'Create QR code'}
-              </button>
+              </Button>
             </div>
           </div>
         </div>

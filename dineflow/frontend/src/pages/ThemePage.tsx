@@ -12,12 +12,34 @@ const PRESETS: Record<string, Partial<Theme>> = {
   'Bold red':      { bgColor: '#1a0808', accentColor: '#e84c4c', cardColor: '#240a0a', textColor: '#f5e8e8' },
 };
 
-const FONTS = [
-  { label: 'Cormorant Garamond — Luxury serif', value: "'Cormorant Garamond', serif" },
-  { label: 'Playfair Display — Editorial',       value: "'Playfair Display', serif"   },
-  { label: 'DM Sans — Modern clean',             value: "'DM Sans', sans-serif"       },
-  { label: 'Outfit — Friendly modern',           value: "'Outfit', sans-serif"        },
-  { label: 'Plus Jakarta Sans — Premium',        value: "'Plus Jakarta Sans', sans-serif" },
+const GOOGLE_FONTS = [
+  // Serif
+  { name: 'Playfair Display', category: 'Serif', value: "'Playfair Display', serif" },
+  { name: 'Cormorant Garamond', category: 'Serif', value: "'Cormorant Garamond', serif" },
+  { name: 'Lora', category: 'Serif', value: "'Lora', serif" },
+  { name: 'Merriweather', category: 'Serif', value: "'Merriweather', serif" },
+  { name: 'Crimson Text', category: 'Serif', value: "'Crimson Text', serif" },
+  { name: 'EB Garamond', category: 'Serif', value: "'EB Garamond', serif" },
+  
+  // Sans-serif
+  { name: 'DM Sans', category: 'Sans-serif', value: "'DM Sans', sans-serif" },
+  { name: 'Inter', category: 'Sans-serif', value: "'Inter', sans-serif" },
+  { name: 'Outfit', category: 'Sans-serif', value: "'Outfit', sans-serif" },
+  { name: 'Plus Jakarta Sans', category: 'Sans-serif', value: "'Plus Jakarta Sans', sans-serif" },
+  { name: 'Manrope', category: 'Sans-serif', value: "'Manrope', sans-serif" },
+  { name: 'Work Sans', category: 'Sans-serif', value: "'Work Sans', sans-serif" },
+  { name: 'Poppins', category: 'Sans-serif', value: "'Poppins', sans-serif" },
+  { name: 'Montserrat', category: 'Sans-serif', value: "'Montserrat', sans-serif" },
+  { name: 'Raleway', category: 'Sans-serif', value: "'Raleway', sans-serif" },
+  
+  // Display
+  { name: 'Bebas Neue', category: 'Display', value: "'Bebas Neue', sans-serif" },
+  { name: 'Righteous', category: 'Display', value: "'Righteous', sans-serif" },
+  { name: 'Oswald', category: 'Display', value: "'Oswald', sans-serif" },
+  
+  // Handwriting
+  { name: 'Dancing Script', category: 'Handwriting', value: "'Dancing Script', cursive" },
+  { name: 'Pacifico', category: 'Handwriting', value: "'Pacifico', cursive" },
 ];
 
 export default function ThemePage() {
@@ -29,11 +51,19 @@ export default function ThemePage() {
     fontDisplay: "'Cormorant Garamond', serif", fontBody: "'DM Sans', sans-serif",
     borderRadius: 8, cardPadding: 8, itemGap: 6,
     showImages: true, showPrice: true, showMealTabs: true, showDesc: true,
+    cardStyle: 'default', menuLayout: 'list', categoryStyle: 'pills',
+    drinkStyle: 'same', showAllergens: false, showBadges: true,
+    imageShape: 'rounded', pricePosition: 'bottom', polygonVariant: 'hexagon',
+    animateItems: false, animateHover: false, hoverStyle: 'lift', animatePrice: false,
+    animateCategories: false, animationSpeed: 5,
   });
+  
   const [saving,  setSaving]  = useState(false);
   const [saved,   setSaved]   = useState(false);
   const [active,  setActive]  = useState('Luxury dark');
   const [viewMode, setViewMode] = useState<'mobile' | 'desktop'>('mobile');
+  const [fontSearch, setFontSearch] = useState('');
+  const [fontCategory, setFontCategory] = useState<string>('All');
 
   useEffect(() => {
     api.get('/settings').then(({ data }) => {
@@ -44,7 +74,6 @@ export default function ThemePage() {
     });
   }, []);
 
-  // Apply theme to iframe whenever it changes
   useEffect(() => {
     const applyToIframe = () => {
       try {
@@ -62,24 +91,35 @@ export default function ThemePage() {
           root.style.setProperty('--brand-padding', `${theme.cardPadding || 8}px`);
           root.style.setProperty('--brand-gap', `${theme.itemGap || 6}px`);
           
-          // Feature toggles
           root.dataset.showImages = String(theme.showImages ?? true);
           root.dataset.showPrice = String(theme.showPrice ?? true);
           root.dataset.showMealTabs = String(theme.showMealTabs ?? true);
           root.dataset.showDesc = String(theme.showDesc ?? true);
+          root.dataset.showAllergens = String(theme.showAllergens ?? false);
+          root.dataset.showBadges = String(theme.showBadges ?? true);
+          root.dataset.cardStyle = theme.cardStyle || 'default';
+          root.dataset.menuLayout = theme.menuLayout || 'list';
+          root.dataset.categoryStyle = theme.categoryStyle || 'pills';
+          root.dataset.polygonVariant = theme.polygonVariant || 'hexagon';
+          root.dataset.imageShape = theme.imageShape || 'rounded';
+          root.dataset.pricePosition = theme.pricePosition || 'bottom';
+          
+          // Animation controls
+          root.dataset.animateItems = String(theme.animateItems ?? false);
+          root.dataset.animateHover = String(theme.animateHover ?? false);
+          root.dataset.hoverStyle = theme.hoverStyle || 'lift';
+          root.dataset.animatePrice = String(theme.animatePrice ?? false);
+          root.dataset.animateCategories = String(theme.animateCategories ?? false);
+          root.dataset.animationSpeed = String(theme.animationSpeed ?? 5);
+          root.dataset.pricePosition = theme.pricePosition || 'bottom';
         }
       } catch (err) {
-        // Cross-origin or not loaded yet
         console.log('Iframe not ready yet');
       }
     };
 
-    // Try immediately
     applyToIframe();
-    
-    // Also try after a short delay in case iframe is still loading
     const timer = setTimeout(applyToIframe, 100);
-    
     return () => clearTimeout(timer);
   }, [theme]);
 
@@ -109,14 +149,20 @@ export default function ThemePage() {
     }
   };
 
+  const filteredFonts = GOOGLE_FONTS.filter(f => {
+    const matchesSearch = f.name.toLowerCase().includes(fontSearch.toLowerCase());
+    const matchesCategory = fontCategory === 'All' || f.category === fontCategory;
+    return matchesSearch && matchesCategory;
+  });
+
   return (
     <div className="flex gap-6 h-[calc(100vh-120px)]">
-      {/* ── Left: Controls (scrollable) ── */}
+      {/* ── Left: Controls ── */}
       <div className="w-[420px] flex-shrink-0 overflow-y-auto pr-2">
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-xl font-semibold text-white">Branding</h1>
-            <p className="text-gray-400 text-sm mt-0.5">Customize how your menu looks for guests</p>
+            <p className="text-gray-400 text-sm mt-0.5">Customize your menu appearance</p>
           </div>
         </div>
 
@@ -132,6 +178,40 @@ export default function ThemePage() {
                       : 'bg-gray-800 border-gray-700 text-gray-400 hover:text-white'
                   }`}>
                   {name}
+                </button>
+              ))}
+            </div>
+          </Section>
+
+          {/* Card Style */}
+          <Section title="Card style">
+            <div className="grid grid-cols-2 gap-2">
+              {([
+                { value: 'default', label: 'Classic', desc: 'Image left, text right' },
+                { value: 'compact', label: 'Compact', desc: 'No image, inline' },
+                { value: 'imageTop', label: 'Image top', desc: 'Photo above text' },
+                { value: 'minimal', label: 'Minimal', desc: 'Borderless list' },
+                { value: 'bold', label: 'Bold', desc: 'Accent background' },
+              ] as const).map(style => (
+                <button key={style.value}
+                  onClick={() => update({ cardStyle: style.value })}
+                  className={`p-3 rounded-lg border text-left transition-all ${
+                    theme.cardStyle === style.value
+                      ? 'bg-amber-500/10 border-amber-500/40'
+                      : 'bg-gray-800 border-gray-700 hover:border-gray-600'
+                  }`}>
+                  <div className="text-xs font-medium text-white mb-0.5">{style.label}</div>
+                  <div className="text-[10px] text-gray-500">{style.desc}</div>
+                  {/* Mini preview */}
+                  <div className="mt-2 h-8 rounded border border-gray-700 bg-gray-900 flex items-center gap-1 px-1.5">
+                    {style.value !== 'compact' && style.value !== 'minimal' && (
+                      <div className="w-5 h-5 rounded bg-gray-700 flex-shrink-0" />
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <div className="h-1.5 w-full bg-gray-700 rounded mb-0.5" />
+                      <div className="h-1 w-2/3 bg-gray-800 rounded" />
+                    </div>
+                  </div>
                 </button>
               ))}
             </div>
@@ -163,22 +243,129 @@ export default function ThemePage() {
             </div>
           </Section>
 
-          {/* Typography */}
+          {/* Google Fonts Picker */}
           <Section title="Typography">
-            {[
-              { label: 'Heading font', key: 'fontDisplay' },
-              { label: 'Body font',    key: 'fontBody'    },
-            ].map(({ label, key }) => (
-              <div key={key} className="mb-3 last:mb-0">
-                <label className="text-xs text-gray-400 uppercase tracking-wider mb-1 block">{label}</label>
+            <div className="space-y-3">
+              {/* Search & Filter */}
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  placeholder="Search fonts..."
+                  value={fontSearch}
+                  onChange={e => setFontSearch(e.target.value)}
+                  className="flex-1 bg-gray-800 border border-gray-700 text-white text-xs rounded-lg px-3 py-2 outline-none focus:border-amber-500"
+                />
                 <select
-                  value={(theme as any)[key]}
-                  onChange={e => update({ [key]: e.target.value } as any)}
-                  className="w-full bg-gray-800 border border-gray-700 text-white text-sm rounded-lg px-3 py-2 outline-none focus:border-amber-500">
-                  {FONTS.map(f => <option key={f.value} value={f.value}>{f.label}</option>)}
+                  value={fontCategory}
+                  onChange={e => setFontCategory(e.target.value)}
+                  className="bg-gray-800 border border-gray-700 text-white text-xs rounded-lg px-3 py-2 outline-none focus:border-amber-500">
+                  <option>All</option>
+                  <option>Serif</option>
+                  <option>Sans-serif</option>
+                  <option>Display</option>
+                  <option>Handwriting</option>
                 </select>
               </div>
-            ))}
+
+              {/* Heading Font */}
+              <div>
+                <label className="text-xs text-gray-400 uppercase tracking-wider mb-2 block">Heading font</label>
+                <div className="max-h-32 overflow-y-auto border border-gray-700 rounded-lg bg-gray-800">
+                  {filteredFonts.map(f => (
+                    <button key={f.value}
+                      onClick={() => update({ fontDisplay: f.value })}
+                      className={`w-full text-left px-3 py-2 text-sm border-b border-gray-700 last:border-0 transition-colors ${
+                        theme.fontDisplay === f.value
+                          ? 'bg-amber-500/10 text-amber-400'
+                          : 'text-gray-300 hover:bg-gray-700'
+                      }`}
+                      style={{ fontFamily: f.value }}>
+                      {f.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Body Font */}
+              <div>
+                <label className="text-xs text-gray-400 uppercase tracking-wider mb-2 block">Body font</label>
+                <div className="max-h-32 overflow-y-auto border border-gray-700 rounded-lg bg-gray-800">
+                  {filteredFonts.map(f => (
+                    <button key={f.value}
+                      onClick={() => update({ fontBody: f.value })}
+                      className={`w-full text-left px-3 py-2 text-sm border-b border-gray-700 last:border-0 transition-colors ${
+                        theme.fontBody === f.value
+                          ? 'bg-amber-500/10 text-amber-400'
+                          : 'text-gray-300 hover:bg-gray-700'
+                      }`}
+                      style={{ fontFamily: f.value }}>
+                      {f.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Font Preview */}
+              <div className="bg-gray-800 border border-gray-700 rounded-lg p-3">
+                <div className="text-sm font-semibold mb-1" style={{ fontFamily: theme.fontDisplay }}>
+                  Bella Vista Café
+                </div>
+                <div className="text-xs text-gray-400" style={{ fontFamily: theme.fontBody }}>
+                  Authentic Ethiopian cuisine with modern flair
+                </div>
+              </div>
+            </div>
+          </Section>
+
+          {/* Category Navigation Style */}
+          <Section title="Category navigation">
+            <div className="grid grid-cols-2 gap-2">
+              {([
+                { value: 'pills', label: 'Pills', icon: '💊' },
+                { value: 'tabs', label: 'Tabs', icon: '📑' },
+                { value: 'dropdown', label: 'Dropdown', icon: '📋' },
+                { value: 'icons', label: 'Icons', icon: '🎨' },
+                { value: 'polygon', label: 'Polygon', icon: '⬢' },
+              ] as const).map(style => (
+                <button key={style.value}
+                  onClick={() => update({ categoryStyle: style.value })}
+                  className={`p-3 rounded-lg border text-center transition-all ${
+                    theme.categoryStyle === style.value
+                      ? 'bg-amber-500/10 border-amber-500/40 text-amber-400'
+                      : 'bg-gray-800 border-gray-700 text-gray-400 hover:text-white'
+                  }`}>
+                  <div className="text-xl mb-1">{style.icon}</div>
+                  <div className="text-xs font-medium">{style.label}</div>
+                </button>
+              ))}
+            </div>
+
+            {/* Polygon shape selector - only visible when polygon is selected */}
+            {theme.categoryStyle === 'polygon' && (
+              <div className="mt-3 pt-3 border-t border-gray-800">
+                <label className="text-xs text-gray-400 uppercase tracking-wider mb-2 block">Polygon shape</label>
+                <div className="grid grid-cols-3 gap-2">
+                  {([
+                    { value: 'hexagon', label: 'Hexagon', icon: '⬢' },
+                    { value: 'diamond', label: 'Diamond', icon: '◆' },
+                    { value: 'chevron', label: 'Chevron', icon: '›' },
+                    { value: 'octagon', label: 'Octagon', icon: '⯃' },
+                    { value: 'pentagon', label: 'Pentagon', icon: '⬟' },
+                  ] as const).map(shape => (
+                    <button key={shape.value}
+                      onClick={() => update({ polygonVariant: shape.value })}
+                      className={`p-2 rounded-lg border text-center transition-all ${
+                        (theme.polygonVariant || 'hexagon') === shape.value
+                          ? 'bg-amber-500/10 border-amber-500/40 text-amber-400'
+                          : 'bg-gray-800 border-gray-700 text-gray-400 hover:text-white'
+                      }`}>
+                      <div className="text-lg mb-0.5">{shape.icon}</div>
+                      <div className="text-[10px] font-medium">{shape.label}</div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </Section>
 
           {/* Shape & spacing */}
@@ -209,6 +396,8 @@ export default function ThemePage() {
               { label: 'Prices',           key: 'showPrice'    },
               { label: 'Meal-time tabs',   key: 'showMealTabs' },
               { label: 'Descriptions',     key: 'showDesc'     },
+              { label: 'Allergen info',    key: 'showAllergens' },
+              { label: 'Feature badges',   key: 'showBadges'   },
             ].map(({ label, key }) => (
               <div key={key} className="flex items-center justify-between py-2 border-b border-gray-800 last:border-0">
                 <span className="text-sm text-gray-300">{label}</span>
@@ -223,6 +412,123 @@ export default function ThemePage() {
                 </div>
               </div>
             ))}
+          </Section>
+
+          {/* Animation controls */}
+          <Section title="Animations & effects">
+            <div className="mb-4">
+              <div className="flex justify-between mb-2">
+                <label className="text-xs text-gray-400 uppercase tracking-wider">Animation speed</label>
+                <span className="text-xs text-amber-500 font-mono">
+                  {theme.animationSpeed === 1 ? 'Slowest' :
+                   theme.animationSpeed === 2 ? 'Very Slow' :
+                   theme.animationSpeed === 3 ? 'Slow' :
+                   theme.animationSpeed === 4 ? 'Moderate' :
+                   theme.animationSpeed === 5 ? 'Normal' :
+                   theme.animationSpeed === 6 ? 'Quick' :
+                   theme.animationSpeed === 7 ? 'Fast' :
+                   theme.animationSpeed === 8 ? 'Very Fast' :
+                   theme.animationSpeed === 9 ? 'Rapid' :
+                   theme.animationSpeed === 10 ? 'Instant' : 'Normal'}
+                </span>
+              </div>
+              <input
+                type="range"
+                min="1"
+                max="10"
+                value={theme.animationSpeed || 5}
+                onChange={e => update({ animationSpeed: Number(e.target.value) })}
+                className="w-full accent-amber-500"
+              />
+              <div className="flex justify-between text-xs text-gray-600 mt-1">
+                <span>Slow</span>
+                <span>Fast</span>
+              </div>
+            </div>
+
+            {[
+              { label: 'Item entrance animations',  key: 'animateItems',      desc: 'Staggered fade-in effect' },
+              { label: 'Price shimmer',             key: 'animatePrice',      desc: 'Subtle shine effect' },
+              { label: 'Category animations',       key: 'animateCategories', desc: 'Ripple & transitions' },
+            ].map(({ label, key, desc }) => (
+              <div key={key} className="flex items-center justify-between py-2 border-b border-gray-800 last:border-0">
+                <div>
+                  <div className="text-sm text-gray-300">{label}</div>
+                  <div className="text-xs text-gray-500 mt-0.5">{desc}</div>
+                </div>
+                <div
+                  onClick={() => update({ [key]: !(theme as any)[key] } as any)}
+                  className={`w-10 h-5 rounded-full cursor-pointer relative transition-colors flex-shrink-0 ${
+                    (theme as any)[key] === true ? 'bg-amber-500' : 'bg-gray-700'
+                  }`}>
+                  <div className={`absolute top-0.5 w-4 h-4 bg-white rounded-full transition-transform ${
+                    (theme as any)[key] === true ? 'translate-x-5' : 'translate-x-0.5'
+                  }`} />
+                </div>
+              </div>
+            ))}
+
+            {/* Hover effects with style selector */}
+            <div className="py-2 border-b border-gray-800">
+              <div className="flex items-center justify-between mb-2">
+                <div>
+                  <div className="text-sm text-gray-300">Hover effects</div>
+                  <div className="text-xs text-gray-500 mt-0.5">Interactive animations on hover</div>
+                </div>
+                <div
+                  onClick={() => update({ animateHover: !theme.animateHover })}
+                  className={`w-10 h-5 rounded-full cursor-pointer relative transition-colors flex-shrink-0 ${
+                    theme.animateHover === true ? 'bg-amber-500' : 'bg-gray-700'
+                  }`}>
+                  <div className={`absolute top-0.5 w-4 h-4 bg-white rounded-full transition-transform ${
+                    theme.animateHover === true ? 'translate-x-5' : 'translate-x-0.5'
+                  }`} />
+                </div>
+              </div>
+
+              {/* Hover style selector - only visible when hover is enabled */}
+              {theme.animateHover && (
+                <div className="mt-3 pt-3 border-t border-gray-800">
+                  <label className="text-xs text-gray-400 uppercase tracking-wider mb-2 block">Hover style</label>
+                  <div className="grid grid-cols-2 gap-2">
+                    {([
+                      { value: 'lift', label: 'Lift', icon: '↑', desc: 'Lift & scale' },
+                      { value: 'glow', label: 'Glow', icon: '✨', desc: 'Glowing shadow' },
+                      { value: 'tilt', label: 'Tilt', icon: '⤸', desc: '3D tilt effect' },
+                      { value: 'zoom', label: 'Zoom', icon: '🔍', desc: 'Zoom in' },
+                      { value: 'bounce', label: 'Bounce', icon: '⤴', desc: 'Bounce effect' },
+                      { value: 'rotate', label: 'Rotate', icon: '↻', desc: 'Slight rotation' },
+                      { value: 'slide', label: 'Slide', icon: '→', desc: 'Slide up' },
+                      { value: 'flip', label: 'Flip', icon: '⟲', desc: 'Flip animation' },
+                      { value: 'pulse', label: 'Pulse', icon: '◉', desc: 'Pulse scale' },
+                      { value: 'shake', label: 'Shake', icon: '⚡', desc: 'Shake effect' },
+                      { value: 'bgLeft', label: 'BG Left→Right', icon: '→', desc: 'Color sweeps left to right' },
+                      { value: 'bgRight', label: 'BG Right→Left', icon: '←', desc: 'Color sweeps right to left' },
+                      { value: 'bgCenter', label: 'BG Center Out', icon: '↔', desc: 'Expands from center' },
+                      { value: 'bgCorners', label: 'BG Corners', icon: '⤢', desc: 'Radiates from corners' },
+                      { value: 'bgDiagonal', label: 'BG Diagonal', icon: '⤡', desc: 'Diagonal sweep' },
+                      { value: 'bgReveal', label: 'BG Reveal', icon: '▭', desc: 'Curtain reveal' },
+                      { value: 'bgSplit', label: 'BG Split', icon: '⇆', desc: 'Split from sides' },
+                      { value: 'bgWave', label: 'BG Wave', icon: '〰', desc: 'Wave transition' },
+                    ] as const).map(style => (
+                      <button key={style.value}
+                        onClick={() => update({ hoverStyle: style.value })}
+                        className={`p-2 rounded-lg border text-left transition-all ${
+                          (theme.hoverStyle || 'lift') === style.value
+                            ? 'bg-amber-500/10 border-amber-500/40 text-amber-400'
+                            : 'bg-gray-800 border-gray-700 text-gray-400 hover:text-white'
+                        }`}>
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-base">{style.icon}</span>
+                          <span className="text-xs font-medium">{style.label}</span>
+                        </div>
+                        <div className="text-[10px] text-gray-500">{style.desc}</div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
           </Section>
 
           {/* Save button */}
@@ -242,13 +548,12 @@ export default function ThemePage() {
         </div>
       </div>
 
-      {/* ── Right: Live Preview (fixed, non-scrolling) ── */}
+      {/* ── Right: Live Preview ── */}
       <div className="flex-1 flex flex-col overflow-hidden">
         <div className="mb-3 flex items-center justify-between flex-shrink-0">
           <h2 className="text-sm font-medium text-gray-400 uppercase tracking-wider">Live Preview</h2>
           <div className="flex items-center gap-2">
             <span className="text-xs text-gray-600">Changes apply instantly</span>
-            {/* View mode toggle */}
             <div className="flex items-center gap-0.5 bg-gray-800 rounded-md p-0.5 border border-gray-700">
               <button
                 onClick={() => setViewMode('mobile')}
@@ -274,9 +579,7 @@ export default function ThemePage() {
         <div className="flex-1 bg-gray-900 border border-gray-800 rounded-xl overflow-hidden relative">
           <div className="absolute inset-0 flex items-center justify-center p-8">
             {viewMode === 'mobile' ? (
-              /* Mobile view - Phone frame (scaled down) */
               <div className="w-[280px] h-[560px] bg-gray-950 rounded-[2rem] shadow-2xl overflow-hidden border-[10px] border-gray-900 relative">
-                {/* Notch */}
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-4 bg-gray-900 rounded-b-lg z-10" />
                 <iframe
                   ref={iframeRef}
@@ -284,39 +587,10 @@ export default function ThemePage() {
                   className="w-full h-full"
                   style={{ transform: 'scale(0.75)', transformOrigin: 'top left', width: '133.33%', height: '133.33%' }}
                   title="Guest Menu Preview"
-                  onLoad={() => {
-                    setTimeout(() => {
-                      try {
-                        if (iframeRef.current?.contentWindow) {
-                          const iframeDoc = iframeRef.current.contentWindow.document;
-                          const root = iframeDoc.documentElement;
-                          
-                          root.style.setProperty('--brand-bg', theme.bgColor || '#0d1f1a');
-                          root.style.setProperty('--brand-accent', theme.accentColor || '#c9a84c');
-                          root.style.setProperty('--brand-card', theme.cardColor || '#122219');
-                          root.style.setProperty('--brand-text', theme.textColor || '#e8e0d0');
-                          root.style.setProperty('--brand-font-display', theme.fontDisplay || "'Cormorant Garamond', serif");
-                          root.style.setProperty('--brand-font-body', theme.fontBody || "'DM Sans', sans-serif");
-                          root.style.setProperty('--brand-radius', `${theme.borderRadius || 8}px`);
-                          root.style.setProperty('--brand-padding', `${theme.cardPadding || 8}px`);
-                          root.style.setProperty('--brand-gap', `${theme.itemGap || 6}px`);
-                          
-                          root.dataset.showImages = String(theme.showImages ?? true);
-                          root.dataset.showPrice = String(theme.showPrice ?? true);
-                          root.dataset.showMealTabs = String(theme.showMealTabs ?? true);
-                          root.dataset.showDesc = String(theme.showDesc ?? true);
-                        }
-                      } catch (err) {
-                        console.log('Cannot access iframe:', err);
-                      }
-                    }, 50);
-                  }}
                 />
               </div>
             ) : (
-              /* Desktop view - Larger browser frame */
               <div className="w-[800px] h-[600px] bg-gray-950 rounded-lg shadow-2xl overflow-hidden border-2 border-gray-800 flex flex-col">
-                {/* Browser chrome */}
                 <div className="h-8 bg-gray-900 border-b border-gray-800 flex items-center px-3 gap-2 flex-shrink-0">
                   <div className="flex gap-1.5">
                     <div className="w-2.5 h-2.5 rounded-full bg-red-500/80" />
@@ -329,39 +603,11 @@ export default function ThemePage() {
                     </div>
                   </div>
                 </div>
-                {/* Desktop iframe */}
                 <iframe
                   ref={iframeRef}
                   src={`/menu/${venue?.slug}`}
                   className="w-full flex-1"
                   title="Guest Menu Preview"
-                  onLoad={() => {
-                    setTimeout(() => {
-                      try {
-                        if (iframeRef.current?.contentWindow) {
-                          const iframeDoc = iframeRef.current.contentWindow.document;
-                          const root = iframeDoc.documentElement;
-                          
-                          root.style.setProperty('--brand-bg', theme.bgColor || '#0d1f1a');
-                          root.style.setProperty('--brand-accent', theme.accentColor || '#c9a84c');
-                          root.style.setProperty('--brand-card', theme.cardColor || '#122219');
-                          root.style.setProperty('--brand-text', theme.textColor || '#e8e0d0');
-                          root.style.setProperty('--brand-font-display', theme.fontDisplay || "'Cormorant Garamond', serif");
-                          root.style.setProperty('--brand-font-body', theme.fontBody || "'DM Sans', sans-serif");
-                          root.style.setProperty('--brand-radius', `${theme.borderRadius || 8}px`);
-                          root.style.setProperty('--brand-padding', `${theme.cardPadding || 8}px`);
-                          root.style.setProperty('--brand-gap', `${theme.itemGap || 6}px`);
-                          
-                          root.dataset.showImages = String(theme.showImages ?? true);
-                          root.dataset.showPrice = String(theme.showPrice ?? true);
-                          root.dataset.showMealTabs = String(theme.showMealTabs ?? true);
-                          root.dataset.showDesc = String(theme.showDesc ?? true);
-                        }
-                      } catch (err) {
-                        console.log('Cannot access iframe:', err);
-                      }
-                    }, 50);
-                  }}
                 />
               </div>
             )}

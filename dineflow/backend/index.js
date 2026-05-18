@@ -22,6 +22,7 @@ app.use('/api/reviews',    require('./src/routes/reviewRoutes'));
 app.use('/api/qr',         require('./src/routes/qrRoutes'));
 app.use('/api/amenities',  require('./src/routes/amenityRoutes'));
 app.use('/api/public',     require('./src/routes/publicRoutes'));
+app.use('/api/bulk',       require('./src/routes/bulkRoutes'));
 
 // Upload — protected
 const { upload, uploadImage } = require('./src/controllers/uploadController');

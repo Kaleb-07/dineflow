@@ -28,6 +28,619 @@
   min-height: 100vh;
 }
 
+/* ═══════════════════════════════════════════════════════
+   LUXURY ANIMATIONS FOR GUEST MENU (Admin Controlled)
+   ═══════════════════════════════════════════════════════ */
+
+/* Animation speed variables - calculated from 1-10 scale */
+:root {
+  --anim-speed: attr(data-animation-speed number, 5);
+  /* Speed 1 = slowest (1.2s), Speed 10 = fastest (0.2s) */
+  --anim-duration: calc(1.4s - (var(--anim-speed, 5) * 0.12s));
+  --anim-delay: calc(0.1s - (var(--anim-speed, 5) * 0.008s));
+}
+
+/* Fallback for different speed values */
+:root[data-animation-speed="1"] { --anim-duration: 1.2s; --anim-delay: 0.092s; }
+:root[data-animation-speed="2"] { --anim-duration: 1.0s; --anim-delay: 0.084s; }
+:root[data-animation-speed="3"] { --anim-duration: 0.8s; --anim-delay: 0.076s; }
+:root[data-animation-speed="4"] { --anim-duration: 0.7s; --anim-delay: 0.068s; }
+:root[data-animation-speed="5"] { --anim-duration: 0.5s; --anim-delay: 0.05s; }
+:root[data-animation-speed="6"] { --anim-duration: 0.45s; --anim-delay: 0.042s; }
+:root[data-animation-speed="7"] { --anim-duration: 0.4s; --anim-delay: 0.034s; }
+:root[data-animation-speed="8"] { --anim-duration: 0.35s; --anim-delay: 0.026s; }
+:root[data-animation-speed="9"] { --anim-duration: 0.3s; --anim-delay: 0.018s; }
+:root[data-animation-speed="10"] { --anim-duration: 0.2s; --anim-delay: 0.01s; }
+
+/* Fade in page on load - only when animations enabled */
+[data-animate-items="true"] .guest-bg {
+  animation: fadeInPage 0.6s ease-out;
+}
+
+@keyframes fadeInPage {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Staggered fade-in for menu items - controlled by animateItems */
+[data-animate-items="true"] .guest-card {
+  animation: slideInUp var(--anim-duration, 0.5s) ease-out backwards;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+[data-animate-items="true"] .guest-card:nth-child(1)  { animation-delay: calc(var(--anim-delay, 0.05s) * 1); }
+[data-animate-items="true"] .guest-card:nth-child(2)  { animation-delay: calc(var(--anim-delay, 0.05s) * 2); }
+[data-animate-items="true"] .guest-card:nth-child(3)  { animation-delay: calc(var(--anim-delay, 0.05s) * 3); }
+[data-animate-items="true"] .guest-card:nth-child(4)  { animation-delay: calc(var(--anim-delay, 0.05s) * 4); }
+[data-animate-items="true"] .guest-card:nth-child(5)  { animation-delay: calc(var(--anim-delay, 0.05s) * 5); }
+[data-animate-items="true"] .guest-card:nth-child(6)  { animation-delay: calc(var(--anim-delay, 0.05s) * 6); }
+[data-animate-items="true"] .guest-card:nth-child(7)  { animation-delay: calc(var(--anim-delay, 0.05s) * 7); }
+[data-animate-items="true"] .guest-card:nth-child(8)  { animation-delay: calc(var(--anim-delay, 0.05s) * 8); }
+[data-animate-items="true"] .guest-card:nth-child(9)  { animation-delay: calc(var(--anim-delay, 0.05s) * 9); }
+[data-animate-items="true"] .guest-card:nth-child(10) { animation-delay: calc(var(--anim-delay, 0.05s) * 10); }
+
+[data-animate-items="false"] .guest-card {
+  animation: none;
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Hover effect on menu items - controlled by animateHover with multiple styles */
+[data-animate-hover="true"] .guest-card {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ── Hover Style: Lift (default) ── */
+[data-animate-hover="true"][data-hover-style="lift"] .guest-card:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--brand-accent) 15%, transparent);
+  border-color: color-mix(in srgb, var(--brand-accent) 30%, transparent) !important;
+}
+
+/* ── Hover Style: Glow ── */
+[data-animate-hover="true"][data-hover-style="glow"] .guest-card:hover {
+  box-shadow: 0 0 30px color-mix(in srgb, var(--brand-accent) 40%, transparent),
+              0 0 60px color-mix(in srgb, var(--brand-accent) 20%, transparent),
+              0 4px 12px rgba(0, 0, 0, 0.3);
+  border-color: color-mix(in srgb, var(--brand-accent) 50%, transparent) !important;
+}
+
+/* ── Hover Style: Tilt (3D effect) ── */
+[data-animate-hover="true"][data-hover-style="tilt"] .guest-card {
+  transform-style: preserve-3d;
+  perspective: 1000px;
+}
+
+[data-animate-hover="true"][data-hover-style="tilt"] .guest-card:hover {
+  transform: rotateY(5deg) rotateX(-2deg) scale(1.02);
+  box-shadow: -8px 8px 24px color-mix(in srgb, var(--brand-accent) 15%, transparent);
+  border-color: color-mix(in srgb, var(--brand-accent) 30%, transparent) !important;
+}
+
+/* ── Hover Style: Zoom ── */
+[data-animate-hover="true"][data-hover-style="zoom"] .guest-card:hover {
+  transform: scale(1.08);
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--brand-accent) 20%, transparent);
+  border-color: color-mix(in srgb, var(--brand-accent) 40%, transparent) !important;
+  z-index: 10;
+}
+
+/* ── Hover Style: Bounce ── */
+[data-animate-hover="true"][data-hover-style="bounce"] .guest-card:hover {
+  animation: hoverBounce 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--brand-accent) 15%, transparent);
+  border-color: color-mix(in srgb, var(--brand-accent) 30%, transparent) !important;
+}
+
+@keyframes hoverBounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  25% {
+    transform: translateY(-8px);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+  75% {
+    transform: translateY(-6px);
+  }
+}
+
+/* ── Hover Style: Rotate ── */
+[data-animate-hover="true"][data-hover-style="rotate"] .guest-card:hover {
+  transform: rotate(2deg) scale(1.03);
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--brand-accent) 15%, transparent);
+  border-color: color-mix(in srgb, var(--brand-accent) 30%, transparent) !important;
+}
+
+/* ── Hover Style: Slide ── */
+[data-animate-hover="true"][data-hover-style="slide"] .guest-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 28px color-mix(in srgb, var(--brand-accent) 18%, transparent);
+  border-color: color-mix(in srgb, var(--brand-accent) 35%, transparent) !important;
+}
+
+/* ── Hover Style: Flip ── */
+[data-animate-hover="true"][data-hover-style="flip"] .guest-card {
+  transform-style: preserve-3d;
+}
+
+[data-animate-hover="true"][data-hover-style="flip"] .guest-card:hover {
+  animation: hoverFlip 0.6s ease-in-out;
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--brand-accent) 15%, transparent);
+  border-color: color-mix(in srgb, var(--brand-accent) 30%, transparent) !important;
+}
+
+@keyframes hoverFlip {
+  0% {
+    transform: rotateY(0deg);
+  }
+  50% {
+    transform: rotateY(180deg);
+  }
+  100% {
+    transform: rotateY(360deg);
+  }
+}
+
+/* ── Hover Style: Pulse ── */
+[data-animate-hover="true"][data-hover-style="pulse"] .guest-card:hover {
+  animation: hoverPulse 0.8s ease-in-out infinite;
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--brand-accent) 15%, transparent);
+  border-color: color-mix(in srgb, var(--brand-accent) 30%, transparent) !important;
+}
+
+@keyframes hoverPulse {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+}
+
+/* ── Hover Style: Shake ── */
+[data-animate-hover="true"][data-hover-style="shake"] .guest-card:hover {
+  animation: hoverShake 0.5s ease-in-out;
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--brand-accent) 15%, transparent);
+  border-color: color-mix(in srgb, var(--brand-accent) 30%, transparent) !important;
+}
+
+@keyframes hoverShake {
+  0%, 100% {
+    transform: translateX(0);
+  }
+  10%, 30%, 50%, 70%, 90% {
+    transform: translateX(-4px);
+  }
+  20%, 40%, 60%, 80% {
+    transform: translateX(4px);
+  }
+}
+
+/* Image zoom effect for all hover styles */
+[data-animate-hover="true"] .item-image {
+  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+}
+
+[data-animate-hover="true"] .guest-card:hover .item-image {
+  transform: scale(1.1);
+}
+
+[data-animate-hover="true"] .item-image img {
+  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+[data-animate-hover="true"] .guest-card:hover .item-image img {
+  transform: scale(1.15) rotate(2deg);
+}
+
+/* Disable hover effects when animations are off */
+[data-animate-hover="false"] .guest-card:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+/* ═══════════════════════════════════════════════════════
+   BACKGROUND COLOR SWEEP ANIMATIONS
+   ═══════════════════════════════════════════════════════ */
+
+/* Common setup for background animations */
+[data-animate-hover="true"][data-hover-style^="bg"] .guest-card {
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+}
+
+[data-animate-hover="true"][data-hover-style^="bg"] .guest-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, 
+    color-mix(in srgb, var(--brand-accent) 25%, transparent),
+    color-mix(in srgb, var(--brand-accent) 15%, transparent)
+  );
+  z-index: -1;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+[data-animate-hover="true"][data-hover-style^="bg"] .guest-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* ── BG Left to Right ── */
+[data-animate-hover="true"][data-hover-style="bgLeft"] .guest-card::before {
+  transform: translateX(-100%);
+}
+
+[data-animate-hover="true"][data-hover-style="bgLeft"] .guest-card:hover::before {
+  transform: translateX(0);
+}
+
+[data-animate-hover="true"][data-hover-style="bgLeft"] .guest-card:hover {
+  border-color: color-mix(in srgb, var(--brand-accent) 40%, transparent) !important;
+}
+
+/* ── BG Right to Left ── */
+[data-animate-hover="true"][data-hover-style="bgRight"] .guest-card::before {
+  transform: translateX(100%);
+}
+
+[data-animate-hover="true"][data-hover-style="bgRight"] .guest-card:hover::before {
+  transform: translateX(0);
+}
+
+[data-animate-hover="true"][data-hover-style="bgRight"] .guest-card:hover {
+  border-color: color-mix(in srgb, var(--brand-accent) 40%, transparent) !important;
+}
+
+/* ── BG Center Out (Expand from center) ── */
+[data-animate-hover="true"][data-hover-style="bgCenter"] .guest-card::before {
+  transform: scaleX(0);
+  transform-origin: center;
+}
+
+[data-animate-hover="true"][data-hover-style="bgCenter"] .guest-card:hover::before {
+  transform: scaleX(1);
+}
+
+[data-animate-hover="true"][data-hover-style="bgCenter"] .guest-card:hover {
+  border-color: color-mix(in srgb, var(--brand-accent) 40%, transparent) !important;
+}
+
+/* ── BG Corners (Radial from corners) ── */
+[data-animate-hover="true"][data-hover-style="bgCorners"] .guest-card::before {
+  background: radial-gradient(circle at top left, 
+    color-mix(in srgb, var(--brand-accent) 30%, transparent),
+    color-mix(in srgb, var(--brand-accent) 15%, transparent),
+    transparent
+  );
+  opacity: 0;
+  transform: scale(0.5);
+}
+
+[data-animate-hover="true"][data-hover-style="bgCorners"] .guest-card:hover::before {
+  opacity: 1;
+  transform: scale(1.2);
+}
+
+[data-animate-hover="true"][data-hover-style="bgCorners"] .guest-card:hover {
+  border-color: color-mix(in srgb, var(--brand-accent) 40%, transparent) !important;
+}
+
+/* ── BG Diagonal (Diagonal sweep) ── */
+[data-animate-hover="true"][data-hover-style="bgDiagonal"] .guest-card::before {
+  background: linear-gradient(45deg, 
+    color-mix(in srgb, var(--brand-accent) 30%, transparent),
+    color-mix(in srgb, var(--brand-accent) 15%, transparent)
+  );
+  transform: translateX(-100%) translateY(-100%);
+}
+
+[data-animate-hover="true"][data-hover-style="bgDiagonal"] .guest-card:hover::before {
+  transform: translateX(0) translateY(0);
+}
+
+[data-animate-hover="true"][data-hover-style="bgDiagonal"] .guest-card:hover {
+  border-color: color-mix(in srgb, var(--brand-accent) 40%, transparent) !important;
+}
+
+/* ── BG Reveal (Curtain reveal from top) ── */
+[data-animate-hover="true"][data-hover-style="bgReveal"] .guest-card::before {
+  transform: translateY(-100%);
+}
+
+[data-animate-hover="true"][data-hover-style="bgReveal"] .guest-card:hover::before {
+  transform: translateY(0);
+}
+
+[data-animate-hover="true"][data-hover-style="bgReveal"] .guest-card:hover {
+  border-color: color-mix(in srgb, var(--brand-accent) 40%, transparent) !important;
+}
+
+/* ── BG Split (Split from both sides) ── */
+[data-animate-hover="true"][data-hover-style="bgSplit"] .guest-card::before {
+  clip-path: polygon(0 0, 0 0, 0 100%, 0 100%);
+}
+
+[data-animate-hover="true"][data-hover-style="bgSplit"] .guest-card:hover::before {
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+}
+
+[data-animate-hover="true"][data-hover-style="bgSplit"] .guest-card::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background: linear-gradient(-135deg, 
+    color-mix(in srgb, var(--brand-accent) 25%, transparent),
+    color-mix(in srgb, var(--brand-accent) 15%, transparent)
+  );
+  z-index: -1;
+  clip-path: polygon(100% 0, 100% 0, 100% 100%, 100% 100%);
+  transition: clip-path 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+[data-animate-hover="true"][data-hover-style="bgSplit"] .guest-card:hover::after {
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+}
+
+[data-animate-hover="true"][data-hover-style="bgSplit"] .guest-card:hover {
+  border-color: color-mix(in srgb, var(--brand-accent) 40%, transparent) !important;
+}
+
+/* ── BG Wave (Wave transition) ── */
+[data-animate-hover="true"][data-hover-style="bgWave"] .guest-card::before {
+  background: radial-gradient(ellipse at center, 
+    color-mix(in srgb, var(--brand-accent) 30%, transparent),
+    color-mix(in srgb, var(--brand-accent) 15%, transparent)
+  );
+  transform: scale(0) translateY(-50%);
+  border-radius: 50%;
+}
+
+[data-animate-hover="true"][data-hover-style="bgWave"] .guest-card:hover::before {
+  transform: scale(2.5) translateY(0);
+  border-radius: 0;
+}
+
+[data-animate-hover="true"][data-hover-style="bgWave"] .guest-card:hover {
+  border-color: color-mix(in srgb, var(--brand-accent) 40%, transparent) !important;
+}
+
+/* Add subtle lift to all background animations */
+[data-animate-hover="true"][data-hover-style^="bg"] .guest-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px color-mix(in srgb, var(--brand-accent) 12%, transparent);
+}
+
+/* Featured star animation */
+[data-animate-hover="true"] .guest-card [style*="color: var(--brand-accent)"] {
+  display: inline-block;
+  animation: starPulse 2s ease-in-out infinite;
+}
+
+@keyframes starPulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.2);
+    opacity: 0.8;
+  }
+}
+
+/* Category chips animation - controlled by animateCategories */
+[data-animate-categories="true"] .category-chip {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+[data-animate-categories="true"] .category-chip::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--brand-accent) 20%, transparent);
+  transform: translate(-50%, -50%);
+  transition: width 0.4s ease, height 0.4s ease;
+  z-index: -1;
+}
+
+[data-animate-categories="true"] .category-chip:hover::after {
+  width: 200%;
+  height: 200%;
+}
+
+[data-animate-categories="true"] .category-chip:active {
+  transform: scale(0.95);
+}
+
+/* Price shimmer effect - controlled by animatePrice */
+[data-animate-price="true"] .item-price {
+  position: relative;
+  overflow: hidden;
+}
+
+[data-animate-price="true"] .item-price::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in srgb, var(--brand-accent) 30%, transparent),
+    transparent
+  );
+  animation: shimmer 3s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    left: -100%;
+  }
+  50%, 100% {
+    left: 100%;
+  }
+}
+
+/* Smooth tab transitions - only when category animations enabled */
+[data-animate-categories="true"] [style*="border-bottom: 2px solid var(--brand-accent)"] {
+  position: relative;
+}
+
+[data-animate-categories="true"] [style*="border-bottom: 2px solid var(--brand-accent)"]::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--brand-accent);
+  animation: slideInLine 0.3s ease-out;
+}
+
+@keyframes slideInLine {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* Bottom nav icons bounce on tap - only when animations enabled */
+[data-animate-hover="true"] .guest-bg button:active {
+  animation: bouncePress 0.3s ease;
+}
+
+@keyframes bouncePress {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(0.9);
+  }
+}
+
+/* Modal/Sheet slide up animation */
+[style*="position: fixed"][style*="inset: 0"] > div:last-child {
+  animation: slideUpModal 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes slideUpModal {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Backdrop fade in */
+[style*="position: fixed"][style*="inset: 0"] > div:first-child {
+  animation: fadeInBackdrop 0.3s ease-out;
+}
+
+@keyframes fadeInBackdrop {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Loading spinner smooth rotation */
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Venue name entrance - only when animations enabled */
+[data-animate-items="true"] .guest-heading {
+  animation: fadeInDown 0.6s ease-out;
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Smooth scroll behavior */
+.guest-bg {
+  scroll-behavior: smooth;
+}
+
+/* Ripple effect on buttons */
+button {
+  position: relative;
+  overflow: hidden;
+}
+
+button::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+button:active::before {
+  width: 300px;
+  height: 300px;
+}
+
 /* ── Feature flag toggles ── */
 [data-show-images="false"]   .item-image  { display: none }
 [data-show-price="false"]    .item-price  { display: none }
@@ -81,4 +694,479 @@
   border-radius: 0.5rem;
   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
   padding: 1.5rem;
+}
+
+
+/* ═══════════════════════════════════════════════════════
+   ADVANCED BRANDING STYLES
+   ═══════════════════════════════════════════════════════ */
+
+/* ── Card Styles ── */
+[data-card-style="imageTop"] .guest-card {
+  flex-direction: column;
+}
+
+[data-card-style="imageTop"] .item-image {
+  width: 100%;
+  height: 120px;
+}
+
+[data-card-style="compact"] .item-image {
+  display: none;
+}
+
+[data-card-style="compact"] .guest-card {
+  padding: var(--brand-padding);
+}
+
+[data-card-style="minimal"] .guest-card {
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid color-mix(in srgb, var(--brand-accent) 15%, transparent);
+  border-radius: 0;
+  padding: 12px 0;
+}
+
+[data-card-style="bold"] .guest-card {
+  background: var(--brand-accent);
+  border-color: var(--brand-accent);
+}
+
+[data-card-style="bold"] .guest-heading,
+[data-card-style="bold"] .item-price {
+  color: var(--brand-bg) !important;
+}
+
+[data-card-style="bold"] .item-desc {
+  color: color-mix(in srgb, var(--brand-bg) 70%, transparent) !important;
+}
+
+/* ── Menu Layout ── */
+[data-menu-layout="grid"] .item-list {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--brand-gap);
+}
+
+[data-menu-layout="grid"] .guest-card {
+  flex-direction: column;
+}
+
+[data-menu-layout="grid"] .item-image {
+  width: 100%;
+  height: 100px;
+}
+
+/* ── Image Shape ── */
+[data-image-shape="circle"] .item-image {
+  border-radius: 50%;
+}
+
+[data-image-shape="square"] .item-image {
+  border-radius: 0;
+}
+
+/* ── Price Position ── */
+[data-price-position="right"] .guest-card {
+  align-items: center;
+}
+
+[data-price-position="right"] .item-price {
+  margin-left: auto;
+  margin-top: 0;
+}
+
+[data-price-position="badge"] .item-price {
+  display: inline-block;
+  background: var(--brand-accent);
+  color: var(--brand-bg);
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+/* ── Category Styles ── */
+
+/* Pills (default) - already styled inline */
+
+/* Tabs style */
+[data-category-style="tabs"] .category-chips {
+  border-bottom: 1px solid color-mix(in srgb, var(--brand-accent) 20%, transparent);
+  padding-bottom: 0;
+  gap: 0;
+}
+
+[data-category-style="tabs"] .category-chip {
+  border-radius: 0;
+  border: none;
+  border-bottom: 2px solid transparent;
+  padding-bottom: 12px;
+  background: transparent !important;
+}
+
+[data-category-style="tabs"] .category-chip.active {
+  border-bottom-color: var(--brand-accent);
+}
+
+/* Icons style */
+[data-category-style="icons"] .category-chip {
+  flex-direction: column;
+  align-items: center;
+  padding: 12px 16px;
+  min-width: 80px;
+  gap: 4px;
+}
+
+[data-category-style="icons"] .category-chip .icon {
+  font-size: 24px;
+  display: block;
+  margin-right: 0 !important;
+  margin-bottom: 4px;
+}
+
+/* Dropdown style - Collapsible select */
+[data-category-style="dropdown"] .dropdown-trigger {
+  display: flex !important;
+}
+
+[data-category-style="dropdown"] .category-chips {
+  flex-direction: column;
+  gap: 0;
+  padding: 0;
+  margin: 0;
+  background: var(--brand-card);
+  border: 1px solid color-mix(in srgb, var(--brand-accent) 30%, transparent);
+  border-radius: 12px;
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+  transition: max-height 0.3s ease, opacity 0.3s ease;
+}
+
+[data-category-style="dropdown"] .category-chips.dropdown-open {
+  max-height: 500px;
+  opacity: 1;
+  margin-top: 8px;
+}
+
+[data-category-style="dropdown"] .category-chip {
+  width: 100%;
+  justify-content: space-between;
+  border-radius: 0;
+  border: none;
+  border-bottom: 1px solid color-mix(in srgb, var(--brand-accent) 15%, transparent);
+  padding: 14px 16px;
+  background: transparent;
+  transition: all 0.2s;
+}
+
+[data-category-style="dropdown"] .category-chip:last-child {
+  border-bottom: none;
+}
+
+[data-category-style="dropdown"] .category-chip:hover {
+  background: color-mix(in srgb, var(--brand-accent) 8%, transparent);
+  padding-left: 20px;
+}
+
+[data-category-style="dropdown"] .category-chip.active {
+  background: color-mix(in srgb, var(--brand-accent) 12%, transparent);
+  border-left: 3px solid var(--brand-accent);
+  padding-left: 20px;
+}
+
+[data-category-style="dropdown"] .category-chip .icon {
+  margin-right: 12px !important;
+  font-size: 18px;
+}
+
+/* Add chevron indicator for active item */
+[data-category-style="dropdown"] .category-chip.active::after {
+  content: '✓';
+  font-size: 16px;
+  font-weight: bold;
+  color: var(--brand-accent);
+}
+
+/* ── Feature Toggles ── */
+[data-show-allergens="false"] .allergen-chips {
+  display: none;
+}
+
+[data-show-badges="false"] .item-badge,
+[data-show-badges="false"] .featured-badge {
+  display: none;
+}
+
+[data-show-images="false"] .item-image {
+  display: none;
+}
+
+[data-show-price="false"] .item-price {
+  display: none;
+}
+
+[data-show-desc="false"] .item-desc {
+  display: none;
+}
+
+/* ── Responsive Grid ── */
+@media (max-width: 640px) {
+  [data-menu-layout="grid"] .item-list {
+    grid-template-columns: 1fr;
+  }
+}
+
+
+/* ── Polygon Style - Multiple shape variants with animations ── */
+[data-category-style="polygon"] .category-chips {
+  gap: 12px;
+  padding: 0 16px;
+}
+
+[data-category-style="polygon"] .category-chip {
+  position: relative;
+  padding: 10px 20px;
+  border: none;
+  background: transparent;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Polygon float animation - only when category animations enabled */
+[data-animate-categories="true"][data-category-style="polygon"] .category-chip {
+  animation: polygon-float 3s ease-in-out infinite;
+}
+
+[data-category-style="polygon"] .category-chip::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--brand-card);
+  border: 2px solid color-mix(in srgb, var(--brand-accent) 25%, transparent);
+  z-index: -1;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
+              clip-path 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+[data-category-style="polygon"] .category-chip.active::before {
+  background: color-mix(in srgb, var(--brand-accent) 20%, transparent);
+  border-color: var(--brand-accent);
+  box-shadow: 0 0 20px color-mix(in srgb, var(--brand-accent) 30%, transparent),
+              0 0 40px color-mix(in srgb, var(--brand-accent) 15%, transparent);
+}
+
+/* Polygon pulse animation - only when category animations enabled */
+[data-animate-categories="true"][data-category-style="polygon"] .category-chip.active::before {
+  animation: polygon-pulse 2s ease-in-out infinite;
+}
+
+[data-category-style="polygon"] .category-chip:hover::before {
+  background: color-mix(in srgb, var(--brand-accent) 12%, transparent);
+  border-color: color-mix(in srgb, var(--brand-accent) 50%, transparent);
+  transform: scale(1.08) rotate(2deg);
+}
+
+[data-category-style="polygon"] .category-chip .icon {
+  margin-right: 8px;
+  font-size: 16px;
+  display: inline-block;
+  transition: transform 0.3s ease;
+}
+
+[data-category-style="polygon"] .category-chip:hover .icon {
+  transform: scale(1.2) rotate(10deg);
+}
+
+[data-category-style="polygon"] .category-chip span {
+  position: relative;
+  z-index: 1;
+}
+
+/* Floating animation */
+@keyframes polygon-float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+/* Pulse animation for active state */
+@keyframes polygon-pulse {
+  0%, 100% {
+    box-shadow: 0 0 20px color-mix(in srgb, var(--brand-accent) 30%, transparent),
+                0 0 40px color-mix(in srgb, var(--brand-accent) 15%, transparent);
+  }
+  50% {
+    box-shadow: 0 0 30px color-mix(in srgb, var(--brand-accent) 40%, transparent),
+                0 0 60px color-mix(in srgb, var(--brand-accent) 20%, transparent);
+  }
+}
+
+/* Staggered animation delays for wave effect */
+[data-category-style="polygon"] .category-chip:nth-child(1) {
+  animation-delay: 0s;
+}
+
+[data-category-style="polygon"] .category-chip:nth-child(2) {
+  animation-delay: 0.1s;
+}
+
+[data-category-style="polygon"] .category-chip:nth-child(3) {
+  animation-delay: 0.2s;
+}
+
+[data-category-style="polygon"] .category-chip:nth-child(4) {
+  animation-delay: 0.3s;
+}
+
+[data-category-style="polygon"] .category-chip:nth-child(5) {
+  animation-delay: 0.4s;
+}
+
+[data-category-style="polygon"] .category-chip:nth-child(6) {
+  animation-delay: 0.5s;
+}
+
+[data-category-style="polygon"] .category-chip:nth-child(7) {
+  animation-delay: 0.6s;
+}
+
+[data-category-style="polygon"] .category-chip:nth-child(8) {
+  animation-delay: 0.7s;
+}
+
+/* Hexagon shape (default) */
+[data-category-style="polygon"][data-polygon-variant="hexagon"] .category-chip,
+[data-category-style="polygon"]:not([data-polygon-variant]) .category-chip {
+  clip-path: polygon(15% 0%, 85% 0%, 100% 50%, 85% 100%, 15% 100%, 0% 50%);
+}
+
+/* Hexagon morph animation - only when category animations enabled */
+[data-animate-categories="true"][data-category-style="polygon"][data-polygon-variant="hexagon"] .category-chip,
+[data-animate-categories="true"][data-category-style="polygon"]:not([data-polygon-variant]) .category-chip {
+  animation: polygon-float 3s ease-in-out infinite, morph-to-hexagon 0.6s ease-out;
+}
+
+[data-category-style="polygon"][data-polygon-variant="hexagon"] .category-chip::before,
+[data-category-style="polygon"]:not([data-polygon-variant]) .category-chip::before {
+  clip-path: polygon(15% 0%, 85% 0%, 100% 50%, 85% 100%, 15% 100%, 0% 50%);
+}
+
+/* Diamond shape */
+[data-category-style="polygon"][data-polygon-variant="diamond"] .category-chip {
+  clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+  padding: 12px 16px;
+}
+
+/* Diamond morph animation - only when category animations enabled */
+[data-animate-categories="true"][data-category-style="polygon"][data-polygon-variant="diamond"] .category-chip {
+  animation: polygon-float 3s ease-in-out infinite, morph-to-diamond 0.6s ease-out;
+}
+
+[data-category-style="polygon"][data-polygon-variant="diamond"] .category-chip::before {
+  clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+}
+
+/* Chevron/Arrow shape */
+[data-category-style="polygon"][data-polygon-variant="chevron"] .category-chip {
+  clip-path: polygon(0% 0%, 85% 0%, 100% 50%, 85% 100%, 0% 100%, 15% 50%);
+  padding: 10px 24px 10px 20px;
+}
+
+/* Chevron morph animation - only when category animations enabled */
+[data-animate-categories="true"][data-category-style="polygon"][data-polygon-variant="chevron"] .category-chip {
+  animation: polygon-float 3s ease-in-out infinite, morph-to-chevron 0.6s ease-out;
+}
+
+[data-category-style="polygon"][data-polygon-variant="chevron"] .category-chip::before {
+  clip-path: polygon(0% 0%, 85% 0%, 100% 50%, 85% 100%, 0% 100%, 15% 50%);
+}
+
+/* Octagon shape */
+[data-category-style="polygon"][data-polygon-variant="octagon"] .category-chip {
+  clip-path: polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%);
+  padding: 10px 18px;
+}
+
+/* Octagon morph animation - only when category animations enabled */
+[data-animate-categories="true"][data-category-style="polygon"][data-polygon-variant="octagon"] .category-chip {
+  animation: polygon-float 3s ease-in-out infinite, morph-to-octagon 0.6s ease-out;
+}
+
+[data-category-style="polygon"][data-polygon-variant="octagon"] .category-chip::before {
+  clip-path: polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%);
+}
+
+/* Pentagon shape */
+[data-category-style="polygon"][data-polygon-variant="pentagon"] .category-chip {
+  clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%);
+  padding: 10px 18px;
+}
+
+/* Pentagon morph animation - only when category animations enabled */
+[data-animate-categories="true"][data-category-style="polygon"][data-polygon-variant="pentagon"] .category-chip {
+  animation: polygon-float 3s ease-in-out infinite, morph-to-pentagon 0.6s ease-out;
+}
+
+[data-category-style="polygon"][data-polygon-variant="pentagon"] .category-chip::before {
+  clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%);
+}
+
+/* Morph animations */
+@keyframes morph-to-hexagon {
+  0% {
+    clip-path: polygon(50% 50%, 50% 50%, 50% 50%, 50% 50%, 50% 50%, 50% 50%);
+    transform: scale(0.8) rotate(-10deg);
+  }
+  100% {
+    clip-path: polygon(15% 0%, 85% 0%, 100% 50%, 85% 100%, 15% 100%, 0% 50%);
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+@keyframes morph-to-diamond {
+  0% {
+    clip-path: polygon(50% 50%, 50% 50%, 50% 50%, 50% 50%);
+    transform: scale(0.8) rotate(-15deg);
+  }
+  100% {
+    clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+@keyframes morph-to-chevron {
+  0% {
+    clip-path: polygon(50% 50%, 50% 50%, 50% 50%, 50% 50%, 50% 50%, 50% 50%);
+    transform: scale(0.8) translateX(-10px);
+  }
+  100% {
+    clip-path: polygon(0% 0%, 85% 0%, 100% 50%, 85% 100%, 0% 100%, 15% 50%);
+    transform: scale(1) translateX(0);
+  }
+}
+
+@keyframes morph-to-octagon {
+  0% {
+    clip-path: polygon(50% 50%, 50% 50%, 50% 50%, 50% 50%, 50% 50%, 50% 50%, 50% 50%, 50% 50%);
+    transform: scale(0.8) rotate(10deg);
+  }
+  100% {
+    clip-path: polygon(30% 0%, 70% 0%, 100% 30%, 100% 70%, 70% 100%, 30% 100%, 0% 70%, 0% 30%);
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+@keyframes morph-to-pentagon {
+  0% {
+    clip-path: polygon(50% 50%, 50% 50%, 50% 50%, 50% 50%, 50% 50%);
+    transform: scale(0.8) rotate(-20deg);
+  }
+  100% {
+    clip-path: polygon(50% 0%, 100% 38%, 82% 100%, 18% 100%, 0% 38%);
+    transform: scale(1) rotate(0deg);
+  }
 }

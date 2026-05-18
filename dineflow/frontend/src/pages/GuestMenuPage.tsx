@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { ChevronRight, X } from 'lucide-react';
+import { ChevronRight, X, ChevronDown } from 'lucide-react';
 import { applyTheme } from '../hooks/useTheme';
-import type { Venue, MenuItem, Variant, Review } from '../types';
+import type { Venue, MenuItem, Variant, Review, Category } from '../types';
 import api from '../lib/axios';
 
 type Tab = 'menu' | 'about' | 'reviews' | 'location';
@@ -20,6 +20,7 @@ export default function GuestMenuPage() {
   const [review,  setReview]  = useState(false);
   const [location,setLocation] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
 
   // Apply defaults immediately on mount — no flash
   useEffect(() => {
@@ -31,16 +32,33 @@ export default function GuestMenuPage() {
       borderRadius: 8, cardPadding: 8, itemGap: 6,
       showImages: true, showPrice: true,
       showMealTabs: true, showDesc: true,
+      // Animation defaults - all OFF
+      animateItems: false,
+      animateHover: false,
+      animatePrice: false,
+      animateCategories: false,
+      animationSpeed: 5,
     });
   }, []);
 
   useEffect(() => {
     if (!slug) return;
+    console.log('🌐 Fetching venue:', slug);
     api.get(`/public/${slug}`).then(({ data }) => {
+      console.log('✅ Venue data received:', {
+        id: data.id,
+        name: data.name,
+        slug: data.slug,
+        categoriesCount: data.categories?.length,
+        categories: data.categories?.map((c: Category) => ({ id: c.id, name: c.name, type: c.type, itemsCount: c.items?.length }))
+      });
       setVenue(data);
       if (data.theme) applyTheme(data.theme);
       setLoading(false);
-    }).catch(() => setLoading(false));
+    }).catch((err) => {
+      console.error('❌ Error fetching venue:', err);
+      setLoading(false);
+    });
   }, [slug]);
 
   if (loading) return (
@@ -64,6 +82,18 @@ export default function GuestMenuPage() {
   const avgRating = venue.reviews?.length
     ? (venue.reviews.reduce((a, r) => a + r.rating, 0) / venue.reviews.length).toFixed(1)
     : null;
+
+  // Debug logging
+  const debugInfo = {
+    type,
+    meal,
+    totalCategories: venue.categories?.length,
+    filteredCats: cats.length,
+    activeCat,
+    itemsInCategory: items.length,
+    categories: cats.map((c: Category) => ({ id: c.id, name: c.name, itemCount: c.items?.length }))
+  };
+  console.log('🔍 Debug Info:', JSON.stringify(debugInfo, null, 2));
 
   return (
     <div className="guest-bg min-h-screen max-w-md mx-auto flex flex-col" style={{ fontFamily: 'var(--brand-font-body)' }}>
@@ -112,18 +142,51 @@ export default function GuestMenuPage() {
 
       {/* ── Category chips ── */}
       {cats.length > 0 && (
-        <div className="flex gap-2 px-4 mt-3 overflow-x-auto pb-1 flex-shrink-0" style={{ scrollbarWidth: 'none' }}>
-          {cats.map(c => (
-            <button key={c.id} onClick={() => setCatId(c.id)}
-              className="flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-all border"
-              style={{
-                background: activeCat === c.id ? 'color-mix(in srgb, var(--brand-accent) 15%, transparent)' : 'transparent',
-                borderColor: activeCat === c.id ? 'var(--brand-accent)' : 'color-mix(in srgb, var(--brand-accent) 20%, transparent)',
-                color: activeCat === c.id ? 'var(--brand-accent)' : 'color-mix(in srgb, var(--brand-text) 60%, transparent)'
-              }}>
-              {c.icon} {c.name}
-            </button>
-          ))}
+        <div className="category-chips-wrapper px-4 mt-3 flex-shrink-0">
+          {/* Dropdown trigger (only visible in dropdown mode) */}
+          <button
+            className="dropdown-trigger w-full flex items-center justify-between px-4 py-3 rounded-lg border transition-all mb-2"
+            onClick={() => setDropdownOpen(!dropdownOpen)}
+            style={{
+              background: 'var(--brand-card)',
+              borderColor: 'color-mix(in srgb, var(--brand-accent) 30%, transparent)',
+              color: 'var(--brand-text)',
+              display: 'none' // Hidden by default, shown via CSS for dropdown style
+            }}>
+            <span className="flex items-center gap-2">
+              <span className="text-lg">{cats.find(c => c.id === activeCat)?.icon}</span>
+              <span className="text-sm font-medium">{cats.find(c => c.id === activeCat)?.name || 'Select category'}</span>
+            </span>
+            <ChevronDown 
+              size={18} 
+              style={{ 
+                transform: dropdownOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+                transition: 'transform 0.2s'
+              }} 
+            />
+          </button>
+
+          {/* Category list */}
+          <div className={`category-chips flex gap-2 overflow-x-auto pb-1 ${dropdownOpen ? 'dropdown-open' : ''}`} style={{ scrollbarWidth: 'none' }}>
+            {cats.map(c => (
+              <button key={c.id} 
+                onClick={() => {
+                  setCatId(c.id);
+                  setDropdownOpen(false); // Close dropdown after selection
+                }}
+                className={`category-chip flex items-center flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-all border ${
+                  activeCat === c.id ? 'active' : ''
+                }`}
+                style={{
+                  background: activeCat === c.id ? 'color-mix(in srgb, var(--brand-accent) 15%, transparent)' : 'transparent',
+                  borderColor: activeCat === c.id ? 'var(--brand-accent)' : 'color-mix(in srgb, var(--brand-accent) 20%, transparent)',
+                  color: activeCat === c.id ? 'var(--brand-accent)' : 'color-mix(in srgb, var(--brand-text) 60%, transparent)'
+                }}>
+                <span className="icon mr-1">{c.icon}</span>
+                <span>{c.name}</span>
+              </button>
+            ))}
+          </div>
         </div>
       )}
 

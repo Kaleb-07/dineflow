@@ -4,7 +4,7 @@ import { useStore } from './store/useStore';
 // Admin pages
 import LoginPage from './pages/LoginPage';
 import DashboardPage from './pages/DashboardPage';
-import MenuPage from './pages/MenuPage';
+import MenuPage from './pages/MenuPageWithTable';
 import ThemePage from './pages/ThemePage';
 import QRPage from './pages/QRPage';
 import ReviewsPage from './pages/ReviewsPage';

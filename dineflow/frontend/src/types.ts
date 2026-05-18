@@ -27,19 +27,41 @@ export interface Venue {
 export interface Theme {
   id: number
   venueId: number
+  // Colors
   bgColor: string
   accentColor: string
   cardColor: string
   textColor: string
+  // Typography
   fontDisplay: string
   fontBody: string
+  // Shape
   borderRadius: number
   cardPadding: number
   itemGap: number
+  // Features
   showImages: boolean
   showPrice: boolean
   showMealTabs: boolean
   showDesc: boolean
+  // New branding options
+  cardStyle?: 'default' | 'compact' | 'imageTop' | 'minimal' | 'bold'
+  menuLayout?: 'list' | 'grid'
+  categoryStyle?: 'pills' | 'tabs' | 'dropdown' | 'icons' | 'polygon'
+  polygonVariant?: 'hexagon' | 'diamond' | 'chevron' | 'octagon' | 'pentagon'
+  drinkStyle?: 'same' | 'dark' | 'light' | 'accent'
+  showAllergens?: boolean
+  showBadges?: boolean
+  imageShape?: 'rounded' | 'circle' | 'square'
+  pricePosition?: 'bottom' | 'right' | 'badge'
+  // Animation controls
+  animateItems?: boolean
+  animateHover?: boolean
+  hoverStyle?: 'lift' | 'glow' | 'tilt' | 'zoom' | 'bounce' | 'rotate' | 'slide' | 'flip' | 'pulse' | 'shake' | 
+                'bgLeft' | 'bgRight' | 'bgCenter' | 'bgCorners' | 'bgDiagonal' | 'bgReveal' | 'bgSplit' | 'bgWave'
+  animatePrice?: boolean
+  animateCategories?: boolean
+  animationSpeed?: number // 1-10 scale, 5 is normal
 }
 
 export interface Amenity {

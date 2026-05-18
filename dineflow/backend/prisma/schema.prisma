@@ -112,6 +112,25 @@ model Theme {
   showMealTabs Boolean @default(true)
   showDesc     Boolean @default(true)
 
+  // New branding options
+  cardStyle      String  @default("default")
+  menuLayout     String  @default("list")
+  categoryStyle  String  @default("pills")  // pills, tabs, dropdown, icons, polygon
+  polygonVariant String  @default("hexagon") // hexagon, diamond, chevron, octagon, pentagon
+  drinkStyle     String  @default("same")
+  showAllergens  Boolean @default(false)
+  showBadges     Boolean @default(true)
+  imageShape     String  @default("rounded")
+  pricePosition  String  @default("bottom")
+  
+  // Animation controls
+  animateItems      Boolean @default(false)
+  animateHover      Boolean @default(false)
+  hoverStyle        String  @default("lift") // lift, glow, tilt, zoom, bounce, rotate, slide, flip, pulse, shake, bgLeft, bgRight, bgCenter, bgCorners, bgDiagonal, bgReveal, bgSplit, bgWave
+  animatePrice      Boolean @default(false)
+  animateCategories Boolean @default(false)
+  animationSpeed    Int     @default(5) // 1-10 scale, 5 is normal
+
   updatedAt    DateTime @updatedAt
 }
 
