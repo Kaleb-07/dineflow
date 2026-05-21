@@ -29,6 +29,7 @@ const defaults: Partial<Theme> = {
   animateItems:      false,
   animateHover:      false,
   hoverStyle:        'lift',
+  hoverSpeed:        5, // 1-10 scale, 5 is normal
   animatePrice:      false,
   animateCategories: false,
   animationSpeed:    5, // 1-10 scale, 5 is normal
@@ -73,10 +74,36 @@ export function applyTheme(theme: Partial<Theme>) {
   // Animation options
   r.dataset.animateItems      = String(t.animateItems      ?? false);
   r.dataset.animateHover      = String(t.animateHover      ?? false);
-  r.dataset.hoverStyle        = t.hoverStyle               || 'lift';
   r.dataset.animatePrice      = String(t.animatePrice      ?? false);
   r.dataset.animateCategories = String(t.animateCategories ?? false);
   r.dataset.animationSpeed    = String(t.animationSpeed    ?? 5);
+  
+  // CRITICAL: Set hover style attribute
+  const hoverStyle = t.hoverStyle || 'lift';
+  r.dataset.hoverStyle = hoverStyle;
+  
+  // Hover animation speed CSS variable
+  const speedSeconds = ((Number(t.hoverSpeed ?? 5) * 0.05) + 0.05).toFixed(2);
+  r.style.setProperty('--hover-speed', `${speedSeconds}s`);
+  
+  // Page animation speed and data attributes
+  const animSec = ((Number(t.animSpeed ?? 5) * 0.05) + 0.05).toFixed(2);
+  r.style.setProperty('--anim-speed', `${animSec}s`);
+  r.dataset.entrance = t.entranceStyle || 'fade-up';
+  r.dataset.priceFx = t.priceFx || 'shimmer';
+  r.dataset.categoryFx = t.categoryFx || 'crossfade';
+  
+  // Debug log
+  console.log('🎨 Theme applied:', {
+    hoverStyle: r.dataset.hoverStyle,
+    hoverSpeed: t.hoverSpeed,
+    speedSeconds,
+    entranceStyle: r.dataset.entrance,
+    priceFx: r.dataset.priceFx,
+    categoryFx: r.dataset.categoryFx,
+    animSpeed: t.animSpeed,
+    accentColor: t.accentColor
+  });
 }
 
 export function useTheme(theme?: Partial<Theme> | null) {

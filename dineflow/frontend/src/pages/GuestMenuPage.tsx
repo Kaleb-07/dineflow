@@ -21,6 +21,14 @@ export default function GuestMenuPage() {
   const [location,setLocation] = useState(false);
   const [loading, setLoading] = useState(true);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [switching, setSwitching] = useState(false);
+
+  // Category change handler with animation trigger
+  const changeCategory = (id: number) => {
+    setSwitching(true);
+    setCatId(id);
+    setTimeout(() => setSwitching(false), 50);
+  };
 
   // Apply defaults immediately on mount — no flash
   useEffect(() => {
@@ -96,7 +104,7 @@ export default function GuestMenuPage() {
   console.log('🔍 Debug Info:', JSON.stringify(debugInfo, null, 2));
 
   return (
-    <div className="guest-bg min-h-screen max-w-md mx-auto flex flex-col" style={{ fontFamily: 'var(--brand-font-body)' }}>
+    <div className="guest-page-root guest-bg min-h-screen max-w-md mx-auto flex flex-col" style={{ fontFamily: 'var(--brand-font-body)' }}>
 
       {/* ── Top bar ── */}
       <div className="px-4 pt-4 pb-2 flex-shrink-0">
@@ -171,7 +179,7 @@ export default function GuestMenuPage() {
             {cats.map(c => (
               <button key={c.id} 
                 onClick={() => {
-                  setCatId(c.id);
+                  changeCategory(c.id);
                   setDropdownOpen(false); // Close dropdown after selection
                 }}
                 className={`category-chip flex items-center flex-shrink-0 px-3 py-1.5 rounded-full text-xs font-medium transition-all border ${
@@ -191,16 +199,22 @@ export default function GuestMenuPage() {
       )}
 
       {/* ── Item list ── */}
-      <div className="flex-1 overflow-y-auto px-4 mt-3 pb-24 space-y-2">
+      <div className={`item-list flex-1 overflow-y-auto px-4 mt-3 pb-24 space-y-2 ${switching ? 'category-switching' : ''}`}>
         {items.length === 0 && (
           <div className="text-center py-12" style={{ color: 'color-mix(in srgb, var(--brand-text) 40%, transparent)' }}>
             No items in this category
           </div>
         )}
-        {items.map(i => (
+        {items.map((i, index) => (
           <button key={i.id} onClick={() => setItem(i)} className="w-full text-left">
-            <div className="guest-card flex gap-3 border transition-all"
-              style={{ borderColor: 'color-mix(in srgb, var(--brand-accent) 12%, transparent)', marginBottom: 'var(--brand-gap)' }}>
+            <div 
+              className="menu-card guest-card flex gap-3 border"
+              style={{ 
+                borderColor: 'color-mix(in srgb, var(--brand-accent) 12%, transparent)', 
+                marginBottom: 'var(--brand-gap)',
+                '--card-index': index
+              } as React.CSSProperties}
+            >
               <div className="item-image w-16 h-16 rounded-lg flex-shrink-0 overflow-hidden"
                 style={{ background: 'color-mix(in srgb, var(--brand-accent) 8%, transparent)', borderRadius: 'calc(var(--brand-radius) - 2px)' }}>
                 {i.image
@@ -212,7 +226,7 @@ export default function GuestMenuPage() {
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-start justify-between gap-1">
-                  <span className="text-sm font-medium guest-heading" style={{ fontFamily: 'var(--brand-font-display)', color: 'var(--brand-text)' }}>
+                  <span className="item-name text-sm font-medium guest-heading" style={{ fontFamily: 'var(--brand-font-display)', color: 'var(--brand-text)' }}>
                     {i.name}
                   </span>
                   {i.isFeatured && (

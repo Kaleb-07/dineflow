@@ -1,0 +1,520 @@
+/* ═══════════════════════════════════════════════════════════════
+   DineFlow — Page Animations  (page-animations.css)
+   3 sections × 10+ styles each = 35+ total animations
+   All controlled by data attributes on :root
+   Speed: --anim-speed CSS variable
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ──────────────────────────────────────────────────────────────
+   SECTION 1: ITEM ENTRANCE ANIMATIONS
+   Triggered when menu items appear (page load / category switch)
+   data-entrance="[style]" on :root
+   .menu-card gets --card-index custom property for stagger
+   ────────────────────────────────────────────────────────────── */
+
+/* Base: all cards start invisible, stagger by index */
+:root[data-entrance]:not([data-entrance="none"]) .menu-card {
+  opacity: 0;
+  animation-fill-mode: both;
+  animation-duration: var(--anim-speed, 0.5s);
+  animation-delay: calc(var(--card-index, 0) * 0.07s);
+}
+
+/* ── 1. FADE UP — elegant upward reveal */
+@keyframes entrance-fade-up {
+  from { opacity: 0; transform: translateY(24px) }
+  to   { opacity: 1; transform: translateY(0)    }
+}
+:root[data-entrance="fade-up"] .menu-card {
+  animation-name: entrance-fade-up;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ── 2. FADE DOWN — drops in from above */
+@keyframes entrance-fade-down {
+  from { opacity: 0; transform: translateY(-24px) }
+  to   { opacity: 1; transform: translateY(0)     }
+}
+:root[data-entrance="fade-down"] .menu-card {
+  animation-name: entrance-fade-down;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ── 3. FADE LEFT — slides in from right */
+@keyframes entrance-fade-left {
+  from { opacity: 0; transform: translateX(32px) }
+  to   { opacity: 1; transform: translateX(0)    }
+}
+:root[data-entrance="fade-left"] .menu-card {
+  animation-name: entrance-fade-left;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ── 4. FADE RIGHT — slides in from left */
+@keyframes entrance-fade-right {
+  from { opacity: 0; transform: translateX(-32px) }
+  to   { opacity: 1; transform: translateX(0)     }
+}
+:root[data-entrance="fade-right"] .menu-card {
+  animation-name: entrance-fade-right;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ── 5. SCALE UP — grows from small */
+@keyframes entrance-scale-up {
+  from { opacity: 0; transform: scale(0.82) }
+  to   { opacity: 1; transform: scale(1)    }
+}
+:root[data-entrance="scale-up"] .menu-card {
+  animation-name: entrance-scale-up;
+  animation-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ── 6. SCALE DOWN — shrinks in from large */
+@keyframes entrance-scale-down {
+  from { opacity: 0; transform: scale(1.14) }
+  to   { opacity: 1; transform: scale(1)    }
+}
+:root[data-entrance="scale-down"] .menu-card {
+  animation-name: entrance-scale-down;
+  animation-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* ── 7. FLIP IN — 3D flip reveal */
+@keyframes entrance-flip {
+  from { opacity: 0; transform: perspective(600px) rotateX(-40deg) translateY(20px) }
+  to   { opacity: 1; transform: perspective(600px) rotateX(0) translateY(0)         }
+}
+:root[data-entrance="flip"] .menu-card {
+  animation-name: entrance-flip;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ── 8. ROTATE IN — spins in from angle */
+@keyframes entrance-rotate {
+  from { opacity: 0; transform: rotate(-8deg) scale(0.9) translateY(16px) }
+  to   { opacity: 1; transform: rotate(0) scale(1) translateY(0)          }
+}
+:root[data-entrance="rotate"] .menu-card {
+  animation-name: entrance-rotate;
+  animation-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ── 9. BLUR IN — focus pull from blur */
+@keyframes entrance-blur {
+  from { opacity: 0; filter: blur(8px); transform: translateY(12px) scale(0.97) }
+  to   { opacity: 1; filter: blur(0);   transform: translateY(0) scale(1)       }
+}
+:root[data-entrance="blur"] .menu-card {
+  animation-name: entrance-blur;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ── 10. BOUNCE IN — playful spring */
+@keyframes entrance-bounce {
+  0%   { opacity: 0; transform: translateY(36px) scale(0.88) }
+  60%  { opacity: 1; transform: translateY(-8px) scale(1.03) }
+  80%  { transform: translateY(4px) scale(0.98) }
+  100% { transform: translateY(0) scale(1) }
+}
+:root[data-entrance="bounce"] .menu-card {
+  animation-name: entrance-bounce;
+  animation-timing-function: ease-out;
+}
+
+/* ── 11. SLIDE DOOR — splits open like doors */
+@keyframes entrance-door-l {
+  from { opacity: 0; transform: translateX(-60px) skewX(4deg) }
+  to   { opacity: 1; transform: translateX(0) skewX(0)        }
+}
+@keyframes entrance-door-r {
+  from { opacity: 0; transform: translateX(60px) skewX(-4deg) }
+  to   { opacity: 1; transform: translateX(0) skewX(0)        }
+}
+:root[data-entrance="door"] .menu-card:nth-child(odd) {
+  animation-name: entrance-door-l;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+:root[data-entrance="door"] .menu-card:nth-child(even) {
+  animation-name: entrance-door-r;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ── 12. WAVE — cascades like a wave */
+@keyframes entrance-wave {
+  0%   { opacity: 0; transform: translateY(20px) rotate(-2deg) }
+  60%  { opacity: 1; transform: translateY(-5px) rotate(0.5deg) }
+  100% { opacity: 1; transform: translateY(0) rotate(0) }
+}
+:root[data-entrance="wave"] .menu-card {
+  animation-name: entrance-wave;
+  animation-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ── NONE */
+:root[data-entrance="none"] .menu-card {
+  opacity: 1 !important;
+  animation: none !important;
+}
+
+/* ──────────────────────────────────────────────────────────────
+   SECTION 2: PRICE SHIMMER EFFECTS
+   Continuous animation on .item-price elements
+   data-price-fx="[style]" on :root
+   ────────────────────────────────────────────────────────────── */
+
+/* ── 1. SHIMMER — light sweep (classic luxury) */
+@keyframes price-shimmer {
+  0%   { background-position: -200% center }
+  100% { background-position: 200% center  }
+}
+:root[data-price-fx="shimmer"] .item-price {
+  background: linear-gradient(90deg,
+    var(--brand-accent) 0%,
+    color-mix(in srgb, var(--brand-accent) 50%, white) 40%,
+    var(--brand-accent) 55%,
+    color-mix(in srgb, var(--brand-accent) 80%, white) 70%,
+    var(--brand-accent) 100%);
+  background-size: 250% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: price-shimmer calc(var(--anim-speed, 0.5s) * 6) linear infinite;
+}
+
+/* ── 2. PULSE GLOW — breathes with a glow */
+@keyframes price-pulse {
+  0%, 100% {
+    text-shadow: 0 0 0 transparent;
+    opacity: 1;
+  }
+  50% {
+    text-shadow:
+      0 0 8px color-mix(in srgb, var(--brand-accent) 70%, transparent),
+      0 0 20px color-mix(in srgb, var(--brand-accent) 35%, transparent);
+    opacity: 0.85;
+  }
+}
+:root[data-price-fx="pulse-glow"] .item-price {
+  animation: price-pulse calc(var(--anim-speed, 0.5s) * 5) ease-in-out infinite;
+  color: var(--brand-accent) !important;
+  -webkit-text-fill-color: unset !important;
+}
+
+/* ── 3. TYPEWRITER — counts up from left */
+@keyframes price-typewriter {
+  from { clip-path: inset(0 100% 0 0); opacity: 1 }
+  to   { clip-path: inset(0 0% 0 0);   opacity: 1 }
+}
+:root[data-price-fx="typewriter"] .item-price {
+  animation: price-typewriter calc(var(--anim-speed, 0.5s) * 2) steps(8, end)
+             calc(var(--card-index, 0) * 0.1s) both;
+  color: var(--brand-accent) !important;
+}
+
+/* ── 4. GOLD FLASH — single dramatic flash */
+@keyframes price-flash {
+  0%, 85%, 100% { color: var(--brand-accent); text-shadow: none }
+  88% {
+    color: white;
+    text-shadow:
+      0 0 10px var(--brand-accent),
+      0 0 30px color-mix(in srgb, var(--brand-accent) 60%, white);
+  }
+  92% { color: var(--brand-accent); text-shadow: none }
+  96% {
+    color: color-mix(in srgb, var(--brand-accent) 70%, white);
+    text-shadow: 0 0 6px color-mix(in srgb, var(--brand-accent) 40%, transparent);
+  }
+}
+:root[data-price-fx="flash"] .item-price {
+  animation: price-flash calc(var(--anim-speed, 0.5s) * 8) ease-in-out infinite;
+  color: var(--brand-accent) !important;
+  -webkit-text-fill-color: unset !important;
+}
+
+/* ── 5. WAVE COLOR — cycles through accent shades */
+@keyframes price-wave-color {
+  0%   { color: var(--brand-accent) }
+  25%  { color: color-mix(in srgb, var(--brand-accent) 70%, white) }
+  50%  { color: color-mix(in srgb, var(--brand-accent) 85%, white) }
+  75%  { color: color-mix(in srgb, var(--brand-accent) 70%, white) }
+  100% { color: var(--brand-accent) }
+}
+:root[data-price-fx="wave-color"] .item-price {
+  animation: price-wave-color calc(var(--anim-speed, 0.5s) * 6) ease-in-out infinite;
+  -webkit-text-fill-color: unset !important;
+}
+
+/* ── 6. BOUNCE SCALE — rhythmic scale bounce */
+@keyframes price-bounce-scale {
+  0%, 100% { transform: scale(1)    }
+  50%       { transform: scale(1.12) }
+}
+:root[data-price-fx="bounce-scale"] .item-price {
+  animation: price-bounce-scale calc(var(--anim-speed, 0.5s) * 4) cubic-bezier(0.34,1.56,0.64,1) infinite;
+  display: inline-block;
+  color: var(--brand-accent) !important;
+}
+
+/* ── 7. UNDERLINE SWEEP — animated underline */
+@keyframes price-underline {
+  0%   { background-size: 0% 2px   }
+  50%  { background-size: 100% 2px }
+  100% { background-size: 0% 2px   }
+}
+:root[data-price-fx="underline"] .item-price {
+  background-image: linear-gradient(90deg, var(--brand-accent), var(--brand-accent));
+  background-repeat: no-repeat;
+  background-position: left bottom;
+  background-size: 0% 2px;
+  animation: price-underline calc(var(--anim-speed, 0.5s) * 5) ease-in-out infinite;
+  color: var(--brand-accent) !important;
+  padding-bottom: 2px;
+}
+
+/* ── 8. NEON FLICKER — electric neon sign */
+@keyframes price-neon {
+  0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
+    color: var(--brand-accent);
+    text-shadow:
+      0 0 4px var(--brand-accent),
+      0 0 10px color-mix(in srgb, var(--brand-accent) 80%, transparent),
+      0 0 20px color-mix(in srgb, var(--brand-accent) 60%, transparent),
+      0 0 40px color-mix(in srgb, var(--brand-accent) 40%, transparent);
+  }
+  20%, 24%, 55% {
+    color: color-mix(in srgb, var(--brand-accent) 40%, transparent);
+    text-shadow: none;
+  }
+}
+:root[data-price-fx="neon"] .item-price {
+  animation: price-neon calc(var(--anim-speed, 0.5s) * 10) ease-in-out infinite;
+  -webkit-text-fill-color: unset !important;
+}
+
+/* ── 9. REVEAL SLIDE — slides in from left on load */
+@keyframes price-reveal {
+  from { opacity: 0; transform: translateX(-14px) }
+  to   { opacity: 1; transform: translateX(0) }
+}
+:root[data-price-fx="reveal"] .item-price {
+  animation: price-reveal var(--anim-speed, 0.5s) cubic-bezier(0.22,1,0.36,1)
+             calc(var(--card-index, 0) * 0.1s + 0.2s) both;
+  color: var(--brand-accent) !important;
+}
+
+/* ── 10. STAMP — bold press-down effect */
+@keyframes price-stamp {
+  0%   { opacity: 0; transform: scale(1.5) rotate(-8deg); filter: blur(3px) }
+  60%  { opacity: 1; transform: scale(0.96) rotate(1deg); filter: blur(0) }
+  80%  { transform: scale(1.02) rotate(-0.5deg) }
+  100% { transform: scale(1) rotate(0) }
+}
+:root[data-price-fx="stamp"] .item-price {
+  animation: price-stamp calc(var(--anim-speed, 0.5s) * 1.5) cubic-bezier(0.34,1.56,0.64,1)
+             calc(var(--card-index, 0) * 0.08s) both;
+  display: inline-block;
+  color: var(--brand-accent) !important;
+}
+
+/* ── 11. GRADIENT SHIFT — slow color morph */
+@keyframes price-gradient-shift {
+  0%   { background-position: 0% center   }
+  50%  { background-position: 100% center }
+  100% { background-position: 0% center   }
+}
+:root[data-price-fx="gradient-shift"] .item-price {
+  background: linear-gradient(90deg,
+    var(--brand-accent) 0%,
+    color-mix(in srgb, var(--brand-accent) 60%, white) 30%,
+    color-mix(in srgb, var(--brand-accent) 80%, transparent) 60%,
+    var(--brand-accent) 100%);
+  background-size: 300% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: price-gradient-shift calc(var(--anim-speed, 0.5s) * 8) ease-in-out infinite;
+}
+
+/* ── NONE */
+:root[data-price-fx="none"] .item-price {
+  animation: none !important;
+  background: none !important;
+  -webkit-text-fill-color: var(--brand-accent) !important;
+  color: var(--brand-accent) !important;
+}
+
+/* ──────────────────────────────────────────────────────────────
+   SECTION 3: CATEGORY SWITCH ANIMATIONS
+   Fires when category/tab changes — applies to .item-list wrapper
+   data-category-fx="[style]" on :root
+   Add class 'category-switching' to .item-list during switch
+   ────────────────────────────────────────────────────────────── */
+
+/* ── 1. CROSSFADE — smooth opacity blend */
+@keyframes cat-crossfade-in {
+  from { opacity: 0 }
+  to   { opacity: 1 }
+}
+.item-list { transition: opacity var(--anim-speed, 0.3s) ease; }
+:root[data-category-fx="crossfade"] .item-list.category-switching {
+  animation: cat-crossfade-in var(--anim-speed, 0.3s) ease both;
+}
+
+/* ── 2. SLIDE LEFT — new content slides in from right */
+@keyframes cat-slide-left-in {
+  from { opacity: 0; transform: translateX(40px) }
+  to   { opacity: 1; transform: translateX(0)    }
+}
+:root[data-category-fx="slide-left"] .item-list.category-switching {
+  animation: cat-slide-left-in var(--anim-speed, 0.3s) cubic-bezier(0.22,1,0.36,1) both;
+}
+
+/* ── 3. SLIDE RIGHT — new content slides in from left */
+@keyframes cat-slide-right-in {
+  from { opacity: 0; transform: translateX(-40px) }
+  to   { opacity: 1; transform: translateX(0)     }
+}
+:root[data-category-fx="slide-right"] .item-list.category-switching {
+  animation: cat-slide-right-in var(--anim-speed, 0.3s) cubic-bezier(0.22,1,0.36,1) both;
+}
+
+/* ── 4. SCALE FADE — zooms in while fading */
+@keyframes cat-scale-fade-in {
+  from { opacity: 0; transform: scale(0.9) }
+  to   { opacity: 1; transform: scale(1)   }
+}
+:root[data-category-fx="scale-fade"] .item-list.category-switching {
+  animation: cat-scale-fade-in var(--anim-speed, 0.3s) cubic-bezier(0.34,1.56,0.64,1) both;
+}
+
+/* ── 5. FLIP PAGE — newspaper page turn */
+@keyframes cat-flip-page {
+  0%   { opacity: 0; transform: perspective(1000px) rotateY(-25deg) translateX(-20px) }
+  100% { opacity: 1; transform: perspective(1000px) rotateY(0) translateX(0)          }
+}
+:root[data-category-fx="flip-page"] .item-list.category-switching {
+  animation: cat-flip-page var(--anim-speed, 0.3s) cubic-bezier(0.22,1,0.36,1) both;
+}
+
+/* ── 6. RIPPLE — expands outward from center */
+@keyframes cat-ripple {
+  from { opacity: 0; transform: scale(0.85); filter: blur(4px) }
+  to   { opacity: 1; transform: scale(1);    filter: blur(0)   }
+}
+:root[data-category-fx="ripple"] .item-list.category-switching {
+  animation: cat-ripple var(--anim-speed, 0.3s) cubic-bezier(0.34,1.56,0.64,1) both;
+}
+
+/* ── 7. WIPE UP — reveals from bottom */
+@keyframes cat-wipe-up {
+  from { opacity: 0; clip-path: inset(100% 0 0 0); transform: translateY(10px) }
+  to   { opacity: 1; clip-path: inset(0% 0 0 0);   transform: translateY(0)    }
+}
+:root[data-category-fx="wipe-up"] .item-list.category-switching {
+  animation: cat-wipe-up var(--anim-speed, 0.3s) cubic-bezier(0.22,1,0.36,1) both;
+}
+
+/* ── 8. WIPE DOWN — reveals from top */
+@keyframes cat-wipe-down {
+  from { opacity: 0; clip-path: inset(0 0 100% 0); transform: translateY(-10px) }
+  to   { opacity: 1; clip-path: inset(0 0 0% 0);   transform: translateY(0)     }
+}
+:root[data-category-fx="wipe-down"] .item-list.category-switching {
+  animation: cat-wipe-down var(--anim-speed, 0.3s) cubic-bezier(0.22,1,0.36,1) both;
+}
+
+/* ── 9. MORPH — blur-in cinematic */
+@keyframes cat-morph {
+  from { opacity: 0; filter: blur(12px) saturate(0.3); transform: scale(1.04) }
+  to   { opacity: 1; filter: blur(0)    saturate(1);   transform: scale(1)    }
+}
+:root[data-category-fx="morph"] .item-list.category-switching {
+  animation: cat-morph calc(var(--anim-speed, 0.3s) * 1.5) cubic-bezier(0.22,1,0.36,1) both;
+}
+
+/* ── 10. SHUTTER — venetian blind effect */
+@keyframes cat-shutter {
+  0%   { opacity: 0; transform: scaleY(0.2) translateY(-20px) }
+  60%  { opacity: 1; transform: scaleY(1.03) translateY(2px) }
+  100% { transform: scaleY(1) translateY(0) }
+}
+:root[data-category-fx="shutter"] .item-list.category-switching {
+  animation: cat-shutter var(--anim-speed, 0.3s) cubic-bezier(0.22,1,0.36,1) both;
+  transform-origin: top;
+}
+
+/* ── 11. DISSOLVE — pixel-like dissolve */
+@keyframes cat-dissolve {
+  0%   { opacity: 0; filter: blur(20px) brightness(2); transform: scale(1.06) }
+  40%  { filter: blur(4px) brightness(1.2); transform: scale(1.01) }
+  100% { opacity: 1; filter: blur(0) brightness(1); transform: scale(1) }
+}
+:root[data-category-fx="dissolve"] .item-list.category-switching {
+  animation: cat-dissolve calc(var(--anim-speed, 0.3s) * 1.8) ease-out both;
+}
+
+/* ── 12. SPLIT — content splits in from center */
+@keyframes cat-split-top {
+  from { opacity: 0; clip-path: inset(50% 0 50% 0) }
+  to   { opacity: 1; clip-path: inset(0% 0 0% 0)   }
+}
+:root[data-category-fx="split"] .item-list.category-switching {
+  animation: cat-split-top var(--anim-speed, 0.3s) cubic-bezier(0.22,1,0.36,1) both;
+}
+
+/* ── NONE */
+:root[data-category-fx="none"] .item-list.category-switching {
+  animation: none !important;
+}
+
+/* ── Category chip/tab transition */
+.category-chip, .category-tab {
+  transition:
+    background  var(--anim-speed, 0.3s) ease,
+    color       var(--anim-speed, 0.3s) ease,
+    border-color var(--anim-speed, 0.3s) ease,
+    transform   var(--anim-speed, 0.3s) cubic-bezier(0.34,1.56,0.64,1),
+    box-shadow  var(--anim-speed, 0.3s) ease;
+}
+
+/* Active category chip gets accent glow */
+.category-chip.active, .category-tab.active {
+  box-shadow: 0 0 12px color-mix(in srgb, var(--brand-accent) 30%, transparent);
+}
+
+/* Category chip click ripple */
+@keyframes chip-ripple {
+  from { transform: scale(0.9); opacity: 0.6 }
+  to   { transform: scale(1);   opacity: 1   }
+}
+.category-chip:active, .category-tab:active {
+  animation: chip-ripple 0.15s ease-out;
+}
+
+/* ──────────────────────────────────────────────────────────────
+   GLOBAL: Smooth page entrance on first load
+   ────────────────────────────────────────────────────────────── */
+@keyframes page-mount {
+  from { opacity: 0; transform: translateY(8px) }
+  to   { opacity: 1; transform: translateY(0)   }
+}
+.guest-page-root {
+  animation: page-mount 0.4s cubic-bezier(0.22,1,0.36,1) both;
+}
+
+/* ──────────────────────────────────────────────────────────────
+   REDUCED MOTION
+   ────────────────────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .menu-card,
+  .item-list,
+  .item-price,
+  .category-chip,
+  .category-tab,
+  .guest-page-root {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -45,7 +45,15 @@ const updateTheme = async (req, res) => {
       bgColor, accentColor, cardColor, textColor,
       fontDisplay, fontBody,
       borderRadius, cardPadding, itemGap,
-      showImages, showPrice, showMealTabs, showDesc
+      showImages, showPrice, showMealTabs, showDesc,
+      // New branding options
+      cardStyle, menuLayout, categoryStyle, polygonVariant,
+      drinkStyle, showAllergens, showBadges, imageShape, pricePosition,
+      // Animation controls
+      animateItems, animateHover, hoverStyle, hoverSpeed,
+      animatePrice, animateCategories, animationSpeed,
+      // Page animations
+      entranceStyle, priceFx, categoryFx, animSpeed
     } = req.body;
 
     const theme = await prisma.theme.upsert({
@@ -54,18 +62,35 @@ const updateTheme = async (req, res) => {
         bgColor, accentColor, cardColor, textColor,
         fontDisplay, fontBody,
         borderRadius, cardPadding, itemGap,
-        showImages, showPrice, showMealTabs, showDesc
+        showImages, showPrice, showMealTabs, showDesc,
+        // New branding options
+        cardStyle, menuLayout, categoryStyle, polygonVariant,
+        drinkStyle, showAllergens, showBadges, imageShape, pricePosition,
+        // Animation controls
+        animateItems, animateHover, hoverStyle, hoverSpeed,
+        animatePrice, animateCategories, animationSpeed,
+        // Page animations
+        entranceStyle, priceFx, categoryFx, animSpeed
       },
       create: {
         venueId: req.user.venueId,
         bgColor, accentColor, cardColor, textColor,
         fontDisplay, fontBody,
         borderRadius, cardPadding, itemGap,
-        showImages, showPrice, showMealTabs, showDesc
+        showImages, showPrice, showMealTabs, showDesc,
+        // New branding options
+        cardStyle, menuLayout, categoryStyle, polygonVariant,
+        drinkStyle, showAllergens, showBadges, imageShape, pricePosition,
+        // Animation controls
+        animateItems, animateHover, hoverStyle, hoverSpeed,
+        animatePrice, animateCategories, animationSpeed,
+        // Page animations
+        entranceStyle, priceFx, categoryFx, animSpeed
       }
     });
     res.json(theme);
   } catch (err) {
+    console.error('Theme update error:', err);
     res.status(500).json({ error: 'Failed to update theme' });
   }
 };

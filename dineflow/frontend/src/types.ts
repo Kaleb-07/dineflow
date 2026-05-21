@@ -57,11 +57,16 @@ export interface Theme {
   // Animation controls
   animateItems?: boolean
   animateHover?: boolean
-  hoverStyle?: 'lift' | 'glow' | 'tilt' | 'zoom' | 'bounce' | 'rotate' | 'slide' | 'flip' | 'pulse' | 'shake' | 
-                'bgLeft' | 'bgRight' | 'bgCenter' | 'bgCorners' | 'bgDiagonal' | 'bgReveal' | 'bgSplit' | 'bgWave'
+  hoverStyle?: string
+  hoverSpeed?: number // 1-10 scale, 5 is normal
   animatePrice?: boolean
   animateCategories?: boolean
   animationSpeed?: number // 1-10 scale, 5 is normal
+  // Page animations (35 total styles)
+  entranceStyle?: string  // 12 entrance animations
+  priceFx?: string        // 11 price effects
+  categoryFx?: string     // 12 category transitions
+  animSpeed?: number      // unified speed control 1-10
 }
 
 export interface Amenity {

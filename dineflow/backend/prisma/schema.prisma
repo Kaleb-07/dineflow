@@ -126,10 +126,17 @@ model Theme {
   // Animation controls
   animateItems      Boolean @default(false)
   animateHover      Boolean @default(false)
-  hoverStyle        String  @default("lift") // lift, glow, tilt, zoom, bounce, rotate, slide, flip, pulse, shake, bgLeft, bgRight, bgCenter, bgCorners, bgDiagonal, bgReveal, bgSplit, bgWave
+  hoverStyle        String  @default("lift") // lift, glow, tilt, zoom, bounce, rotate, slide, flip, pulse, shake, bg-ltr, bg-rtl, bg-center, bg-corners, bg-diagonal, bg-reveal, bg-split, bg-wave, none
+  hoverSpeed        Int     @default(5) // 1-10 scale, 5 is normal
   animatePrice      Boolean @default(false)
   animateCategories Boolean @default(false)
   animationSpeed    Int     @default(5) // 1-10 scale, 5 is normal
+  
+  // Page animations (35 total styles)
+  entranceStyle     String  @default("fade-up")   // 12 entrance animations
+  priceFx           String  @default("shimmer")   // 11 price effects
+  categoryFx        String  @default("crossfade") // 12 category transitions
+  animSpeed         Int     @default(5)           // unified speed control 1-10
 
   updatedAt    DateTime @updatedAt
 }

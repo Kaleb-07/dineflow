@@ -3,6 +3,8 @@ import { useStore } from '../store/useStore';
 import { applyTheme } from '../hooks/useTheme';
 import api from '../lib/axios';
 import type { Theme } from '../types';
+import HoverSection from '../components/HoverSection';
+import AnimationsSection from '../components/AnimationsSection';
 
 const PRESETS: Record<string, Partial<Theme>> = {
   'Luxury dark':   { bgColor: '#0d1f1a', accentColor: '#c9a84c', cardColor: '#122219', textColor: '#e8e0d0' },
@@ -54,7 +56,7 @@ export default function ThemePage() {
     cardStyle: 'default', menuLayout: 'list', categoryStyle: 'pills',
     drinkStyle: 'same', showAllergens: false, showBadges: true,
     imageShape: 'rounded', pricePosition: 'bottom', polygonVariant: 'hexagon',
-    animateItems: false, animateHover: false, hoverStyle: 'lift', animatePrice: false,
+    animateItems: false, animateHover: false, hoverStyle: 'lift', hoverSpeed: 5, animatePrice: false,
     animateCategories: false, animationSpeed: 5,
   });
   
@@ -112,6 +114,10 @@ export default function ThemePage() {
           root.dataset.animateCategories = String(theme.animateCategories ?? false);
           root.dataset.animationSpeed = String(theme.animationSpeed ?? 5);
           root.dataset.pricePosition = theme.pricePosition || 'bottom';
+          
+          // Hover animation speed CSS variable
+          const speedSeconds = ((Number(theme.hoverSpeed ?? 5) * 0.05) + 0.05).toFixed(2);
+          root.style.setProperty('--hover-speed', `${speedSeconds}s`);
         }
       } catch (err) {
         console.log('Iframe not ready yet');
@@ -389,6 +395,12 @@ export default function ThemePage() {
             ))}
           </Section>
 
+          {/* Hover animations - Beautiful custom component */}
+          <HoverSection theme={theme} update={update} />
+
+          {/* Page animations - 35 total styles (12 entrance + 11 price + 12 category) */}
+          <AnimationsSection theme={theme} update={update} />
+
           {/* Feature toggles */}
           <Section title="Show / hide features">
             {[
@@ -467,68 +479,6 @@ export default function ThemePage() {
                 </div>
               </div>
             ))}
-
-            {/* Hover effects with style selector */}
-            <div className="py-2 border-b border-gray-800">
-              <div className="flex items-center justify-between mb-2">
-                <div>
-                  <div className="text-sm text-gray-300">Hover effects</div>
-                  <div className="text-xs text-gray-500 mt-0.5">Interactive animations on hover</div>
-                </div>
-                <div
-                  onClick={() => update({ animateHover: !theme.animateHover })}
-                  className={`w-10 h-5 rounded-full cursor-pointer relative transition-colors flex-shrink-0 ${
-                    theme.animateHover === true ? 'bg-amber-500' : 'bg-gray-700'
-                  }`}>
-                  <div className={`absolute top-0.5 w-4 h-4 bg-white rounded-full transition-transform ${
-                    theme.animateHover === true ? 'translate-x-5' : 'translate-x-0.5'
-                  }`} />
-                </div>
-              </div>
-
-              {/* Hover style selector - only visible when hover is enabled */}
-              {theme.animateHover && (
-                <div className="mt-3 pt-3 border-t border-gray-800">
-                  <label className="text-xs text-gray-400 uppercase tracking-wider mb-2 block">Hover style</label>
-                  <div className="grid grid-cols-2 gap-2">
-                    {([
-                      { value: 'lift', label: 'Lift', icon: '↑', desc: 'Lift & scale' },
-                      { value: 'glow', label: 'Glow', icon: '✨', desc: 'Glowing shadow' },
-                      { value: 'tilt', label: 'Tilt', icon: '⤸', desc: '3D tilt effect' },
-                      { value: 'zoom', label: 'Zoom', icon: '🔍', desc: 'Zoom in' },
-                      { value: 'bounce', label: 'Bounce', icon: '⤴', desc: 'Bounce effect' },
-                      { value: 'rotate', label: 'Rotate', icon: '↻', desc: 'Slight rotation' },
-                      { value: 'slide', label: 'Slide', icon: '→', desc: 'Slide up' },
-                      { value: 'flip', label: 'Flip', icon: '⟲', desc: 'Flip animation' },
-                      { value: 'pulse', label: 'Pulse', icon: '◉', desc: 'Pulse scale' },
-                      { value: 'shake', label: 'Shake', icon: '⚡', desc: 'Shake effect' },
-                      { value: 'bgLeft', label: 'BG Left→Right', icon: '→', desc: 'Color sweeps left to right' },
-                      { value: 'bgRight', label: 'BG Right→Left', icon: '←', desc: 'Color sweeps right to left' },
-                      { value: 'bgCenter', label: 'BG Center Out', icon: '↔', desc: 'Expands from center' },
-                      { value: 'bgCorners', label: 'BG Corners', icon: '⤢', desc: 'Radiates from corners' },
-                      { value: 'bgDiagonal', label: 'BG Diagonal', icon: '⤡', desc: 'Diagonal sweep' },
-                      { value: 'bgReveal', label: 'BG Reveal', icon: '▭', desc: 'Curtain reveal' },
-                      { value: 'bgSplit', label: 'BG Split', icon: '⇆', desc: 'Split from sides' },
-                      { value: 'bgWave', label: 'BG Wave', icon: '〰', desc: 'Wave transition' },
-                    ] as const).map(style => (
-                      <button key={style.value}
-                        onClick={() => update({ hoverStyle: style.value })}
-                        className={`p-2 rounded-lg border text-left transition-all ${
-                          (theme.hoverStyle || 'lift') === style.value
-                            ? 'bg-amber-500/10 border-amber-500/40 text-amber-400'
-                            : 'bg-gray-800 border-gray-700 text-gray-400 hover:text-white'
-                        }`}>
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="text-base">{style.icon}</span>
-                          <span className="text-xs font-medium">{style.label}</span>
-                        </div>
-                        <div className="text-[10px] text-gray-500">{style.desc}</div>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
           </Section>
 
           {/* Save button */}
