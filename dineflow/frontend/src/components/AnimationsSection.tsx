@@ -1,11 +1,10 @@
 //  Paste into ThemePage controls panel
 //  Usage: <AnimationsSection theme={theme} update={update} />
-// ─────────────────────────────────────────────────────────────
 
 import { useState } from 'react'
 import type { Theme } from '../types'
 
-// ── Data ─────────────────────────────────────────────────────
+// ── Data ──
 
 const ENTRANCE_STYLES = [
   { id: 'fade-up',     icon: '↑',  label: 'Fade Up',      desc: 'Elegant upward reveal'      },
