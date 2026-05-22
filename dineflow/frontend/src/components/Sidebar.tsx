@@ -5,7 +5,7 @@ import { useStore } from '../store/useStore';
 const Sidebar = () => {
   const location = useLocation();
   const { logout } = useStore();
-
+// side bars
   const links = [
     { to: '/admin', icon: LayoutDashboard, label: 'Dashboard' },
     { to: '/admin/menu', icon: Menu, label: 'Menu' },
