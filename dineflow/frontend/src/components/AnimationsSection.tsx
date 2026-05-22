@@ -1,5 +1,3 @@
-// ─────────────────────────────────────────────────────────────
-//  AnimationsSection.tsx
 //  Paste into ThemePage controls panel
 //  Usage: <AnimationsSection theme={theme} update={update} />
 // ─────────────────────────────────────────────────────────────
