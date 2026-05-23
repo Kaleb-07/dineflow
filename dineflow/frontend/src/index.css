@@ -31,74 +31,9 @@
 }
 
 /* ═══════════════════════════════════════════════════════
-   LUXURY ANIMATIONS FOR GUEST MENU (Admin Controlled)
+   HOVER ANIMATIONS (Admin Controlled)
+   Controlled by data-animate-hover attribute
    ═══════════════════════════════════════════════════════ */
-
-/* Animation speed variables - calculated from 1-10 scale */
-:root {
-  --anim-speed: attr(data-animation-speed number, 5);
-  /* Speed 1 = slowest (1.2s), Speed 10 = fastest (0.2s) */
-  --anim-duration: calc(1.4s - (var(--anim-speed, 5) * 0.12s));
-  --anim-delay: calc(0.1s - (var(--anim-speed, 5) * 0.008s));
-}
-
-/* Fallback for different speed values */
-:root[data-animation-speed="1"] { --anim-duration: 1.2s; --anim-delay: 0.092s; }
-:root[data-animation-speed="2"] { --anim-duration: 1.0s; --anim-delay: 0.084s; }
-:root[data-animation-speed="3"] { --anim-duration: 0.8s; --anim-delay: 0.076s; }
-:root[data-animation-speed="4"] { --anim-duration: 0.7s; --anim-delay: 0.068s; }
-:root[data-animation-speed="5"] { --anim-duration: 0.5s; --anim-delay: 0.05s; }
-:root[data-animation-speed="6"] { --anim-duration: 0.45s; --anim-delay: 0.042s; }
-:root[data-animation-speed="7"] { --anim-duration: 0.4s; --anim-delay: 0.034s; }
-:root[data-animation-speed="8"] { --anim-duration: 0.35s; --anim-delay: 0.026s; }
-:root[data-animation-speed="9"] { --anim-duration: 0.3s; --anim-delay: 0.018s; }
-:root[data-animation-speed="10"] { --anim-duration: 0.2s; --anim-delay: 0.01s; }
-
-/* Fade in page on load - only when animations enabled */
-[data-animate-items="true"] .guest-bg {
-  animation: fadeInPage 0.6s ease-out;
-}
-
-@keyframes fadeInPage {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-/* Staggered fade-in for menu items - controlled by animateItems */
-[data-animate-items="true"] .guest-card {
-  animation: slideInUp var(--anim-duration, 0.5s) ease-out backwards;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-[data-animate-items="true"] .guest-card:nth-child(1)  { animation-delay: calc(var(--anim-delay, 0.05s) * 1); }
-[data-animate-items="true"] .guest-card:nth-child(2)  { animation-delay: calc(var(--anim-delay, 0.05s) * 2); }
-[data-animate-items="true"] .guest-card:nth-child(3)  { animation-delay: calc(var(--anim-delay, 0.05s) * 3); }
-[data-animate-items="true"] .guest-card:nth-child(4)  { animation-delay: calc(var(--anim-delay, 0.05s) * 4); }
-[data-animate-items="true"] .guest-card:nth-child(5)  { animation-delay: calc(var(--anim-delay, 0.05s) * 5); }
-[data-animate-items="true"] .guest-card:nth-child(6)  { animation-delay: calc(var(--anim-delay, 0.05s) * 6); }
-[data-animate-items="true"] .guest-card:nth-child(7)  { animation-delay: calc(var(--anim-delay, 0.05s) * 7); }
-[data-animate-items="true"] .guest-card:nth-child(8)  { animation-delay: calc(var(--anim-delay, 0.05s) * 8); }
-[data-animate-items="true"] .guest-card:nth-child(9)  { animation-delay: calc(var(--anim-delay, 0.05s) * 9); }
-[data-animate-items="true"] .guest-card:nth-child(10) { animation-delay: calc(var(--anim-delay, 0.05s) * 10); }
-
-[data-animate-items="false"] .guest-card {
-  animation: none;
-}
-
-@keyframes slideInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
 
 /* Hover effect on menu items - controlled by animateHover with multiple styles */
 [data-animate-hover="true"] .guest-card {
@@ -454,105 +389,9 @@
   }
 }
 
-/* Category chips animation - controlled by animateCategories */
-[data-animate-categories="true"] .category-chip {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-  overflow: hidden;
-}
-
-[data-animate-categories="true"] .category-chip::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 0;
-  height: 0;
-  border-radius: 50%;
-  background: color-mix(in srgb, var(--brand-accent) 20%, transparent);
-  transform: translate(-50%, -50%);
-  transition: width 0.4s ease, height 0.4s ease;
-  z-index: -1;
-}
-
-[data-animate-categories="true"] .category-chip:hover::after {
-  width: 200%;
-  height: 200%;
-}
-
-[data-animate-categories="true"] .category-chip:active {
-  transform: scale(0.95);
-}
-
-/* Price shimmer effect - controlled by animatePrice */
-[data-animate-price="true"] .item-price {
-  position: relative;
-  overflow: hidden;
-}
-
-[data-animate-price="true"] .item-price::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    color-mix(in srgb, var(--brand-accent) 30%, transparent),
-    transparent
-  );
-  animation: shimmer 3s infinite;
-}
-
-@keyframes shimmer {
-  0% {
-    left: -100%;
-  }
-  50%, 100% {
-    left: 100%;
-  }
-}
-
-/* Smooth tab transitions - only when category animations enabled */
-[data-animate-categories="true"] [style*="border-bottom: 2px solid var(--brand-accent)"] {
-  position: relative;
-}
-
-[data-animate-categories="true"] [style*="border-bottom: 2px solid var(--brand-accent)"]::after {
-  content: '';
-  position: absolute;
-  bottom: -2px;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: var(--brand-accent);
-  animation: slideInLine 0.3s ease-out;
-}
-
-@keyframes slideInLine {
-  from {
-    transform: scaleX(0);
-  }
-  to {
-    transform: scaleX(1);
-  }
-}
-
-/* Bottom nav icons bounce on tap - only when animations enabled */
-[data-animate-hover="true"] .guest-bg button:active {
-  animation: bouncePress 0.3s ease;
-}
-
-@keyframes bouncePress {
-  0%, 100% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(0.9);
-  }
-}
+/* ═══════════════════════════════════════════════════════
+   MODAL & UI ANIMATIONS
+   ═══════════════════════════════════════════════════════ */
 
 /* Modal/Sheet slide up animation */
 [style*="position: fixed"][style*="inset: 0"] > div:last-child {
@@ -595,22 +434,6 @@
   }
   to {
     transform: rotate(360deg);
-  }
-}
-
-/* Venue name entrance - only when animations enabled */
-[data-animate-items="true"] .guest-heading {
-  animation: fadeInDown 0.6s ease-out;
-}
-
-@keyframes fadeInDown {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
   }
 }
 

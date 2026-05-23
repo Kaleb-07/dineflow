@@ -33,6 +33,11 @@ const defaults: Partial<Theme> = {
   animatePrice:      false,
   animateCategories: false,
   animationSpeed:    5, // 1-10 scale, 5 is normal
+  // Page animation defaults
+  entranceStyle:     'fade-up',
+  priceFx:           'shimmer',
+  categoryFx:        'crossfade',
+  animSpeed:         5, // 1-10 scale, 5 is normal
 };
 
 export function applyTheme(theme: Partial<Theme>) {
@@ -92,18 +97,6 @@ export function applyTheme(theme: Partial<Theme>) {
   r.dataset.entrance = t.entranceStyle || 'fade-up';
   r.dataset.priceFx = t.priceFx || 'shimmer';
   r.dataset.categoryFx = t.categoryFx || 'crossfade';
-  
-  // Debug log
-  console.log('🎨 Theme applied:', {
-    hoverStyle: r.dataset.hoverStyle,
-    hoverSpeed: t.hoverSpeed,
-    speedSeconds,
-    entranceStyle: r.dataset.entrance,
-    priceFx: r.dataset.priceFx,
-    categoryFx: r.dataset.categoryFx,
-    animSpeed: t.animSpeed,
-    accentColor: t.accentColor
-  });
 }
 
 export function useTheme(theme?: Partial<Theme> | null) {

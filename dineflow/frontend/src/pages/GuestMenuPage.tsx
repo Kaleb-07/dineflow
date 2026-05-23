@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { ChevronRight, X, ChevronDown } from 'lucide-react';
 import { applyTheme } from '../hooks/useTheme';
-import type { Venue, MenuItem, Variant, Review, Category } from '../types';
+import type { Venue, MenuItem, Variant, Review } from '../types';
 import api from '../lib/axios';
 
 type Tab = 'menu' | 'about' | 'reviews' | 'location';
@@ -46,25 +46,21 @@ export default function GuestMenuPage() {
       animatePrice: false,
       animateCategories: false,
       animationSpeed: 5,
+      // Page animation defaults
+      entranceStyle: 'fade-up',
+      priceFx: 'shimmer',
+      categoryFx: 'crossfade',
+      animSpeed: 5,
     });
   }, []);
 
   useEffect(() => {
     if (!slug) return;
-    console.log('🌐 Fetching venue:', slug);
     api.get(`/public/${slug}`).then(({ data }) => {
-      console.log('✅ Venue data received:', {
-        id: data.id,
-        name: data.name,
-        slug: data.slug,
-        categoriesCount: data.categories?.length,
-        categories: data.categories?.map((c: Category) => ({ id: c.id, name: c.name, type: c.type, itemsCount: c.items?.length }))
-      });
       setVenue(data);
       if (data.theme) applyTheme(data.theme);
       setLoading(false);
-    }).catch((err) => {
-      console.error('❌ Error fetching venue:', err);
+    }).catch(() => {
       setLoading(false);
     });
   }, [slug]);
@@ -90,18 +86,6 @@ export default function GuestMenuPage() {
   const avgRating = venue.reviews?.length
     ? (venue.reviews.reduce((a, r) => a + r.rating, 0) / venue.reviews.length).toFixed(1)
     : null;
-
-  // Debug logging
-  const debugInfo = {
-    type,
-    meal,
-    totalCategories: venue.categories?.length,
-    filteredCats: cats.length,
-    activeCat,
-    itemsInCategory: items.length,
-    categories: cats.map((c: Category) => ({ id: c.id, name: c.name, itemCount: c.items?.length }))
-  };
-  console.log('🔍 Debug Info:', JSON.stringify(debugInfo, null, 2));
 
   return (
     <div className="guest-page-root guest-bg min-h-screen max-w-md mx-auto flex flex-col" style={{ fontFamily: 'var(--brand-font-body)' }}>
@@ -199,14 +183,14 @@ export default function GuestMenuPage() {
       )}
 
       {/* ── Item list ── */}
-      <div className={`item-list flex-1 overflow-y-auto px-4 mt-3 pb-24 space-y-2 ${switching ? 'category-switching' : ''}`}>
+      <div className={`item-list flex-1 overflow-y-auto px-4 mt-3 pb-24 space-y-2 ${switching ? 'category-switching' : ''}`} key={activeCat}>
         {items.length === 0 && (
           <div className="text-center py-12" style={{ color: 'color-mix(in srgb, var(--brand-text) 40%, transparent)' }}>
             No items in this category
           </div>
         )}
         {items.map((i, index) => (
-          <button key={i.id} onClick={() => setItem(i)} className="w-full text-left">
+          <button key={`${activeCat}-${i.id}`} onClick={() => setItem(i)} className="w-full text-left">
             <div 
               className="menu-card guest-card flex gap-3 border"
               style={{ 
