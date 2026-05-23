@@ -15,7 +15,7 @@ import VenuePage from './pages/VenuePage';
 import GuestMenuPage from './pages/GuestMenuPage';
 
 // Layout
-import AdminLayout from './components/AdminLayout';
+import AdminLayout from './components/layout/AdminLayout';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const token = useStore((s) => s.token);

@@ -3,8 +3,8 @@ import { useStore } from '../store/useStore';
 import { applyTheme } from '../hooks/useTheme';
 import api from '../lib/axios';
 import type { Theme } from '../types';
-import HoverSection from '../components/HoverSection';
-import AnimationsSection from '../components/AnimationsSection';
+import HoverSection from '../components/features/HoverSection';
+import AnimationsSection from '../components/features/AnimationsSection';
 
 const PRESETS: Record<string, Partial<Theme>> = {
   'Luxury dark':   { bgColor: '#0d1f1a', accentColor: '#c9a84c', cardColor: '#122219', textColor: '#e8e0d0' },

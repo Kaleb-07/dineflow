@@ -5,7 +5,7 @@
 // ─────────────────────────────────────────────────────────────
 
 import React, { useState } from 'react'
-import type { Theme } from '../types'
+import type { Theme } from '../../types'
 
 // ── Animation definitions ─────────────────────────────────────
 const TRANSFORM_STYLES = [

@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback } from 'react';
 import { Upload, X, Download, CheckCircle, AlertCircle, FileSpreadsheet, Loader2 } from 'lucide-react';
 import * as XLSX from 'xlsx';
-import api from '../lib/axios';
+import api from '../../lib/axios';
 
 interface ParsedRow {
   category_name: string;

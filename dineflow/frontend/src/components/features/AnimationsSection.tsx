@@ -2,7 +2,7 @@
 //  Usage: <AnimationsSection theme={theme} update={update} />
 
 import { useState } from 'react'
-import type { Theme } from '../types'
+import type { Theme } from '../../types'
 
 // ── Data ──
 

@@ -292,7 +292,7 @@ export default function VenuePage() {
   );
 }
 
-const inp = 'w-full bg-gray-800 border border-gray-700 text-white text-sm rounded-lg px-3 py-2 outline-none focus:border-amber-500 transition-colors';
+
 
 function Field({ label, children, span }: {
   label: string; children: React.ReactNode; span?: number

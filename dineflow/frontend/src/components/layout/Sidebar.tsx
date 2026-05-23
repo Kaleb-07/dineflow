@@ -1,10 +1,12 @@
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { LayoutDashboard, Menu, Palette, QrCode, Star, Settings, LogOut } from 'lucide-react';
-import { useStore } from '../store/useStore';
+import { useStore } from '../../store/useStore';
 
 const Sidebar = () => {
   const location = useLocation();
-  const { logout } = useStore();
+  const navigate = useNavigate();
+  const { clearAuth } = useStore();
+  const logout = () => { clearAuth(); navigate('/login'); };
 // side bars
   const links = [
     { to: '/admin', icon: LayoutDashboard, label: 'Dashboard' },

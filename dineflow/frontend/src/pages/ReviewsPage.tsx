@@ -3,7 +3,7 @@ import { type ColumnDef } from '@tanstack/react-table';
 import { Star, Eye, EyeOff, Trash2, ArrowUpDown, MoreHorizontal } from 'lucide-react';
 import api from '../lib/axios';
 import type { Review } from '../types';
-import { DataTable } from '../components/DataTable';
+import { DataTable } from '../components/ui/data-table';
 import { Button } from '../components/ui/button';
 import {
   DropdownMenu,

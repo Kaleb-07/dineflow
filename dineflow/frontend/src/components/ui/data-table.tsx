@@ -12,7 +12,7 @@ import {
 } from "@tanstack/react-table";
 import { ChevronDown, Columns3, RefreshCcw, Search } from "lucide-react";
 import * as React from "react";
-import { Button } from "./ui/button";
+import { Button } from "./button";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -20,8 +20,8 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "./ui/dropdown-menu";
-import { Input } from "./ui/input";
+} from "./dropdown-menu";
+import { Input } from "./input";
 import {
   Table,
   TableBody,
@@ -29,7 +29,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "./ui/table";
+} from "./table";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];

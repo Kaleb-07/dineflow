@@ -12,11 +12,12 @@ export default function DashboardPage() {
     Promise.all([
       api.get('/items'),
       api.get('/reviews'),
-    ]).then(([items, reviews]) => {
+      api.get('/qr'),
+    ]).then(([items, reviews, qr]) => {
       const ratings = reviews.data.map((r: any) => r.rating);
       setStats({
         items: items.data.length,
-        qrCodes: 0,
+        qrCodes: qr.data.length,
         reviews: reviews.data.length,
         avgRating: ratings.length
           ? (ratings.reduce((a: number, b: number) => a + b, 0) / ratings.length).toFixed(1) as any

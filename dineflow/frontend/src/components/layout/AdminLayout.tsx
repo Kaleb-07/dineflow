@@ -1,5 +1,5 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
-import { useStore } from '../store/useStore';
+import { useStore } from '../../store/useStore';
 import {
   LayoutDashboard, UtensilsCrossed, Building2,
   Palette, QrCode, Star, Settings, LogOut, Menu, X

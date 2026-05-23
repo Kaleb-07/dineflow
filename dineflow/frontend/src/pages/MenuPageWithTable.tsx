@@ -3,8 +3,8 @@ import { type ColumnDef } from '@tanstack/react-table';
 import { Plus, Pencil, Trash2, Image as ImageIcon, FileSpreadsheet, ArrowUpDown, MoreHorizontal } from 'lucide-react';
 import api from '../lib/axios';
 import type { Category, MenuItem, Variant } from '../types';
-import BulkUploadModal from '../components/BulkUploadModal';
-import { DataTable } from '../components/DataTable';
+import BulkUploadModal from '../components/modals/BulkUploadModal';
+import { DataTable } from '../components/ui/data-table';
 import { Button } from '../components/ui/button';
 import { Checkbox } from '../components/ui/checkbox';
 import {
