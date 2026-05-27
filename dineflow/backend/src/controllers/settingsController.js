@@ -18,7 +18,7 @@ const updateSettings = async (req, res) => {
   try {
     const {
       name, tagline, description, phone, email,
-      address, city, country, currency,
+      address, city, country, currency, logo, coverPhoto,
       facebook, instagram, twitter, tiktok, website,
       businessHours, latitude, longitude
     } = req.body;
@@ -27,7 +27,7 @@ const updateSettings = async (req, res) => {
       where: { id: req.user.venueId },
       data: {
         name, tagline, description, phone, email,
-        address, city, country, currency,
+        address, city, country, currency, logo, coverPhoto,
         facebook, instagram, twitter, tiktok, website,
         businessHours, latitude, longitude
       }

@@ -163,6 +163,12 @@
    data-price-fx="[style]" on :root
    ────────────────────────────────────────────────────────────── */
 
+/* All active price effects get inline-block and support custom price animation speeds */
+:root[data-price-fx]:not([data-price-fx="none"]) .item-price {
+  display: inline-block;
+  --anim-speed: var(--price-anim-speed, var(--anim-speed, 0.5s));
+}
+
 /* ── 1. SHIMMER — light sweep (classic luxury) */
 @keyframes price-shimmer {
   0%   { background-position: -200% center }

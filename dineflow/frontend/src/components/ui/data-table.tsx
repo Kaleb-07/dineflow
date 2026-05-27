@@ -10,7 +10,7 @@ import {
   useReactTable,
   type VisibilityState,
 } from "@tanstack/react-table";
-import { ChevronDown, Columns3, RefreshCcw, Search } from "lucide-react";
+import { ChevronDown, Columns3, RefreshCcw, Search, Trash2 } from "lucide-react";
 import * as React from "react";
 import { Button } from "./button";
 import {
@@ -36,6 +36,7 @@ interface DataTableProps<TData, TValue> {
   data: TData[];
   searchKey?: string;
   searchPlaceholder?: string;
+  onDeleteSelected?: (selectedItems: TData[]) => void;
 }
 
 export function DataTable<TData, TValue>({
@@ -43,6 +44,7 @@ export function DataTable<TData, TValue>({
   data,
   searchKey,
   searchPlaceholder = "Search...",
+  onDeleteSelected,
 }: DataTableProps<TData, TValue>) {
   const [searchQuery, setSearchQuery] = React.useState<string>("");
   const [sorting, setSorting] = React.useState<SortingState>([]);
@@ -187,11 +189,29 @@ export function DataTable<TData, TValue>({
       </div>
 
       <div className="flex items-center justify-between">
-        <div className="flex-1 text-sm text-gray-500">
+        <div className="flex-1 text-sm text-gray-500 flex items-center gap-2">
           {table.getFilteredSelectedRowModel().rows.length > 0 && (
             <>
-              {table.getFilteredSelectedRowModel().rows.length} of{" "}
-              {table.getFilteredRowModel().rows.length} row(s) selected.
+              <span>
+                {table.getFilteredSelectedRowModel().rows.length} of{" "}
+                {table.getFilteredRowModel().rows.length} row(s) selected.
+              </span>
+              {onDeleteSelected && (
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => {
+                    const selectedData = table
+                      .getFilteredSelectedRowModel()
+                      .rows.map((row) => row.original);
+                    onDeleteSelected(selectedData);
+                    table.resetRowSelection();
+                  }}
+                  className="bg-red-600 hover:bg-red-500 text-white text-xs px-2.5 py-1 h-7 flex items-center gap-1.5"
+                >
+                  <Trash2 size={13} /> Delete Selected
+                </Button>
+              )}
             </>
           )}
         </div>

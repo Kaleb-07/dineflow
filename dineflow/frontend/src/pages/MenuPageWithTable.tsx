@@ -50,6 +50,33 @@ export default function MenuPage() {
     setItems(p => p.filter(i => i.categoryId !== id));
   };
 
+  const bulkDeleteItems = async (selectedItems: MenuItem[]) => {
+    if (!confirm(`Delete the ${selectedItems.length} selected item(s)?`)) return;
+    try {
+      await Promise.all(selectedItems.map(item => api.delete(`/items/${item.id}`)));
+      const deletedIds = new Set(selectedItems.map(item => item.id));
+      setItems(p => p.filter(i => !deletedIds.has(i.id)));
+    } catch (err) {
+      console.error("Bulk delete items failed", err);
+      alert("Failed to delete some items.");
+      load();
+    }
+  };
+
+  const bulkDeleteCategories = async (selectedCats: Category[]) => {
+    if (!confirm(`Delete the ${selectedCats.length} selected category(ies) and all of their items?`)) return;
+    try {
+      await Promise.all(selectedCats.map(cat => api.delete(`/categories/${cat.id}`)));
+      const deletedIds = new Set(selectedCats.map(cat => cat.id));
+      setCategories(p => p.filter(c => !deletedIds.has(c.id)));
+      setItems(p => p.filter(i => !deletedIds.has(i.categoryId)));
+    } catch (err) {
+      console.error("Bulk delete categories failed", err);
+      alert("Failed to delete some categories.");
+      load();
+    }
+  };
+
   // Menu Items Columns
   const itemColumns: ColumnDef<MenuItem>[] = [
     {
@@ -110,7 +137,7 @@ export default function MenuPage() {
       cell: ({ row }) => {
         const cat = categories.find(c => c.id === row.original.categoryId);
         return (
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1.5 whitespace-nowrap">
             <span>{cat?.icon || '🍽'}</span>
             <span className="text-sm">{cat?.name || 'Unknown'}</span>
           </div>
@@ -121,7 +148,7 @@ export default function MenuPage() {
       accessorKey: 'variants',
       header: 'Prices',
       cell: ({ row }) => (
-        <div className="text-sm text-gray-400">
+        <div className="text-sm text-gray-400 whitespace-nowrap">
           {row.original.variants.map(v => `${v.label}: ${v.price} ETB`).join(' · ')}
         </div>
       ),
@@ -130,7 +157,7 @@ export default function MenuPage() {
       accessorKey: 'isFeatured',
       header: 'Status',
       cell: ({ row }) => (
-        <div className="flex flex-wrap gap-1">
+        <div className="flex flex-wrap gap-1 whitespace-nowrap">
           {row.original.isFeatured && (
             <span className="text-xs bg-amber-500/10 text-amber-400 border border-amber-500/20 px-2 py-0.5 rounded-full">
               Featured
@@ -153,27 +180,29 @@ export default function MenuPage() {
       cell: ({ row }) => {
         const item = row.original;
         return (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="h-8 w-8 p-0">
-                <span className="sr-only">Open menu</span>
-                <MoreHorizontal size={16} />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Actions</DropdownMenuLabel>
-              <DropdownMenuItem onClick={() => { setEditItem(item); setItemModal(true); }}>
-                <Pencil size={14} /> Edit item
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                className="text-red-400"
-                onClick={() => deleteItem(item.id)}
-              >
-                <Trash2 size={14} /> Delete item
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <div className="text-right whitespace-nowrap w-12 ml-auto">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="h-8 w-8 p-0">
+                  <span className="sr-only">Open menu</span>
+                  <MoreHorizontal size={16} />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                <DropdownMenuItem onClick={() => { setEditItem(item); setItemModal(true); }}>
+                  <Pencil size={14} /> Edit item
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  className="text-red-400"
+                  onClick={() => deleteItem(item.id)}
+                >
+                  <Trash2 size={14} /> Delete item
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         );
       },
     },
@@ -181,6 +210,25 @@ export default function MenuPage() {
 
   // Category Columns
   const categoryColumns: ColumnDef<Category>[] = [
+    {
+      id: 'select',
+      header: ({ table }) => (
+        <Checkbox
+          checked={table.getIsAllPageRowsSelected()}
+          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+          aria-label="Select all"
+        />
+      ),
+      cell: ({ row }) => (
+        <Checkbox
+          checked={row.getIsSelected()}
+          onCheckedChange={(value) => row.toggleSelected(!!value)}
+          aria-label="Select row"
+        />
+      ),
+      enableSorting: false,
+      enableHiding: false,
+    },
     {
       accessorKey: 'icon',
       header: 'Icon',
@@ -219,27 +267,29 @@ export default function MenuPage() {
       cell: ({ row }) => {
         const cat = row.original;
         return (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="h-8 w-8 p-0">
-                <span className="sr-only">Open menu</span>
-                <MoreHorizontal size={16} />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Actions</DropdownMenuLabel>
-              <DropdownMenuItem onClick={() => { setEditCat(cat); setCatModal(true); }}>
-                <Pencil size={14} /> Edit category
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                className="text-red-400"
-                onClick={() => deleteCat(cat.id)}
-              >
-                <Trash2 size={14} /> Delete category
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <div className="text-right whitespace-nowrap w-12 ml-auto">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="h-8 w-8 p-0">
+                  <span className="sr-only">Open menu</span>
+                  <MoreHorizontal size={16} />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                <DropdownMenuItem onClick={() => { setEditCat(cat); setCatModal(true); }}>
+                  <Pencil size={14} /> Edit category
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  className="text-red-400"
+                  onClick={() => deleteCat(cat.id)}
+                >
+                  <Trash2 size={14} /> Delete category
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         );
       },
     },
@@ -285,6 +335,7 @@ export default function MenuPage() {
           data={categories}
           searchKey="name"
           searchPlaceholder="Search categories..."
+          onDeleteSelected={bulkDeleteCategories}
         />
       ) : (
         <DataTable
@@ -292,6 +343,7 @@ export default function MenuPage() {
           data={items}
           searchKey="name"
           searchPlaceholder="Search menu items..."
+          onDeleteSelected={bulkDeleteItems}
         />
       )}
 

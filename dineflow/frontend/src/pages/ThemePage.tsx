@@ -58,6 +58,8 @@ export default function ThemePage() {
     imageShape: 'rounded', pricePosition: 'bottom', polygonVariant: 'hexagon',
     animateItems: false, animateHover: false, hoverStyle: 'lift', hoverSpeed: 5, animatePrice: false,
     animateCategories: false, animationSpeed: 5,
+    // Page animation defaults — MUST be set so applyToIframe doesn't default to 'none'
+    entranceStyle: 'none', priceFx: 'none', categoryFx: 'crossfade', animSpeed: 5,
   });
   
   const [saving,  setSaving]  = useState(false);
@@ -76,57 +78,72 @@ export default function ThemePage() {
     });
   }, []);
 
-  useEffect(() => {
-    const applyToIframe = () => {
-      try {
-        if (iframeRef.current?.contentWindow) {
-          const iframeDoc = iframeRef.current.contentWindow.document;
-          const root = iframeDoc.documentElement;
-          
-          root.style.setProperty('--brand-bg', theme.bgColor || '#0d1f1a');
-          root.style.setProperty('--brand-accent', theme.accentColor || '#c9a84c');
-          root.style.setProperty('--brand-card', theme.cardColor || '#122219');
-          root.style.setProperty('--brand-text', theme.textColor || '#e8e0d0');
-          root.style.setProperty('--brand-font-display', theme.fontDisplay || "'Cormorant Garamond', serif");
-          root.style.setProperty('--brand-font-body', theme.fontBody || "'DM Sans', sans-serif");
-          root.style.setProperty('--brand-radius', `${theme.borderRadius || 8}px`);
-          root.style.setProperty('--brand-padding', `${theme.cardPadding || 8}px`);
-          root.style.setProperty('--brand-gap', `${theme.itemGap || 6}px`);
-          
-          root.dataset.showImages = String(theme.showImages ?? true);
-          root.dataset.showPrice = String(theme.showPrice ?? true);
-          root.dataset.showMealTabs = String(theme.showMealTabs ?? true);
-          root.dataset.showDesc = String(theme.showDesc ?? true);
-          root.dataset.showAllergens = String(theme.showAllergens ?? false);
-          root.dataset.showBadges = String(theme.showBadges ?? true);
-          root.dataset.cardStyle = theme.cardStyle || 'default';
-          root.dataset.menuLayout = theme.menuLayout || 'list';
-          root.dataset.categoryStyle = theme.categoryStyle || 'pills';
-          root.dataset.polygonVariant = theme.polygonVariant || 'hexagon';
-          root.dataset.imageShape = theme.imageShape || 'rounded';
-          root.dataset.pricePosition = theme.pricePosition || 'bottom';
-          
-          // Animation controls
-          root.dataset.animateItems = String(theme.animateItems ?? false);
-          root.dataset.animateHover = String(theme.animateHover ?? false);
-          root.dataset.hoverStyle = theme.hoverStyle || 'lift';
-          root.dataset.animatePrice = String(theme.animatePrice ?? false);
-          root.dataset.animateCategories = String(theme.animateCategories ?? false);
-          root.dataset.animationSpeed = String(theme.animationSpeed ?? 5);
-          root.dataset.pricePosition = theme.pricePosition || 'bottom';
-          
-          // Hover animation speed CSS variable
-          const speedSeconds = ((Number(theme.hoverSpeed ?? 5) * 0.05) + 0.05).toFixed(2);
-          root.style.setProperty('--hover-speed', `${speedSeconds}s`);
-        }
-      } catch (err) {
-        console.log('Iframe not ready yet');
-      }
-    };
+  // applyToIframe: forcefully inject theme into the preview iframe.
+  // We use a ref so the interval can always read the latest theme value.
+  const themeRef = useRef(theme);
+  useEffect(() => { themeRef.current = theme; }, [theme]);
 
+  const applyToIframe = () => {
+    try {
+      if (!iframeRef.current?.contentWindow) return;
+      const iframeDoc = iframeRef.current.contentWindow.document;
+      const root = iframeDoc.documentElement;
+      const t = themeRef.current;
+
+      root.style.setProperty('--brand-bg',           t.bgColor      ?? '#0d1f1a');
+      root.style.setProperty('--brand-accent',        t.accentColor  ?? '#c9a84c');
+      root.style.setProperty('--brand-card',          t.cardColor    ?? '#122219');
+      root.style.setProperty('--brand-text',          t.textColor    ?? '#e8e0d0');
+      root.style.setProperty('--brand-font-display',  t.fontDisplay  ?? "'Cormorant Garamond', serif");
+      root.style.setProperty('--brand-font-body',     t.fontBody     ?? "'DM Sans', sans-serif");
+      root.style.setProperty('--brand-radius',        `${t.borderRadius ?? 8}px`);
+      root.style.setProperty('--brand-padding',       `${t.cardPadding  ?? 8}px`);
+      root.style.setProperty('--brand-gap',           `${t.itemGap      ?? 6}px`);
+
+      root.dataset.showImages    = String(t.showImages    ?? true);
+      root.dataset.showPrice     = String(t.showPrice     ?? true);
+      root.dataset.showMealTabs  = String(t.showMealTabs  ?? true);
+      root.dataset.showDesc      = String(t.showDesc      ?? true);
+      root.dataset.showAllergens = String(t.showAllergens ?? false);
+      root.dataset.showBadges    = String(t.showBadges    ?? true);
+      root.dataset.cardStyle     = t.cardStyle     ?? 'default';
+      root.dataset.menuLayout    = t.menuLayout    ?? 'list';
+      root.dataset.categoryStyle = t.categoryStyle ?? 'pills';
+      root.dataset.polygonVariant= t.polygonVariant?? 'hexagon';
+      root.dataset.imageShape    = t.imageShape    ?? 'rounded';
+      root.dataset.pricePosition = t.pricePosition ?? 'bottom';
+
+      // ── Hover animations ──────────────────────────────────────
+      // Use ?? so a saved null from DB doesn't fall through to 'none'
+      const hoverStyle = t.hoverStyle ?? (t.animateHover ? 'lift' : 'none');
+      root.dataset.hoverStyle    = hoverStyle;
+      root.dataset.animateHover  = String(hoverStyle !== 'none');
+      const hoverSec = ((Number(t.hoverSpeed ?? 5) * 0.05) + 0.05).toFixed(2);
+      root.style.setProperty('--hover-speed', `${hoverSec}s`);
+
+      // ── Page animations (entrance / price / category) ─────────
+      const animSec = ((Number(t.animSpeed ?? 5) * 0.05) + 0.05).toFixed(2);
+      root.style.setProperty('--anim-speed', `${animSec}s`);
+      const priceAnimSec = ((Number(t.animationSpeed ?? 5) * 0.05) + 0.05).toFixed(2);
+      root.style.setProperty('--price-anim-speed', `${priceAnimSec}s`);
+
+      // Use ?? — null from DB must NOT fall through to 'none'
+      root.dataset.entrance   = t.entranceStyle ?? (t.animateItems      ? 'fade-up'   : 'none');
+      root.dataset.priceFx    = t.priceFx       ?? (t.animatePrice     ? 'shimmer'   : 'none');
+      root.dataset.categoryFx = t.categoryFx    ?? (t.animateCategories? 'crossfade' : 'none');
+    } catch (_) {
+      // Iframe not ready yet
+    }
+  };
+
+  // Re-apply on every theme change
+  useEffect(() => {
     applyToIframe();
-    const timer = setTimeout(applyToIframe, 100);
-    return () => clearTimeout(timer);
+    // Also re-apply a bit later in case the iframe's own applyTheme fires after us
+    const t1 = setTimeout(applyToIframe, 150);
+    const t2 = setTimeout(applyToIframe, 600);
+    const t3 = setTimeout(applyToIframe, 1500);
+    return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
   }, [theme]);
 
   const update = (patch: Partial<Theme>) => {
@@ -150,6 +167,9 @@ export default function ThemePage() {
       setStoreTheme(data);
       setSaved(true);
       setTimeout(() => setSaved(false), 2500);
+    } catch (err) {
+      console.error("Save failed", err);
+      alert("Failed to save theme. Please try again.");
     } finally {
       setSaving(false);
     }
@@ -426,60 +446,7 @@ export default function ThemePage() {
             ))}
           </Section>
 
-          {/* Animation controls */}
-          <Section title="Animations & effects">
-            <div className="mb-4">
-              <div className="flex justify-between mb-2">
-                <label className="text-xs text-gray-400 uppercase tracking-wider">Animation speed</label>
-                <span className="text-xs text-amber-500 font-mono">
-                  {theme.animationSpeed === 1 ? 'Slowest' :
-                   theme.animationSpeed === 2 ? 'Very Slow' :
-                   theme.animationSpeed === 3 ? 'Slow' :
-                   theme.animationSpeed === 4 ? 'Moderate' :
-                   theme.animationSpeed === 5 ? 'Normal' :
-                   theme.animationSpeed === 6 ? 'Quick' :
-                   theme.animationSpeed === 7 ? 'Fast' :
-                   theme.animationSpeed === 8 ? 'Very Fast' :
-                   theme.animationSpeed === 9 ? 'Rapid' :
-                   theme.animationSpeed === 10 ? 'Instant' : 'Normal'}
-                </span>
-              </div>
-              <input
-                type="range"
-                min="1"
-                max="10"
-                value={theme.animationSpeed || 5}
-                onChange={e => update({ animationSpeed: Number(e.target.value) })}
-                className="w-full accent-amber-500"
-              />
-              <div className="flex justify-between text-xs text-gray-600 mt-1">
-                <span>Slow</span>
-                <span>Fast</span>
-              </div>
-            </div>
 
-            {[
-              { label: 'Item entrance animations',  key: 'animateItems',      desc: 'Staggered fade-in effect' },
-              { label: 'Price shimmer',             key: 'animatePrice',      desc: 'Subtle shine effect' },
-              { label: 'Category animations',       key: 'animateCategories', desc: 'Ripple & transitions' },
-            ].map(({ label, key, desc }) => (
-              <div key={key} className="flex items-center justify-between py-2 border-b border-gray-800 last:border-0">
-                <div>
-                  <div className="text-sm text-gray-300">{label}</div>
-                  <div className="text-xs text-gray-500 mt-0.5">{desc}</div>
-                </div>
-                <div
-                  onClick={() => update({ [key]: !(theme as any)[key] } as any)}
-                  className={`w-10 h-5 rounded-full cursor-pointer relative transition-colors flex-shrink-0 ${
-                    (theme as any)[key] === true ? 'bg-amber-500' : 'bg-gray-700'
-                  }`}>
-                  <div className={`absolute top-0.5 w-4 h-4 bg-white rounded-full transition-transform ${
-                    (theme as any)[key] === true ? 'translate-x-5' : 'translate-x-0.5'
-                  }`} />
-                </div>
-              </div>
-            ))}
-          </Section>
 
           {/* Save button */}
           <button onClick={save} disabled={saving}

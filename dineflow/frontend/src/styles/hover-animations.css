@@ -60,10 +60,12 @@
 /* Price glow on hover */
 :root[data-animate-hover="true"] .menu-card .item-price {
   transition: color var(--hover-speed, 0.3s) ease,
+              -webkit-text-fill-color var(--hover-speed, 0.3s) ease,
               letter-spacing var(--hover-speed, 0.3s) ease;
 }
 :root[data-animate-hover="true"] .menu-card:hover .item-price {
   color: var(--brand-accent) !important;
+  -webkit-text-fill-color: var(--brand-accent) !important;
   letter-spacing: 0.04em;
 }
 

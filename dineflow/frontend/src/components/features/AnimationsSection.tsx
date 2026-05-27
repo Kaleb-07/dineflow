@@ -247,44 +247,88 @@ export default function AnimationsSection({ theme, update }: Props) {
       </div>
 
       <div style={{ padding: '12px 12px 4px', display: 'flex', flexDirection: 'column', gap: 8 }}>
-        {/* ── SPEED CONTROL (shared) ── */}
+        {/* ── SPEED CONTROLS (Entrance & Price speed) ── */}
         <div style={{
           padding: '12px',
           borderRadius: 10,
           background: 'rgba(255,255,255,0.03)',
           border: '1px solid rgba(255,255,255,0.07)',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 12,
         }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-            <div>
-              <div style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.7)' }}>
-                Animation speed
+          {/* 1. General Animations Speed */}
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+              <div>
+                <div style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.7)' }}>
+                  Entrance & Category speed
+                </div>
+                <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.3)', marginTop: 1 }}>
+                  Applies to card loads & tab changes
+                </div>
               </div>
-              <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.3)', marginTop: 1 }}>
-                Applies to all animations
+              <div style={{ textAlign: 'right' as const }}>
+                <div style={{ fontSize: 11, fontWeight: 600, color: ac }}>
+                  {speedLabel(theme.animSpeed ?? 5)}
+                </div>
+                <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.3)', fontFamily: 'monospace' }}>
+                  {speedSec(theme.animSpeed ?? 5)}
+                </div>
               </div>
             </div>
-            <div style={{ textAlign: 'right' as const }}>
-              <div style={{ fontSize: 11, fontWeight: 600, color: ac }}>
-                {speedLabel(theme.animSpeed ?? 5)}
-              </div>
-              <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.3)', fontFamily: 'monospace' }}>
-                {speedSec(theme.animSpeed ?? 5)}
-              </div>
-            </div>
+            <input
+              type="range" min={1} max={10}
+              value={theme.animSpeed ?? 5}
+              onChange={e => update({ animSpeed: Number(e.target.value) })}
+              style={{
+                width: '100%', height: 4, borderRadius: 2,
+                appearance: 'none' as any, cursor: 'pointer',
+                background: `linear-gradient(to right,
+                  ${ac} ${((theme.animSpeed ?? 5) - 1) / 9 * 100}%,
+                  rgba(255,255,255,0.1) ${((theme.animSpeed ?? 5) - 1) / 9 * 100}%)`,
+              }}
+            />
           </div>
-          <input
-            type="range" min={1} max={10}
-            value={theme.animSpeed ?? 5}
-            onChange={e => update({ animSpeed: Number(e.target.value) })}
-            style={{
-              width: '100%', height: 4, borderRadius: 2,
-              appearance: 'none' as any, cursor: 'pointer',
-              background: `linear-gradient(to right,
-                ${ac} ${((theme.animSpeed ?? 5) - 1) / 9 * 100}%,
-                rgba(255,255,255,0.1) ${((theme.animSpeed ?? 5) - 1) / 9 * 100}%)`,
-            }}
-          />
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 4 }}>
+
+          {/* Subtle separator line */}
+          <div style={{ height: '1px', background: 'rgba(255,255,255,0.06)' }} />
+
+          {/* 2. Price Animations Speed */}
+          <div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+              <div>
+                <div style={{ fontSize: 11, fontWeight: 500, color: 'rgba(255,255,255,0.7)' }}>
+                  Price animation speed
+                </div>
+                <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.3)', marginTop: 1 }}>
+                  Applies to continuous price effects
+                </div>
+              </div>
+              <div style={{ textAlign: 'right' as const }}>
+                <div style={{ fontSize: 11, fontWeight: 600, color: ac }}>
+                  {speedLabel(theme.animationSpeed ?? 5)}
+                </div>
+                <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.3)', fontFamily: 'monospace' }}>
+                  {speedSec(theme.animationSpeed ?? 5)}
+                </div>
+              </div>
+            </div>
+            <input
+              type="range" min={1} max={10}
+              value={theme.animationSpeed ?? 5}
+              onChange={e => update({ animationSpeed: Number(e.target.value) })}
+              style={{
+                width: '100%', height: 4, borderRadius: 2,
+                appearance: 'none' as any, cursor: 'pointer',
+                background: `linear-gradient(to right,
+                  ${ac} ${((theme.animationSpeed ?? 5) - 1) / 9 * 100}%,
+                  rgba(255,255,255,0.1) ${((theme.animationSpeed ?? 5) - 1) / 9 * 100}%)`,
+              }}
+            />
+          </div>
+
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 2 }}>
             <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.2)' }}>Slow</span>
             <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.2)' }}>Fast</span>
           </div>

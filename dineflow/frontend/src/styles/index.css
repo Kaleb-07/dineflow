@@ -526,6 +526,21 @@ button:active::before {
    ADVANCED BRANDING STYLES
    ═══════════════════════════════════════════════════════ */
 
+/* Base price styling to avoid inline style specificity overrides */
+.item-price {
+  color: var(--brand-accent);
+  display: inline-block;
+}
+
+.item-name {
+  font-family: var(--brand-font-display);
+  color: var(--brand-text);
+}
+
+.item-desc {
+  color: color-mix(in srgb, var(--brand-text) 55%, transparent);
+}
+
 /* ── Card Styles ── */
 [data-card-style="imageTop"] .guest-card {
   flex-direction: column;

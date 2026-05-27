@@ -27,7 +27,7 @@ export default function GuestMenuPage() {
   const changeCategory = (id: number) => {
     setSwitching(true);
     setCatId(id);
-    setTimeout(() => setSwitching(false), 50);
+    setTimeout(() => setSwitching(false), 800); // Allow animation to finish
   };
 
   // Apply defaults immediately on mount — no flash
@@ -210,23 +210,24 @@ export default function GuestMenuPage() {
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-start justify-between gap-1">
-                  <span className="item-name text-sm font-medium guest-heading" style={{ fontFamily: 'var(--brand-font-display)', color: 'var(--brand-text)' }}>
+                  <span className="item-name text-sm font-medium guest-heading">
                     {i.name}
                   </span>
                   {i.isFeatured && (
                     <span className="text-xs flex-shrink-0" style={{ color: 'var(--brand-accent)' }}>★</span>
                   )}
                 </div>
-                <p className="item-desc text-xs mt-0.5 line-clamp-2"
-                  style={{ color: 'color-mix(in srgb, var(--brand-text) 55%, transparent)' }}>
+                <p className="item-desc text-xs mt-0.5 line-clamp-2">
                   {i.description}
                 </p>
-                <div className="item-price text-xs font-medium mt-1.5" style={{ color: 'var(--brand-accent)' }}>
+                <span 
+                  className="item-price text-xs font-semibold mt-1.5"
+                >
                   {i.variants.length > 0
                     ? `from ${Math.min(...i.variants.map(v => v.price))} ${venue.currency}`
                     : '—'
                   }
-                </div>
+                </span>
               </div>
               <ChevronRight size={14} className="self-center flex-shrink-0"
                 style={{ color: 'color-mix(in srgb, var(--brand-accent) 40%, transparent)' }} />

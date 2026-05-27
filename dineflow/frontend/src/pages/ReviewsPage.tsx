@@ -5,6 +5,7 @@ import api from '../lib/axios';
 import type { Review } from '../types';
 import { DataTable } from '../components/ui/data-table';
 import { Button } from '../components/ui/button';
+import { Checkbox } from '../components/ui/checkbox';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -43,6 +44,19 @@ export default function ReviewsPage() {
     await api.delete(`/reviews/${id}`);
     setReviews(r => r.filter(x => x.id !== id));
   };
+
+  const bulkDeleteReviews = async (selectedReviews: Review[]) => {
+    if (!confirm(`Delete the ${selectedReviews.length} selected review(s)?`)) return;
+    try {
+      await Promise.all(selectedReviews.map(review => api.delete(`/reviews/${review.id}`)));
+      const deletedIds = new Set(selectedReviews.map(r => r.id));
+      setReviews(p => p.filter(r => !deletedIds.has(r.id)));
+    } catch (err) {
+      console.error("Bulk delete reviews failed", err);
+      alert("Failed to delete some reviews.");
+      load();
+    }
+  };
   
   const filtered = filter === 'ALL' ? reviews : reviews.filter(r => r.type === filter);
   const avg = reviews.length
@@ -51,6 +65,25 @@ export default function ReviewsPage() {
 
   // Review Columns
   const reviewColumns: ColumnDef<Review>[] = [
+    {
+      id: 'select',
+      header: ({ table }) => (
+        <Checkbox
+          checked={table.getIsAllPageRowsSelected()}
+          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+          aria-label="Select all"
+        />
+      ),
+      cell: ({ row }) => (
+        <Checkbox
+          checked={row.getIsSelected()}
+          onCheckedChange={(value) => row.toggleSelected(!!value)}
+          aria-label="Select row"
+        />
+      ),
+      enableSorting: false,
+      enableHiding: false,
+    },
     {
       accessorKey: 'type',
       header: 'Type',
@@ -72,7 +105,7 @@ export default function ReviewsPage() {
         </Button>
       ),
       cell: ({ row }) => (
-        <div className="flex gap-0.5">
+        <div className="flex gap-0.5 whitespace-nowrap">
           {[1, 2, 3, 4, 5].map(s => (
             <Star
               key={s}
@@ -87,7 +120,7 @@ export default function ReviewsPage() {
       accessorKey: 'guestName',
       header: 'Guest',
       cell: ({ row }) => (
-        <span className="text-sm text-gray-400">{row.original.guestName || 'Anonymous'}</span>
+        <span className="text-sm text-gray-400 whitespace-nowrap">{row.original.guestName || 'Anonymous'}</span>
       ),
     },
     {
@@ -115,7 +148,7 @@ export default function ReviewsPage() {
         </Button>
       ),
       cell: ({ row }) => (
-        <span className="text-sm text-gray-500">
+        <span className="text-sm text-gray-500 whitespace-nowrap">
           {new Date(row.original.createdAt).toLocaleDateString()}
         </span>
       ),
@@ -139,28 +172,30 @@ export default function ReviewsPage() {
       cell: ({ row }) => {
         const review = row.original;
         return (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="h-8 w-8 p-0">
-                <span className="sr-only">Open menu</span>
-                <MoreHorizontal size={16} />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Actions</DropdownMenuLabel>
-              <DropdownMenuItem onClick={() => toggle(review.id, review.isVisible)}>
-                {review.isVisible ? <EyeOff size={14} /> : <Eye size={14} />}
-                {review.isVisible ? 'Hide review' : 'Show review'}
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                className="text-red-400"
-                onClick={() => remove(review.id)}
-              >
-                <Trash2 size={14} /> Delete review
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <div className="text-right whitespace-nowrap w-12 ml-auto">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="h-8 w-8 p-0">
+                  <span className="sr-only">Open menu</span>
+                  <MoreHorizontal size={16} />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                <DropdownMenuItem onClick={() => toggle(review.id, review.isVisible)}>
+                  {review.isVisible ? <EyeOff size={14} /> : <Eye size={14} />}
+                  {review.isVisible ? 'Hide review' : 'Show review'}
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  className="text-red-400"
+                  onClick={() => remove(review.id)}
+                >
+                  <Trash2 size={14} /> Delete review
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
         );
       },
     },
@@ -197,6 +232,7 @@ export default function ReviewsPage() {
           data={filtered}
           searchKey="guestName"
           searchPlaceholder="Search by guest name..."
+          onDeleteSelected={bulkDeleteReviews}
         />
       )}
     </div>

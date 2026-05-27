@@ -41,7 +41,12 @@ const defaults: Partial<Theme> = {
 };
 
 export function applyTheme(theme: Partial<Theme>) {
-  const t = { ...defaults, ...theme };
+  // Strip null/undefined so DB nulls don't override our defaults.
+  // e.g. DB stores priceFx: null → without this, null would overwrite defaults.priceFx='shimmer'
+  const cleanTheme = Object.fromEntries(
+    Object.entries(theme).filter(([, v]) => v !== null && v !== undefined)
+  ) as Partial<Theme>;
+  const t = { ...defaults, ...cleanTheme };
   const r = document.documentElement;
   
   // Colors
@@ -77,26 +82,30 @@ export function applyTheme(theme: Partial<Theme>) {
   r.dataset.pricePosition  = t.pricePosition  || 'bottom';
   
   // Animation options
-  r.dataset.animateItems      = String(t.animateItems      ?? false);
-  r.dataset.animateHover      = String(t.animateHover      ?? false);
-  r.dataset.animatePrice      = String(t.animatePrice      ?? false);
-  r.dataset.animateCategories = String(t.animateCategories ?? false);
-  r.dataset.animationSpeed    = String(t.animationSpeed    ?? 5);
+  // For legacy backward compatibility, fallback to boolean if present, else use strings.
   
   // CRITICAL: Set hover style attribute
-  const hoverStyle = t.hoverStyle || 'lift';
+  // Use ?? so a DB-stored null doesn't override a real saved value
+  const hoverStyle = t.hoverStyle ?? (t.animateHover ? 'lift' : 'none');
   r.dataset.hoverStyle = hoverStyle;
+  r.dataset.animateHover = String(hoverStyle !== 'none');
+  
+  // Page animation speed and data attributes
+  const animSec = ((Number(t.animSpeed ?? 5) * 0.05) + 0.05).toFixed(2);
+  r.style.setProperty('--anim-speed', `${animSec}s`);
+  
+  // Price animation speed
+  const priceAnimSec = ((Number(t.animationSpeed ?? 5) * 0.05) + 0.05).toFixed(2);
+  r.style.setProperty('--price-anim-speed', `${priceAnimSec}s`);
   
   // Hover animation speed CSS variable
   const speedSeconds = ((Number(t.hoverSpeed ?? 5) * 0.05) + 0.05).toFixed(2);
   r.style.setProperty('--hover-speed', `${speedSeconds}s`);
   
-  // Page animation speed and data attributes
-  const animSec = ((Number(t.animSpeed ?? 5) * 0.05) + 0.05).toFixed(2);
-  r.style.setProperty('--anim-speed', `${animSec}s`);
-  r.dataset.entrance = t.entranceStyle || 'fade-up';
-  r.dataset.priceFx = t.priceFx || 'shimmer';
-  r.dataset.categoryFx = t.categoryFx || 'crossfade';
+  // Use ?? — null from DB must NOT fall through to 'none'
+  r.dataset.entrance   = t.entranceStyle ?? (t.animateItems       ? 'fade-up'   : 'none');
+  r.dataset.priceFx    = t.priceFx       ?? (t.animatePrice      ? 'shimmer'   : 'none');
+  r.dataset.categoryFx = t.categoryFx    ?? (t.animateCategories ? 'crossfade' : 'none');
 }
 
 export function useTheme(theme?: Partial<Theme> | null) {

@@ -1,10 +1,21 @@
 import { useEffect, useRef, useState } from 'react';
-import { useStore } from '../store/useStore';
-import { Plus, Download, Trash2, QrCode } from 'lucide-react';
+import { type ColumnDef } from '@tanstack/react-table';
+import { Plus, Download, Trash2, QrCode, ArrowUpDown, MoreHorizontal, Eye } from 'lucide-react';
 import QRCode from 'qrcode';
 import api from '../lib/axios';
+import { useStore } from '../store/useStore';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
+import { Checkbox } from '../components/ui/checkbox';
+import { DataTable } from '../components/ui/data-table';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '../components/ui/dropdown-menu';
 
 interface QR {
   id: number;
@@ -17,6 +28,29 @@ interface QR {
 
 const TYPES = ['TABLE','ROOM','BAR','TAKEAWAY','OTHER'] as const;
 
+// Self-contained component to render QR code on a canvas.
+// Ensures rendering works perfectly even during table pagination, sorting, and filtering.
+function QRCanvas({ url }: { url: string }) {
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+
+  useEffect(() => {
+    if (canvasRef.current) {
+      QRCode.toCanvas(canvasRef.current, url, {
+        width: 120,
+        margin: 1,
+        color: { dark: '#0d1f1a', light: '#FAF7F0' }
+      }).catch(err => console.error("QR render error", err));
+    }
+  }, [url]);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      style={{ display: 'block', width: '100%', height: '100%' }}
+    />
+  );
+}
+
 export default function QRPage() {
   const { venue } = useStore();
   const [qrCodes, setQrCodes] = useState<QR[]>([]);
@@ -24,7 +58,6 @@ export default function QRPage() {
   const [modal,   setModal]   = useState(false);
   const [form,    setForm]    = useState({ label: '', type: 'TABLE' as QR['type'] });
   const [saving,  setSaving]  = useState(false);
-  const canvasRefs = useRef<Record<number, HTMLCanvasElement | null>>({});
 
   const load = async () => {
     const { data } = await api.get('/qr');
@@ -33,27 +66,13 @@ export default function QRPage() {
   };
   useEffect(() => { load(); }, []);
 
-  // Render QR codes onto canvases after data loads
-  useEffect(() => {
-    qrCodes.forEach(qr => {
-      const canvas = canvasRefs.current[qr.id];
-      if (canvas) {
-        QRCode.toCanvas(canvas, qr.url, {
-          width: 200,
-          margin: 2,
-          color: { dark: '#0d1f1a', light: '#FAF7F0' }
-        });
-      }
-    });
-  }, [qrCodes]);
-
   const create = async () => {
     if (!form.label.trim()) return;
     setSaving(true);
     try {
       const url = `${window.location.origin}/menu/${venue?.slug}`;
       const { data } = await api.post('/qr', { ...form, url });
-      setQrCodes(p => [...p, data]);
+      setQrCodes(p => [data, ...p]);
       setForm({ label: '', type: 'TABLE' });
       setModal(false);
     } finally {
@@ -67,13 +86,34 @@ export default function QRPage() {
     setQrCodes(p => p.filter(q => q.id !== id));
   };
 
-  const download = (id: number, label: string) => {
-    const canvas = canvasRefs.current[id];
-    if (!canvas) return;
-    const link = document.createElement('a');
-    link.download = `${label.toLowerCase().replace(/\s+/g, '-')}-qr.png`;
-    link.href = canvas.toDataURL('image/png');
-    link.click();
+  const bulkDelete = async (selectedQRs: QR[]) => {
+    if (!confirm(`Delete the ${selectedQRs.length} selected QR code(s)?`)) return;
+    try {
+      await Promise.all(selectedQRs.map(qr => api.delete(`/qr/${qr.id}`)));
+      const deletedIds = new Set(selectedQRs.map(qr => qr.id));
+      setQrCodes(p => p.filter(q => !deletedIds.has(q.id)));
+    } catch (err) {
+      console.error("Bulk delete QR codes failed", err);
+      alert("Failed to delete some QR codes.");
+      load();
+    }
+  };
+
+  // Generates high-quality print-ready QR codes dynamically for download
+  const download = async (url: string, label: string) => {
+    try {
+      const dataUrl = await QRCode.toDataURL(url, {
+        width: 600,
+        margin: 2,
+        color: { dark: '#0d1f1a', light: '#FAF7F0' }
+      });
+      const link = document.createElement('a');
+      link.download = `${label.toLowerCase().replace(/\s+/g, '-')}-qr.png`;
+      link.href = dataUrl;
+      link.click();
+    } catch (err) {
+      console.error("QR download generation failed", err);
+    }
   };
 
   const bulk = async () => {
@@ -84,11 +124,121 @@ export default function QRPage() {
       api.post('/qr', { label: `Table ${i + 1}`, type: 'TABLE', url })
     );
     const results = await Promise.all(promises);
-    setQrCodes(p => [...p, ...results.map(r => r.data)]);
+    setQrCodes(p => [...results.map(r => r.data), ...p]);
   };
 
+  const columns: ColumnDef<QR>[] = [
+    {
+      id: 'select',
+      header: ({ table }) => (
+        <Checkbox
+          checked={table.getIsAllPageRowsSelected()}
+          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+          aria-label="Select all"
+        />
+      ),
+      cell: ({ row }) => (
+        <Checkbox
+          checked={row.getIsSelected()}
+          onCheckedChange={(value) => row.toggleSelected(!!value)}
+          aria-label="Select row"
+        />
+      ),
+      enableSorting: false,
+      enableHiding: false,
+    },
+    {
+      id: 'qr',
+      header: 'QR Code',
+      cell: ({ row }) => (
+        <div className="w-12 h-12 rounded-lg bg-[#FAF7F0] p-1 flex items-center justify-center overflow-hidden flex-shrink-0">
+          <QRCanvas url={row.original.url} />
+        </div>
+      ),
+    },
+    {
+      accessorKey: 'label',
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+          className="-ml-4 hover:bg-transparent text-gray-400 hover:text-white"
+        >
+          Label
+          <ArrowUpDown size={14} className="ml-1" />
+        </Button>
+      ),
+      cell: ({ row }) => <span className="font-medium text-white">{row.original.label}</span>,
+    },
+    {
+      accessorKey: 'type',
+      header: 'Type',
+      cell: ({ row }) => (
+        <span className="text-xs text-gray-400 bg-gray-800 px-2 py-0.5 rounded-full capitalize whitespace-nowrap">
+          {row.original.type.toLowerCase()}
+        </span>
+      ),
+    },
+    {
+      accessorKey: 'scanCount',
+      header: ({ column }) => (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+          className="-ml-4 hover:bg-transparent text-gray-400 hover:text-white whitespace-nowrap"
+        >
+          Scans
+          <ArrowUpDown size={14} className="ml-1" />
+        </Button>
+      ),
+      cell: ({ row }) => <span className="text-sm text-gray-400 whitespace-nowrap">{row.original.scanCount} scans</span>,
+    },
+    {
+      accessorKey: 'url',
+      header: 'Guest Menu URL',
+      cell: ({ row }) => (
+        <code className="text-xs text-amber-300 max-w-[220px] block truncate">{row.original.url}</code>
+      ),
+    },
+    {
+      id: 'actions',
+      enableHiding: false,
+      cell: ({ row }) => {
+        const qr = row.original;
+        return (
+          <div className="text-right whitespace-nowrap w-12 ml-auto">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="h-8 w-8 p-0">
+                  <span className="sr-only">Open menu</span>
+                  <MoreHorizontal size={16} />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                <DropdownMenuItem onClick={() => window.open(qr.url, '_blank')}>
+                  <Eye size={14} /> View menu
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => download(qr.url, qr.label)}>
+                  <Download size={14} /> Download QR
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  className="text-red-400"
+                  onClick={() => remove(qr.id)}
+                >
+                  <Trash2 size={14} /> Delete QR
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        );
+      },
+    },
+  ];
+
   return (
-    <div className="max-w-3xl mx-auto">
+    <div className="max-w-4xl mx-auto">
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-xl font-semibold text-white">QR Codes</h1>
@@ -125,50 +275,13 @@ export default function QRPage() {
           </button>
         </div>
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-          {qrCodes.map(qr => (
-            <div key={qr.id}
-              className="bg-gray-900 border border-gray-800 rounded-xl p-4 flex flex-col items-center gap-3">
-              {/* QR canvas */}
-              <div className="rounded-xl overflow-hidden bg-[#FAF7F0] p-2">
-                <canvas
-                  ref={el => { canvasRefs.current[qr.id] = el; }}
-                  width={160} height={160}
-                  style={{ display: 'block' }}
-                />
-              </div>
-              {/* Info */}
-              <div className="text-center w-full">
-                <div className="text-white text-sm font-medium truncate">{qr.label}</div>
-                <div className="flex items-center justify-center gap-2 mt-0.5">
-                  <span className="text-xs text-gray-500 bg-gray-800 px-2 py-0.5 rounded-full capitalize">
-                    {qr.type.toLowerCase()}
-                  </span>
-                  <span className="text-xs text-gray-600">{qr.scanCount} scans</span>
-                </div>
-              </div>
-              {/* Actions */}
-              <div className="flex gap-2 w-full">
-                <Button
-                  onClick={() => download(qr.id, qr.label)}
-                  variant="outline"
-                  size="sm"
-                  className="flex-1"
-                >
-                  <Download size={13} /> Download
-                </Button>
-                <Button
-                  onClick={() => remove(qr.id)}
-                  variant="ghost"
-                  size="sm"
-                  className="text-red-400 hover:text-red-300"
-                >
-                  <Trash2 size={13} />
-                </Button>
-              </div>
-            </div>
-          ))}
-        </div>
+        <DataTable
+          columns={columns}
+          data={qrCodes}
+          searchKey="label"
+          searchPlaceholder="Search QR codes..."
+          onDeleteSelected={bulkDelete}
+        />
       )}
 
       {/* Create modal */}
