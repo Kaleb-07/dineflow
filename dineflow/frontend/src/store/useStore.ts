@@ -9,6 +9,8 @@ interface StoreState {
   venue: Venue | null
   setAuth: (token: string, user: User, venue: Venue) => void
   clearAuth: () => void
+  setUser: (user: User) => void
+  setVenue: (venue: Venue) => void
   
   // Theme (live preview in admin)
   theme: Theme | null
@@ -25,6 +27,8 @@ export const useStore = create<StoreState>()(
       
       setAuth: (token, user, venue) => set({ token, user, venue }),
       clearAuth: () => set({ token: null, user: null, venue: null, theme: null }),
+      setUser: (user) => set({ user }),
+      setVenue: (venue) => set({ venue }),
       setTheme: (theme) => set({ theme }),
     }),
     {

@@ -455,39 +455,216 @@ function LocationModal({ venue, onClose }: { venue: Venue; onClose: () => void }
 }
 
 // ── About sheet ────────────────────────────────────────
+const AMENITY_EMOJI: Record<string, string> = {
+  wifi: '📶', car: '🚗', wind: '❄️', waves: '🏊', utensils: '🍽️',
+  'glass-water': '🍸', dumbbell: '💪', sparkles: '✨', sofa: '🛋️',
+  'chef-hat': '👨‍🍳', 'building-2': '🏙️', 'paw-print': '🐾',
+  key: '🔑', bike: '🚴', package: '📦',
+};
+
+const DAYS = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
+const DAY_SHORT: Record<string, string> = {
+  mon: 'Mon', tue: 'Tue', wed: 'Wed',
+  thu: 'Thu', fri: 'Fri', sat: 'Sat', sun: 'Sun',
+};
+
+function formatTime(t: string) {
+  if (!t) return '';
+  const [h, m] = t.split(':').map(Number);
+  const period = h >= 12 ? 'PM' : 'AM';
+  const hour   = h % 12 || 12;
+  return `${hour}:${m.toString().padStart(2, '0')} ${period}`;
+}
+
 function AboutSheet({ venue, onClose }: { venue: Venue; onClose: () => void }) {
+  const hasHours    = !!venue.businessHours;
+  const hasSocial   = !!(venue.facebook || venue.instagram || venue.twitter || venue.tiktok || venue.website);
+  const hasContact  = !!(venue.phone || venue.email || venue.address);
+
   return (
     <FullSheet onClose={onClose}>
+
+      {/* ── Cover photo ── */}
       {venue.coverPhoto && (
-        <div className="h-40 overflow-hidden mb-4 rounded-xl">
+        <div className="h-44 overflow-hidden mb-4 rounded-2xl -mx-4">
           <img src={venue.coverPhoto} className="w-full h-full object-cover" alt="" />
         </div>
       )}
-      <h2 className="text-2xl font-semibold guest-heading mb-1"
-        style={{ fontFamily: 'var(--brand-font-display)', color: 'var(--brand-text)' }}>
-        {venue.name}
-      </h2>
+
+      {/* ── Logo + name ── */}
+      <div className="flex items-center gap-3 mb-4">
+        {venue.logo && (
+          <img
+            src={venue.logo}
+            className="w-14 h-14 rounded-xl object-cover border flex-shrink-0"
+            style={{ borderColor: 'color-mix(in srgb, var(--brand-accent) 25%, transparent)' }}
+            alt={venue.name}
+          />
+        )}
+        <div>
+          <h2 className="text-xl font-semibold"
+            style={{ fontFamily: 'var(--brand-font-display)', color: 'var(--brand-text)' }}>
+            {venue.name}
+          </h2>
+          {venue.tagline && (
+            <p className="text-xs tracking-widest uppercase mt-0.5"
+              style={{ color: 'var(--brand-accent)' }}>
+              {venue.tagline}
+            </p>
+          )}
+        </div>
+      </div>
+
+      {/* ── Description ── */}
       {venue.description && (
-        <p className="text-sm leading-relaxed mb-5"
+        <p className="text-sm leading-relaxed mb-6"
           style={{ color: 'color-mix(in srgb, var(--brand-text) 65%, transparent)' }}>
           {venue.description}
         </p>
       )}
+
+      {/* ── Amenities ── */}
       {venue.amenities && venue.amenities.length > 0 && (
-        <div className="mb-5">
-          <div className="text-xs uppercase tracking-widest mb-3" style={{ color: 'var(--brand-accent)' }}>Amenities</div>
-          <div className="flex flex-wrap gap-2">
+        <div className="mb-6">
+          <SectionLabel>Amenities</SectionLabel>
+          <div className="flex flex-wrap gap-2 mt-3">
             {venue.amenities.map(a => (
-              <span key={a.id} className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full border"
-                style={{ color: 'color-mix(in srgb, var(--brand-text) 70%, transparent)',
-                         borderColor: 'color-mix(in srgb, var(--brand-accent) 25%, transparent)' }}>
+              <span key={a.id}
+                className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full border"
+                style={{
+                  color: 'color-mix(in srgb, var(--brand-text) 75%, transparent)',
+                  borderColor: 'color-mix(in srgb, var(--brand-accent) 25%, transparent)',
+                  background: 'color-mix(in srgb, var(--brand-accent) 5%, transparent)',
+                }}>
+                <span>{AMENITY_EMOJI[a.icon] ?? '✨'}</span>
                 {a.name}
               </span>
             ))}
           </div>
         </div>
       )}
+
+      {/* ── Business hours ── */}
+      {hasHours && (
+        <div className="mb-6">
+          <SectionLabel>Business Hours</SectionLabel>
+          <div className="mt-3 rounded-xl border overflow-hidden"
+            style={{
+              borderColor: 'color-mix(in srgb, var(--brand-accent) 15%, transparent)',
+            }}>
+            {DAYS.map((day, idx) => {
+              const entry = (venue.businessHours as any)?.[day];
+              return (
+                <div key={day}
+                  className="flex items-center justify-between px-4 py-2.5"
+                  style={{
+                    background: 'color-mix(in srgb, var(--brand-accent) 3%, transparent)',
+                    borderTop: idx > 0 ? '1px solid color-mix(in srgb, var(--brand-accent) 10%, transparent)' : 'none',
+                  }}>
+                  <span className="text-xs font-medium"
+                    style={{ color: 'color-mix(in srgb, var(--brand-text) 80%, transparent)' }}>
+                    {DAY_SHORT[day]}
+                  </span>
+                  {entry?.closed ? (
+                    <span className="text-xs italic"
+                      style={{ color: 'color-mix(in srgb, var(--brand-text) 35%, transparent)' }}>
+                      Closed
+                    </span>
+                  ) : entry ? (
+                    <span className="text-xs" style={{ color: 'var(--brand-accent)' }}>
+                      {formatTime(entry.open)} – {formatTime(entry.close)}
+                    </span>
+                  ) : (
+                    <span className="text-xs italic"
+                      style={{ color: 'color-mix(in srgb, var(--brand-text) 35%, transparent)' }}>
+                      —
+                    </span>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* ── Contact ── */}
+      {hasContact && (
+        <div className="mb-6">
+          <SectionLabel>Contact</SectionLabel>
+          <div className="mt-3 space-y-2">
+            {venue.address && (
+              <InfoRow icon="📍">
+                {venue.address}{venue.city ? `, ${venue.city}` : ''}{venue.country ? `, ${venue.country}` : ''}
+              </InfoRow>
+            )}
+            {venue.phone && (
+              <a href={`tel:${venue.phone}`} className="block">
+                <InfoRow icon="📞" accent>{venue.phone}</InfoRow>
+              </a>
+            )}
+            {venue.email && (
+              <a href={`mailto:${venue.email}`} className="block">
+                <InfoRow icon="✉️" accent>{venue.email}</InfoRow>
+              </a>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* ── Social links ── */}
+      {hasSocial && (
+        <div className="mb-4">
+          <SectionLabel>Find us online</SectionLabel>
+          <div className="flex flex-wrap gap-2 mt-3">
+            {venue.facebook  && <SocialLink href={venue.facebook}  icon="📘" label="Facebook"  />}
+            {venue.instagram && <SocialLink href={venue.instagram} icon="📸" label="Instagram" />}
+            {venue.twitter   && <SocialLink href={venue.twitter}   icon="🐦" label="Twitter"   />}
+            {venue.tiktok    && <SocialLink href={venue.tiktok}    icon="🎵" label="TikTok"    />}
+            {venue.website   && <SocialLink href={venue.website}   icon="🌐" label="Website"   />}
+          </div>
+        </div>
+      )}
+
     </FullSheet>
+  );
+}
+
+// ── About sub-components ───────────────────────────────
+function SectionLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="text-xs uppercase tracking-widest font-medium"
+      style={{ color: 'var(--brand-accent)' }}>
+      {children}
+    </div>
+  );
+}
+
+function InfoRow({ icon, accent, children }: {
+  icon: string; accent?: boolean; children: React.ReactNode
+}) {
+  return (
+    <div className="flex items-start gap-2.5 text-sm rounded-xl px-3 py-2.5"
+      style={{
+        background: 'color-mix(in srgb, var(--brand-accent) 5%, transparent)',
+        color: accent ? 'var(--brand-accent)' : 'color-mix(in srgb, var(--brand-text) 70%, transparent)',
+      }}>
+      <span className="text-base leading-none">{icon}</span>
+      <span className="leading-snug">{children}</span>
+    </div>
+  );
+}
+
+function SocialLink({ href, icon, label }: { href: string; icon: string; label: string }) {
+  return (
+    <a href={href} target="_blank" rel="noreferrer"
+      className="flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-full border transition-all active:scale-95"
+      style={{
+        borderColor: 'color-mix(in srgb, var(--brand-accent) 30%, transparent)',
+        color: 'var(--brand-accent)',
+        background: 'color-mix(in srgb, var(--brand-accent) 6%, transparent)',
+      }}>
+      <span>{icon}</span>{label}
+    </a>
   );
 }
 
