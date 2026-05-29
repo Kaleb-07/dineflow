@@ -2,17 +2,20 @@ import { useState } from 'react';
 import { useStore } from '../store/useStore';
 import { useNavigate } from 'react-router-dom';
 import {
-  LogOut, Copy, Check, ExternalLink, User, Building2, AlertTriangle, Loader2, Key
+  LogOut, Copy, ExternalLink, User, Building2, AlertTriangle, Loader2, Key
 } from 'lucide-react';
 import api from '../lib/axios';
 import { Button, buttonVariants } from '../components/ui/button';
 import { Input } from '../components/ui/input';
+import { useToast } from '../components/Toast';
+import { useConfirm } from '../components/ConfirmDialog';
 
 export default function SettingsPage() {
+  const toast = useToast();
+  const confirm = useConfirm();
   const { user, venue, clearAuth, setUser, setVenue } = useStore();
   const navigate = useNavigate();
   const [tab, setTab] = useState<'account' | 'venue' | 'danger'>('account');
-  const [copied, setCopied] = useState(false);
 
   // Account form
   const [name,     setName]     = useState(user?.name     || '');
@@ -20,7 +23,6 @@ export default function SettingsPage() {
   const [password, setPassword] = useState('');
   const [newPass,  setNewPass]  = useState('');
   const [saving,   setSaving]   = useState(false);
-  const [saved,    setSaved]    = useState(false);
   const [error,    setError]    = useState('');
 
   // Venue settings
@@ -38,12 +40,13 @@ export default function SettingsPage() {
       if (user) {
         setUser({ ...user, name, email });
       }
-      setSaved(true);
       setPassword('');
       setNewPass('');
-      setTimeout(() => setSaved(false), 2500);
+      toast.saved('Account profile');
     } catch (err: any) {
-      setError(err.response?.data?.error || 'Failed to save account settings');
+      const errMsg = err.response?.data?.error || 'Failed to save account settings';
+      setError(errMsg);
+      toast.error('Failed to save profile', errMsg);
     } finally {
       setSaving(false);
     }
@@ -55,10 +58,9 @@ export default function SettingsPage() {
     try {
       const { data } = await api.patch('/settings', { currency, language });
       setVenue(data);
-      setSaved(true);
-      setTimeout(() => setSaved(false), 2500);
+      toast.saved('Venue settings');
     } catch (err: any) {
-      setError('Failed to save venue settings');
+      toast.error('Failed to save settings', 'Please try again');
     } finally {
       setSaving(false);
     }
@@ -66,8 +68,7 @@ export default function SettingsPage() {
 
   const copyLink = () => {
     navigator.clipboard.writeText(`${window.location.origin}/menu/${venue?.slug}`);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    toast.copied('Guest menu link');
   };
 
   const logout = () => {
@@ -76,18 +77,28 @@ export default function SettingsPage() {
   };
 
   const deleteVenue = async () => {
-    const confirm1 = window.confirm(
-      'Are you sure? This will permanently delete all your menu items, QR codes, and reviews.'
-    );
+    const confirm1 = await confirm({
+      title: 'Delete Restaurant Venue',
+      message: 'Are you sure? This will permanently delete all your menu categories, items, custom QR codes, and reviews.',
+      confirmLabel: 'Confirm Delete',
+      isDestructive: true,
+    });
     if (!confirm1) return;
     const typed = window.prompt(`Type your venue name "${venue?.name}" to confirm:`);
-    if (typed !== venue?.name) return alert('Name did not match. Cancelled.');
+    if (typed !== venue?.name) {
+      toast.error('Deletion cancelled', 'Restaurant name did not match');
+      return;
+    }
+    const id = toast.loading('Deleting venue...');
     try {
       await api.delete('/settings/venue');
+      toast.dismiss(id);
+      toast.success('Venue deleted', 'Your account has been deleted.');
       clearAuth();
       navigate('/login');
     } catch (err) {
-      alert('Failed to delete venue');
+      toast.dismiss(id);
+      toast.error('Failed to delete venue', 'Please try again');
     }
   };
 
@@ -167,12 +178,8 @@ export default function SettingsPage() {
             {/* Action Bar */}
             <div className="flex flex-col sm:flex-row items-center gap-3 pt-3 border-t border-gray-800">
               <Button onClick={saveAccount} disabled={saving} className="w-full sm:w-auto px-6 font-semibold">
-                {saving ? (
-                  <Loader2 size={15} className="animate-spin" />
-                ) : saved ? (
-                  <Check size={15} className="text-green-400" />
-                ) : null}
-                {saved ? 'Saved!' : saving ? 'Saving…' : 'Save Profile'}
+                {saving && <Loader2 size={15} className="animate-spin mr-2" />}
+                {saving ? 'Saving…' : 'Save Profile'}
               </Button>
               <Button onClick={logout} variant="ghost" className="w-full sm:w-auto text-gray-500 hover:text-red-400 hover:bg-red-500/10 gap-2">
                 <LogOut size={15} /> Sign Out
@@ -197,8 +204,8 @@ export default function SettingsPage() {
               </code>
               <div className="flex gap-1.5 flex-shrink-0">
                 <Button variant="secondary" size="sm" onClick={copyLink} className="flex-1 sm:flex-none gap-1.5 text-xs">
-                  {copied ? <Check size={13} className="text-green-400" /> : <Copy size={13} />}
-                  {copied ? 'Copied' : 'Copy'}
+                  <Copy size={13} />
+                  Copy
                 </Button>
                 <a
                   href={`/menu/${venue?.slug}`}
@@ -246,12 +253,8 @@ export default function SettingsPage() {
 
             <div className="pt-3 border-t border-gray-800">
               <Button onClick={saveVenue} disabled={saving} className="w-full sm:w-auto px-6 font-semibold">
-                {saving ? (
-                  <Loader2 size={15} className="animate-spin" />
-                ) : saved ? (
-                  <Check size={15} className="text-green-400" />
-                ) : null}
-                {saved ? 'Saved!' : saving ? 'Saving…' : 'Save Venue Settings'}
+                {saving && <Loader2 size={15} className="animate-spin mr-2" />}
+                {saving ? 'Saving…' : 'Save Venue Settings'}
               </Button>
             </div>
           </div>

@@ -16,6 +16,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '../components/ui/dropdown-menu';
+import { useToast } from '../components/Toast';
+import { useConfirm } from '../components/ConfirmDialog';
 
 interface QR {
   id: number;
@@ -52,6 +54,8 @@ function QRCanvas({ url }: { url: string }) {
 }
 
 export default function QRPage() {
+  const toast = useToast();
+  const confirm = useConfirm();
   const { venue } = useStore();
   const [qrCodes, setQrCodes] = useState<QR[]>([]);
   const [loading, setLoading] = useState(true);
@@ -75,26 +79,50 @@ export default function QRPage() {
       setQrCodes(p => [data, ...p]);
       setForm({ label: '', type: 'TABLE' });
       setModal(false);
+      toast.created('QR code');
+    } catch {
+      toast.error('Failed to create QR code');
     } finally {
       setSaving(false);
     }
   };
 
   const remove = async (id: number) => {
-    if (!confirm('Delete this QR code?')) return;
-    await api.delete(`/qr/${id}`);
-    setQrCodes(p => p.filter(q => q.id !== id));
+    const confirmed = await confirm({
+      title: 'Delete QR Code',
+      message: 'Are you sure you want to permanently delete this QR code?',
+      confirmLabel: 'Delete',
+      isDestructive: true,
+    });
+    if (!confirmed) return;
+    try {
+      await api.delete(`/qr/${id}`);
+      setQrCodes(p => p.filter(q => q.id !== id));
+      toast.deleted('QR code');
+    } catch {
+      toast.error('Failed to delete QR code');
+    }
   };
 
   const bulkDelete = async (selectedQRs: QR[]) => {
-    if (!confirm(`Delete the ${selectedQRs.length} selected QR code(s)?`)) return;
+    const confirmed = await confirm({
+      title: 'Delete Multiple QR Codes',
+      message: `Are you sure you want to delete the ${selectedQRs.length} selected QR code(s)?`,
+      confirmLabel: 'Delete Selected',
+      isDestructive: true,
+    });
+    if (!confirmed) return;
+    const toastId = toast.loading(`Deleting ${selectedQRs.length} QR code(s)…`);
     try {
       await Promise.all(selectedQRs.map(qr => api.delete(`/qr/${qr.id}`)));
       const deletedIds = new Set(selectedQRs.map(qr => qr.id));
       setQrCodes(p => p.filter(q => !deletedIds.has(q.id)));
+      toast.dismiss(toastId);
+      toast.success(`${selectedQRs.length} QR code(s) deleted`);
     } catch (err) {
       console.error("Bulk delete QR codes failed", err);
-      alert("Failed to delete some QR codes.");
+      toast.dismiss(toastId);
+      toast.error("Failed to delete some QR codes");
       load();
     }
   };
@@ -111,20 +139,32 @@ export default function QRPage() {
       link.download = `${label.toLowerCase().replace(/\s+/g, '-')}-qr.png`;
       link.href = dataUrl;
       link.click();
+      toast.success('Downloaded!', 'QR Code downloaded successfully');
     } catch (err) {
       console.error("QR download generation failed", err);
+      toast.error('Download failed', 'Failed to generate download');
     }
   };
 
   const bulk = async () => {
     const count = Number(prompt('How many tables? (e.g. 10)'));
     if (!count || count < 1) return;
-    const url = `${window.location.origin}/menu/${venue?.slug}`;
-    const promises = Array.from({ length: count }, (_, i) =>
-      api.post('/qr', { label: `Table ${i + 1}`, type: 'TABLE', url })
-    );
-    const results = await Promise.all(promises);
-    setQrCodes(p => [...results.map(r => r.data), ...p]);
+    const toastId = toast.loading(`Generating ${count} table QR codes…`);
+    try {
+      const url = `${window.location.origin}/menu/${venue?.slug}`;
+      const promises = Array.from({ length: count }, (_, i) =>
+        api.post('/qr', { label: `Table ${i + 1}`, type: 'TABLE', url })
+      );
+      const results = await Promise.all(promises);
+      setQrCodes(p => [...results.map(r => r.data), ...p]);
+      toast.dismiss(toastId);
+      toast.success(`${count} table QR codes generated`);
+    } catch (err) {
+      console.error("Bulk QR generation failed", err);
+      toast.dismiss(toastId);
+      toast.error('Generation failed', 'Failed to generate table QR codes');
+      load();
+    }
   };
 
   const columns: ColumnDef<QR>[] = [

@@ -5,6 +5,7 @@ import api from '../lib/axios';
 import type { Theme } from '../types';
 import HoverSection from '../components/features/HoverSection';
 import AnimationsSection from '../components/features/AnimationsSection';
+import { useToast } from '../components/Toast';
 
 const PRESETS: Record<string, Partial<Theme>> = {
   'Luxury dark':   { bgColor: '#0d1f1a', accentColor: '#c9a84c', cardColor: '#122219', textColor: '#e8e0d0' },
@@ -25,14 +26,13 @@ const GOOGLE_FONTS = [
   
   // Sans-serif
   { name: 'DM Sans', category: 'Sans-serif', value: "'DM Sans', sans-serif" },
-  { name: 'Inter', category: 'Sans-serif', value: "'Inter', sans-serif" },
-  { name: 'Outfit', category: 'Sans-serif', value: "'Outfit', sans-serif" },
-  { name: 'Plus Jakarta Sans', category: 'Sans-serif', value: "'Plus Jakarta Sans', sans-serif" },
   { name: 'Manrope', category: 'Sans-serif', value: "'Manrope', sans-serif" },
+  { name: 'Inter', category: 'Sans-serif', value: "'Inter', sans-serif" },
+  { name: 'Outfit', category: 'Sans-serif', value: "'Manrope', sans-serif" }, // fallbacks
+  { name: 'Plus Jakarta Sans', category: 'Sans-serif', value: "'Plus Jakarta Sans', sans-serif" },
   { name: 'Work Sans', category: 'Sans-serif', value: "'Work Sans', sans-serif" },
   { name: 'Poppins', category: 'Sans-serif', value: "'Poppins', sans-serif" },
-  { name: 'Montserrat', category: 'Sans-serif', value: "'Montserrat', sans-serif" },
-  { name: 'Raleway', category: 'Sans-serif', value: "'Raleway', sans-serif" },
+  { name: 'Manrope', category: 'Sans-serif', value: "'Manrope', sans-serif" },
   
   // Display
   { name: 'Bebas Neue', category: 'Display', value: "'Bebas Neue', sans-serif" },
@@ -45,6 +45,7 @@ const GOOGLE_FONTS = [
 ];
 
 export default function ThemePage() {
+  const toast = useToast();
   const { venue, setTheme: setStoreTheme } = useStore();
   const iframeRef = useRef<HTMLIFrameElement>(null);
   
@@ -161,15 +162,19 @@ export default function ThemePage() {
   };
 
   const save = async () => {
+    const toastId = toast.loading('Saving branding theme…');
     setSaving(true);
     try {
       const { data } = await api.patch('/settings/theme', theme);
       setStoreTheme(data);
+      toast.dismiss(toastId);
+      toast.saved('Branding theme');
       setSaved(true);
       setTimeout(() => setSaved(false), 2500);
     } catch (err) {
       console.error("Save failed", err);
-      alert("Failed to save theme. Please try again.");
+      toast.dismiss(toastId);
+      toast.error('Failed to save branding theme', 'Check your connection and try again');
     } finally {
       setSaving(false);
     }
@@ -206,6 +211,43 @@ export default function ThemePage() {
                   {name}
                 </button>
               ))}
+            </div>
+          </Section>
+
+          {/* Test Toast Notifications */}
+          <Section title="Test Notification System">
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                onClick={() => toast.success('Changes Saved', 'Theme settings have been successfully published!')}
+                className="px-3 py-2 bg-green-500/10 hover:bg-green-500/20 border border-green-500/20 hover:border-green-500/40 text-green-400 rounded-lg text-xs font-semibold transition-all cursor-pointer">
+                ✅ Success
+              </button>
+              <button
+                onClick={() => toast.error('Error Occurred', 'Failed to connect to database server.')}
+                className="px-3 py-2 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 hover:border-red-500/40 text-red-400 rounded-lg text-xs font-semibold transition-all cursor-pointer">
+                ❌ Error
+              </button>
+              <button
+                onClick={() => toast.warning('Storage Limit', 'Your QR code scanning limit is at 90%.')}
+                className="px-3 py-2 bg-yellow-500/10 hover:bg-yellow-500/20 border border-yellow-500/20 hover:border-yellow-500/40 text-yellow-400 rounded-lg text-xs font-semibold transition-all cursor-pointer">
+                ⚠️ Warning
+              </button>
+              <button
+                onClick={() => toast.info('New Update', 'Version 2.4.0 is now live with enhanced animations.')}
+                className="px-3 py-2 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20 hover:border-blue-500/40 text-blue-400 rounded-lg text-xs font-semibold transition-all cursor-pointer">
+                ℹ️ Info
+              </button>
+              <button
+                onClick={() => {
+                  const id = toast.loading('Uploading assets...');
+                  setTimeout(() => {
+                    toast.dismiss(id);
+                    toast.success('Upload complete!', 'All custom branding assets uploaded successfully.');
+                  }, 2000);
+                }}
+                className="px-3 py-2 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/20 hover:border-amber-500/40 text-amber-400 rounded-lg text-xs font-semibold transition-all col-span-2 cursor-pointer">
+                ⏳ Simulated Loading (2s)
+              </button>
             </div>
           </Section>
 

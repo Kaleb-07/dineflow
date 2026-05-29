@@ -14,6 +14,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '../components/ui/dropdown-menu';
+import { useToast } from '../components/Toast';
+import { useConfirm } from '../components/ConfirmDialog';
 
 const TYPE_LABELS = { HOTEL: 'Hotel', FOOD: 'Food', SERVICE: 'Service' };
 const TYPE_COLORS = {
@@ -23,6 +25,8 @@ const TYPE_COLORS = {
 };
 
 export default function ReviewsPage() {
+  const toast = useToast();
+  const confirm = useConfirm();
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<'ALL' | Review['type']>('ALL');
@@ -35,25 +39,54 @@ export default function ReviewsPage() {
   useEffect(() => { load(); }, []);
   
   const toggle = async (id: number, isVisible: boolean) => {
-    await api.patch(`/reviews/${id}`, { isVisible: !isVisible });
-    setReviews(r => r.map(x => x.id === id ? { ...x, isVisible: !isVisible } : x));
+    try {
+      await api.patch(`/reviews/${id}`, { isVisible: !isVisible });
+      setReviews(r => r.map(x => x.id === id ? { ...x, isVisible: !isVisible } : x));
+      toast.success(
+        isVisible ? 'Review hidden' : 'Review visible',
+        isVisible ? 'Review is now hidden from the guest menu' : 'Review is now visible on the guest menu'
+      );
+    } catch {
+      toast.error('Failed to update review status');
+    }
   };
   
   const remove = async (id: number) => {
-    if (!confirm('Delete this review?')) return;
-    await api.delete(`/reviews/${id}`);
-    setReviews(r => r.filter(x => x.id !== id));
+    const confirmed = await confirm({
+      title: 'Delete Review',
+      message: 'Are you sure you want to permanently delete this review?',
+      confirmLabel: 'Delete',
+      isDestructive: true,
+    });
+    if (!confirmed) return;
+    try {
+      await api.delete(`/reviews/${id}`);
+      setReviews(r => r.filter(x => x.id !== id));
+      toast.deleted('Review');
+    } catch {
+      toast.error('Failed to delete review');
+    }
   };
 
   const bulkDeleteReviews = async (selectedReviews: Review[]) => {
-    if (!confirm(`Delete the ${selectedReviews.length} selected review(s)?`)) return;
+    const confirmed = await confirm({
+      title: 'Delete Multiple Reviews',
+      message: `Are you sure you want to delete the ${selectedReviews.length} selected review(s)?`,
+      confirmLabel: 'Delete Selected',
+      isDestructive: true,
+    });
+    if (!confirmed) return;
+    const toastId = toast.loading(`Deleting ${selectedReviews.length} review(s)…`);
     try {
       await Promise.all(selectedReviews.map(review => api.delete(`/reviews/${review.id}`)));
       const deletedIds = new Set(selectedReviews.map(r => r.id));
       setReviews(p => p.filter(r => !deletedIds.has(r.id)));
+      toast.dismiss(toastId);
+      toast.success(`${selectedReviews.length} review(s) deleted`);
     } catch (err) {
       console.error("Bulk delete reviews failed", err);
-      alert("Failed to delete some reviews.");
+      toast.dismiss(toastId);
+      toast.error("Failed to delete some reviews");
       load();
     }
   };

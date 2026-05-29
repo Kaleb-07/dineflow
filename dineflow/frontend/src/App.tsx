@@ -1,5 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { useStore } from './store/useStore';
+import { ToastContainer } from './components/Toast';
+import { ConfirmDialog } from './components/ConfirmDialog';
 
 // Admin pages
 import LoginPage from './pages/LoginPage';
@@ -49,7 +51,10 @@ export default function App() {
         
         {/* ── Fallback ── */}
         <Route path="*" element={<Navigate to="/login" replace />} />
-       </Routes>
+      </Routes>
+      <ToastContainer />
+      <ConfirmDialog />
     </BrowserRouter>
   );
 }
+

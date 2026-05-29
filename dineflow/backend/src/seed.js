@@ -12,19 +12,19 @@ async function main() {
     where: { slug: 'bella-vista' },
     update: {},
     create: {
-      slug:        'bella-vista',
-      name:        'Bella Vista Café',
-      tagline:     'Fine Dining · Addis Ababa',
+      slug: 'bella-vista',
+      name: 'Bella Vista Café',
+      tagline: 'Fine Dining · Addis Ababa',
       description: 'Nestled in the heart of Addis Ababa, Bella Vista Café blends traditional Ethiopian warmth with modern culinary artistry. Every dish tells a story of heritage, spice, and passion. Whether you are joining us for a quiet breakfast or a celebratory dinner, we promise an experience that lingers long after the last bite.',
-      phone:       '+251 911 234 567',
-      email:       'hello@bellavista.et',
-      address:     '47 Bole Road, Bole Sub-City',
-      city:        'Addis Ababa',
-      country:     'Ethiopia',
-      currency:    'ETB',
-      facebook:    'https://facebook.com/bellavistacafe',
-      instagram:   'https://instagram.com/bellavistacafe',
-      website:     'https://bellavista.et',
+      phone: '+251 911 234 567',
+      email: 'hello@bellavista.et',
+      address: '47 Bole Road, Bole Sub-City',
+      city: 'Addis Ababa',
+      country: 'Ethiopia',
+      currency: 'ETB',
+      facebook: 'https://facebook.com/bellavistacafe',
+      instagram: 'https://instagram.com/bellavistacafe',
+      website: 'https://bellavista.et',
       businessHours: {
         mon: { open: '07:00', close: '22:00', closed: false },
         tue: { open: '07:00', close: '22:00', closed: false },
@@ -36,39 +36,39 @@ async function main() {
       },
       users: {
         create: {
-          name:     'Kaleb Admin',
-          email:    'admin@bellavista.et',
+          name: 'Kaleb Admin',
+          email: 'admin@bellavista.et',
           password: hashed,
-          role:     'ADMIN',
+          role: 'ADMIN',
         }
       },
       theme: {
         create: {
-          bgColor:      '#0d1f1a',
-          accentColor:  '#c9a84c',
-          cardColor:    '#122219',
-          textColor:    '#e8e0d0',
-          fontDisplay:  "'Cormorant Garamond', serif",
-          fontBody:     "'DM Sans', sans-serif",
+          bgColor: '#0d1f1a',
+          accentColor: '#c9a84c',
+          cardColor: '#122219',
+          textColor: '#e8e0d0',
+          fontDisplay: "'Cormorant Garamond', serif",
+          fontBody: "'DM Sans', sans-serif",
           borderRadius: 10,
-          cardPadding:  10,
-          itemGap:      8,
-          showImages:   true,
-          showPrice:    true,
+          cardPadding: 10,
+          itemGap: 8,
+          showImages: true,
+          showPrice: true,
           showMealTabs: true,
-          showDesc:     true,
+          showDesc: true,
         }
       },
       amenities: {
         create: [
-          { name: 'Free WiFi',      icon: 'wifi',       sortOrder: 0 },
-          { name: 'Valet Parking',  icon: 'car',        sortOrder: 1 },
-          { name: 'Air Conditioning', icon: 'wind',     sortOrder: 2 },
+          { name: 'Free WiFi', icon: 'wifi', sortOrder: 0 },
+          { name: 'Valet Parking', icon: 'car', sortOrder: 1 },
+          { name: 'Air Conditioning', icon: 'wind', sortOrder: 2 },
           { name: 'Rooftop Lounge', icon: 'building-2', sortOrder: 3 },
-          { name: 'Fine Dining',    icon: 'chef-hat',   sortOrder: 4 },
-          { name: 'Private Events', icon: 'sparkles',   sortOrder: 5 },
-          { name: 'Live Music',     icon: 'music',      sortOrder: 6 },
-          { name: 'Pet Friendly',   icon: 'paw-print',  sortOrder: 7 },
+          { name: 'Fine Dining', icon: 'chef-hat', sortOrder: 4 },
+          { name: 'Private Events', icon: 'sparkles', sortOrder: 5 },
+          { name: 'Live Music', icon: 'music', sortOrder: 6 },
+          { name: 'Pet Friendly', icon: 'paw-print', sortOrder: 7 },
         ]
       }
     },
@@ -81,16 +81,16 @@ async function main() {
   // ── Categories ────────────────────────────────────
   const cats = await Promise.all([
     // FOOD
-    prisma.category.upsert({ where: { id: 1 }, update: {}, create: { venueId, name: 'Breakfast',    type: 'FOOD',  icon: '🌅', sortOrder: 0, isActive: true } }),
-    prisma.category.upsert({ where: { id: 2 }, update: {}, create: { venueId, name: 'Starters',     type: 'FOOD',  icon: '🥗', sortOrder: 1, isActive: true } }),
-    prisma.category.upsert({ where: { id: 3 }, update: {}, create: { venueId, name: 'Main Course',  type: 'FOOD',  icon: '🍽', sortOrder: 2, isActive: true } }),
-    prisma.category.upsert({ where: { id: 4 }, update: {}, create: { venueId, name: 'Traditional',  type: 'FOOD',  icon: '🇪🇹', sortOrder: 3, isActive: true } }),
-    prisma.category.upsert({ where: { id: 5 }, update: {}, create: { venueId, name: 'Desserts',     type: 'FOOD',  icon: '🍰', sortOrder: 4, isActive: true } }),
+    prisma.category.upsert({ where: { id: 1 }, update: {}, create: { venueId, name: 'Breakfast', type: 'FOOD', icon: '🌅', sortOrder: 0, isActive: true } }),
+    prisma.category.upsert({ where: { id: 2 }, update: {}, create: { venueId, name: 'Starters', type: 'FOOD', icon: '🥗', sortOrder: 1, isActive: true } }),
+    prisma.category.upsert({ where: { id: 3 }, update: {}, create: { venueId, name: 'Main Course', type: 'FOOD', icon: '🍽', sortOrder: 2, isActive: true } }),
+    prisma.category.upsert({ where: { id: 4 }, update: {}, create: { venueId, name: 'Traditional', type: 'FOOD', icon: '🇪🇹', sortOrder: 3, isActive: true } }),
+    prisma.category.upsert({ where: { id: 5 }, update: {}, create: { venueId, name: 'Desserts', type: 'FOOD', icon: '🍰', sortOrder: 4, isActive: true } }),
     // DRINK
-    prisma.category.upsert({ where: { id: 6 }, update: {}, create: { venueId, name: 'Hot Drinks',   type: 'DRINK', icon: '☕', sortOrder: 5, isActive: true } }),
-    prisma.category.upsert({ where: { id: 7 }, update: {}, create: { venueId, name: 'Cold Drinks',  type: 'DRINK', icon: '🧃', sortOrder: 6, isActive: true } }),
-    prisma.category.upsert({ where: { id: 8 }, update: {}, create: { venueId, name: 'Fresh Juice',  type: 'DRINK', icon: '🍊', sortOrder: 7, isActive: true } }),
-    prisma.category.upsert({ where: { id: 9 }, update: {}, create: { venueId, name: 'Cocktails',    type: 'DRINK', icon: '🍹', sortOrder: 8, isActive: true } }),
+    prisma.category.upsert({ where: { id: 6 }, update: {}, create: { venueId, name: 'Hot Drinks', type: 'DRINK', icon: '☕', sortOrder: 5, isActive: true } }),
+    prisma.category.upsert({ where: { id: 7 }, update: {}, create: { venueId, name: 'Cold Drinks', type: 'DRINK', icon: '🧃', sortOrder: 6, isActive: true } }),
+    prisma.category.upsert({ where: { id: 8 }, update: {}, create: { venueId, name: 'Fresh Juice', type: 'DRINK', icon: '🍊', sortOrder: 7, isActive: true } }),
+    prisma.category.upsert({ where: { id: 9 }, update: {}, create: { venueId, name: 'Cocktails', type: 'DRINK', icon: '🍹', sortOrder: 8, isActive: true } }),
   ]);
   console.log('✓ Categories created:', cats.length);
 
@@ -104,8 +104,8 @@ async function main() {
       allergens: ['Eggs', 'Dairy'], tags: ["Chef's Pick"],
       isFeatured: true, isAvailable: true, sortOrder: 0,
       variants: [
-        { label: 'Single (1 egg)',  price: 85,  isDefault: false, isAvailable: true, sortOrder: 0 },
-        { label: 'Double (2 eggs)', price: 130, isDefault: true,  isAvailable: true, sortOrder: 1 },
+        { label: 'Single (1 egg)', price: 85, isDefault: false, isAvailable: true, sortOrder: 0 },
+        { label: 'Double (2 eggs)', price: 130, isDefault: true, isAvailable: true, sortOrder: 1 },
         { label: 'Special platter', price: 175, isDefault: false, isAvailable: true, sortOrder: 2 },
       ]
     },
@@ -116,8 +116,8 @@ async function main() {
       allergens: ['Dairy', 'Gluten'], tags: ['Vegetarian'],
       isFeatured: false, isAvailable: true, sortOrder: 1,
       variants: [
-        { label: 'Regular bowl', price: 70,  isDefault: true,  isAvailable: true, sortOrder: 0 },
-        { label: 'Large bowl',   price: 100, isDefault: false, isAvailable: true, sortOrder: 1 },
+        { label: 'Regular bowl', price: 70, isDefault: true, isAvailable: true, sortOrder: 0 },
+        { label: 'Large bowl', price: 100, isDefault: false, isAvailable: true, sortOrder: 1 },
       ]
     },
     {
@@ -127,9 +127,9 @@ async function main() {
       allergens: ['Eggs', 'Dairy'], tags: [],
       isFeatured: false, isAvailable: true, sortOrder: 2,
       variants: [
-        { label: 'Small (2 eggs)',   price: 80,  isDefault: false, isAvailable: true, sortOrder: 0 },
-        { label: 'Regular (3 eggs)', price: 105, isDefault: true,  isAvailable: true, sortOrder: 1 },
-        { label: 'Large (4 eggs)',   price: 130, isDefault: false, isAvailable: true, sortOrder: 2 },
+        { label: 'Small (2 eggs)', price: 80, isDefault: false, isAvailable: true, sortOrder: 0 },
+        { label: 'Regular (3 eggs)', price: 105, isDefault: true, isAvailable: true, sortOrder: 1 },
+        { label: 'Large (4 eggs)', price: 130, isDefault: false, isAvailable: true, sortOrder: 2 },
       ]
     },
     // STARTERS
@@ -141,7 +141,7 @@ async function main() {
       isFeatured: true, isAvailable: true, sortOrder: 0,
       variants: [
         { label: 'Single slice', price: 110, isDefault: false, isAvailable: true, sortOrder: 0 },
-        { label: 'Double slice', price: 180, isDefault: true,  isAvailable: true, sortOrder: 1 },
+        { label: 'Double slice', price: 180, isDefault: true, isAvailable: true, sortOrder: 1 },
       ]
     },
     {
@@ -151,8 +151,8 @@ async function main() {
       allergens: ['Gluten'], tags: [],
       isFeatured: false, isAvailable: true, sortOrder: 1,
       variants: [
-        { label: 'Lentil (4 pcs)',    price: 95,  isDefault: true,  isAvailable: true, sortOrder: 0 },
-        { label: 'Beef (4 pcs)',      price: 115, isDefault: false, isAvailable: true, sortOrder: 1 },
+        { label: 'Lentil (4 pcs)', price: 95, isDefault: true, isAvailable: true, sortOrder: 0 },
+        { label: 'Beef (4 pcs)', price: 115, isDefault: false, isAvailable: true, sortOrder: 1 },
         { label: 'Mixed platter (8)', price: 195, isDefault: false, isAvailable: true, sortOrder: 2 },
       ]
     },
@@ -164,8 +164,8 @@ async function main() {
       allergens: ['Fish'], tags: [],
       isFeatured: true, isAvailable: true, sortOrder: 0,
       variants: [
-        { label: 'Half fish',  price: 280, isDefault: false, isAvailable: true, sortOrder: 0 },
-        { label: 'Whole fish', price: 420, isDefault: true,  isAvailable: true, sortOrder: 1 },
+        { label: 'Half fish', price: 280, isDefault: false, isAvailable: true, sortOrder: 0 },
+        { label: 'Whole fish', price: 420, isDefault: true, isAvailable: true, sortOrder: 1 },
       ]
     },
     {
@@ -176,7 +176,7 @@ async function main() {
       isFeatured: true, isAvailable: true, sortOrder: 1,
       variants: [
         { label: '2 chops', price: 350, isDefault: false, isAvailable: true, sortOrder: 0 },
-        { label: '3 chops', price: 490, isDefault: true,  isAvailable: true, sortOrder: 1 },
+        { label: '3 chops', price: 490, isDefault: true, isAvailable: true, sortOrder: 1 },
         { label: '4 chops', price: 620, isDefault: false, isAvailable: true, sortOrder: 2 },
       ]
     },
@@ -187,7 +187,7 @@ async function main() {
       allergens: ['Dairy', 'Gluten'], tags: [],
       isFeatured: false, isAvailable: true, sortOrder: 2,
       variants: [
-        { label: 'Regular',    price: 220, isDefault: true,  isAvailable: true, sortOrder: 0 },
+        { label: 'Regular', price: 220, isDefault: true, isAvailable: true, sortOrder: 0 },
         { label: 'Extra rich', price: 265, isDefault: false, isAvailable: true, sortOrder: 1 },
       ]
     },
@@ -199,8 +199,8 @@ async function main() {
       allergens: ['Dairy'], tags: ['Signature', 'Traditional'],
       isFeatured: true, isAvailable: true, sortOrder: 0,
       variants: [
-        { label: 'Lebleb (rare)',    price: 260, isDefault: false, isAvailable: true, sortOrder: 0 },
-        { label: 'Tibs (cooked)',    price: 260, isDefault: true,  isAvailable: true, sortOrder: 1 },
+        { label: 'Lebleb (rare)', price: 260, isDefault: false, isAvailable: true, sortOrder: 0 },
+        { label: 'Tibs (cooked)', price: 260, isDefault: true, isAvailable: true, sortOrder: 1 },
         { label: 'Special (double)', price: 420, isDefault: false, isAvailable: true, sortOrder: 2 },
       ]
     },
@@ -211,7 +211,7 @@ async function main() {
       allergens: ['Eggs', 'Dairy'], tags: ['Traditional', 'Spicy'],
       isFeatured: true, isAvailable: true, sortOrder: 1,
       variants: [
-        { label: 'Single portion', price: 195, isDefault: true,  isAvailable: true, sortOrder: 0 },
+        { label: 'Single portion', price: 195, isDefault: true, isAvailable: true, sortOrder: 0 },
         { label: 'Family platter', price: 580, isDefault: false, isAvailable: true, sortOrder: 1 },
       ]
     },
@@ -222,8 +222,8 @@ async function main() {
       allergens: ['Dairy'], tags: ['Vegan', 'Traditional'],
       isFeatured: false, isAvailable: true, sortOrder: 2,
       variants: [
-        { label: 'Regular', price: 130, isDefault: true,  isAvailable: true, sortOrder: 0 },
-        { label: 'Large',   price: 185, isDefault: false, isAvailable: true, sortOrder: 1 },
+        { label: 'Regular', price: 130, isDefault: true, isAvailable: true, sortOrder: 0 },
+        { label: 'Large', price: 185, isDefault: false, isAvailable: true, sortOrder: 1 },
       ]
     },
     // DESSERTS
@@ -234,7 +234,7 @@ async function main() {
       allergens: ['Eggs', 'Dairy', 'Gluten'], tags: [],
       isFeatured: false, isAvailable: true, sortOrder: 0,
       variants: [
-        { label: 'Single slice', price: 120, isDefault: true,  isAvailable: true, sortOrder: 0 },
+        { label: 'Single slice', price: 120, isDefault: true, isAvailable: true, sortOrder: 0 },
         { label: 'Double slice', price: 210, isDefault: false, isAvailable: true, sortOrder: 1 },
       ]
     },
@@ -245,8 +245,8 @@ async function main() {
       allergens: ['Dairy'], tags: ['Signature'],
       isFeatured: true, isAvailable: true, sortOrder: 1,
       variants: [
-        { label: '1 scoop', price: 85,  isDefault: false, isAvailable: true, sortOrder: 0 },
-        { label: '2 scoops', price: 140, isDefault: true,  isAvailable: true, sortOrder: 1 },
+        { label: '1 scoop', price: 85, isDefault: false, isAvailable: true, sortOrder: 0 },
+        { label: '2 scoops', price: 140, isDefault: true, isAvailable: true, sortOrder: 1 },
         { label: '3 scoops', price: 190, isDefault: false, isAvailable: true, sortOrder: 2 },
       ]
     },
@@ -258,8 +258,8 @@ async function main() {
       allergens: [], tags: ['Traditional', 'Signature'],
       isFeatured: true, isAvailable: true, sortOrder: 0,
       variants: [
-        { label: 'For one',  price: 95,  isDefault: false, isAvailable: true, sortOrder: 0 },
-        { label: 'For two',  price: 160, isDefault: true,  isAvailable: true, sortOrder: 1 },
+        { label: 'For one', price: 95, isDefault: false, isAvailable: true, sortOrder: 0 },
+        { label: 'For two', price: 160, isDefault: true, isAvailable: true, sortOrder: 1 },
         { label: 'For four', price: 290, isDefault: false, isAvailable: true, sortOrder: 2 },
       ]
     },
@@ -270,7 +270,7 @@ async function main() {
       allergens: ['Dairy'], tags: [],
       isFeatured: false, isAvailable: true, sortOrder: 1,
       variants: [
-        { label: 'Single', price: 45, isDefault: true,  isAvailable: true, sortOrder: 0 },
+        { label: 'Single', price: 45, isDefault: true, isAvailable: true, sortOrder: 0 },
         { label: 'Double', price: 70, isDefault: false, isAvailable: true, sortOrder: 1 },
       ]
     },
@@ -281,8 +281,8 @@ async function main() {
       allergens: ['Dairy'], tags: [],
       isFeatured: false, isAvailable: true, sortOrder: 2,
       variants: [
-        { label: 'Regular', price: 65, isDefault: true,  isAvailable: true, sortOrder: 0 },
-        { label: 'Large',   price: 90, isDefault: false, isAvailable: true, sortOrder: 1 },
+        { label: 'Regular', price: 65, isDefault: true, isAvailable: true, sortOrder: 0 },
+        { label: 'Large', price: 90, isDefault: false, isAvailable: true, sortOrder: 1 },
       ]
     },
     // COLD DRINKS
@@ -293,8 +293,8 @@ async function main() {
       allergens: [], tags: ['Vegan'],
       isFeatured: false, isAvailable: true, sortOrder: 0,
       variants: [
-        { label: 'Regular', price: 65, isDefault: true,  isAvailable: true, sortOrder: 0 },
-        { label: 'Large',   price: 90, isDefault: false, isAvailable: true, sortOrder: 1 },
+        { label: 'Regular', price: 65, isDefault: true, isAvailable: true, sortOrder: 0 },
+        { label: 'Large', price: 90, isDefault: false, isAvailable: true, sortOrder: 1 },
       ]
     },
     {
@@ -304,8 +304,8 @@ async function main() {
       allergens: [], tags: [],
       isFeatured: true, isAvailable: true, sortOrder: 1,
       variants: [
-        { label: 'Regular', price: 85,  isDefault: true,  isAvailable: true, sortOrder: 0 },
-        { label: 'Large',   price: 120, isDefault: false, isAvailable: true, sortOrder: 1 },
+        { label: 'Regular', price: 85, isDefault: true, isAvailable: true, sortOrder: 0 },
+        { label: 'Large', price: 120, isDefault: false, isAvailable: true, sortOrder: 1 },
       ]
     },
     // FRESH JUICE
@@ -316,7 +316,7 @@ async function main() {
       allergens: [], tags: ['Signature'],
       isFeatured: true, isAvailable: true, sortOrder: 0,
       variants: [
-        { label: '3 layers', price: 95,  isDefault: true,  isAvailable: true, sortOrder: 0 },
+        { label: '3 layers', price: 95, isDefault: true, isAvailable: true, sortOrder: 0 },
         { label: '5 layers', price: 145, isDefault: false, isAvailable: true, sortOrder: 1 },
       ]
     },
@@ -327,8 +327,8 @@ async function main() {
       allergens: ['Dairy'], tags: [],
       isFeatured: false, isAvailable: true, sortOrder: 1,
       variants: [
-        { label: 'Regular', price: 80,  isDefault: true,  isAvailable: true, sortOrder: 0 },
-        { label: 'Large',   price: 110, isDefault: false, isAvailable: true, sortOrder: 1 },
+        { label: 'Regular', price: 80, isDefault: true, isAvailable: true, sortOrder: 0 },
+        { label: 'Large', price: 110, isDefault: false, isAvailable: true, sortOrder: 1 },
       ]
     },
     // COCKTAILS
@@ -339,8 +339,8 @@ async function main() {
       allergens: ['Sulphites'], tags: ['Signature', 'Alcoholic'],
       isFeatured: true, isAvailable: true, sortOrder: 0,
       variants: [
-        { label: 'Single glass', price: 180, isDefault: true,  isAvailable: true, sortOrder: 0 },
-        { label: 'Bottle (4)',   price: 620, isDefault: false, isAvailable: true, sortOrder: 1 },
+        { label: 'Single glass', price: 180, isDefault: true, isAvailable: true, sortOrder: 0 },
+        { label: 'Bottle (4)', price: 620, isDefault: false, isAvailable: true, sortOrder: 1 },
       ]
     },
     {
@@ -372,13 +372,13 @@ async function main() {
   // ── Reviews ───────────────────────────────────────
   await prisma.review.createMany({
     data: [
-      { venueId, type: 'HOTEL',   rating: 5, guestName: 'Selam T.', comment: 'Absolutely stunning ambience. The warm lighting and the traditional décor made us feel so welcome. Will be our go-to spot.', isVisible: true },
-      { venueId, type: 'FOOD',    rating: 5, guestName: 'Dawit M.', comment: 'The Kitfo was extraordinary — perfectly seasoned and the ayib was so fresh. Best traditional food in Bole by far.', isVisible: true },
+      { venueId, type: 'HOTEL', rating: 5, guestName: 'Selam T.', comment: 'Absolutely stunning ambience. The warm lighting and the traditional décor made us feel so welcome. Will be our go-to spot.', isVisible: true },
+      { venueId, type: 'FOOD', rating: 5, guestName: 'Dawit M.', comment: 'The Kitfo was extraordinary — perfectly seasoned and the ayib was so fresh. Best traditional food in Bole by far.', isVisible: true },
       { venueId, type: 'SERVICE', rating: 5, guestName: 'Hanna B.', comment: 'The staff remembered our names on our second visit. That kind of personal touch is rare and truly appreciated.', isVisible: true },
-      { venueId, type: 'FOOD',    rating: 4, guestName: 'Abel K.',  comment: 'Doro Wat was rich and deeply flavoured. The injera was perfectly fermented. Highly recommend the lamb chops too.', isVisible: true },
-      { venueId, type: 'HOTEL',   rating: 5, guestName: 'Sara G.',  comment: 'The digital menu is such a nice touch — makes the whole experience feel premium before the food even arrives.', isVisible: true },
+      { venueId, type: 'FOOD', rating: 4, guestName: 'Abel K.', comment: 'Doro Wat was rich and deeply flavoured. The injera was perfectly fermented. Highly recommend the lamb chops too.', isVisible: true },
+      { venueId, type: 'HOTEL', rating: 5, guestName: 'Sara G.', comment: 'The digital menu is such a nice touch — makes the whole experience feel premium before the food even arrives.', isVisible: true },
       { venueId, type: 'SERVICE', rating: 4, guestName: 'Yonas F.', comment: 'Quick, attentive service. Our waiter knew every dish on the menu and gave great recommendations.', isVisible: true },
-      { venueId, type: 'FOOD',    rating: 5, guestName: 'Meron A.', comment: 'The layered juice is a must-order. And the avocado ice cream is unlike anything I have tasted in the city.', isVisible: true },
+      { venueId, type: 'FOOD', rating: 5, guestName: 'Meron A.', comment: 'The layered juice is a must-order. And the avocado ice cream is unlike anything I have tasted in the city.', isVisible: true },
     ]
   });
   console.log('✓ Reviews seeded');
@@ -387,14 +387,14 @@ async function main() {
   const baseUrl = 'http://localhost:5173/menu/bella-vista';
   await prisma.qRCode.createMany({
     data: [
-      { venueId, label: 'Table 1',  type: 'TABLE',    url: baseUrl, scanCount: 24, isActive: true },
-      { venueId, label: 'Table 2',  type: 'TABLE',    url: baseUrl, scanCount: 18, isActive: true },
-      { venueId, label: 'Table 3',  type: 'TABLE',    url: baseUrl, scanCount: 31, isActive: true },
-      { venueId, label: 'Table 4',  type: 'TABLE',    url: baseUrl, scanCount: 12, isActive: true },
-      { venueId, label: 'Table 5',  type: 'TABLE',    url: baseUrl, scanCount: 9,  isActive: true },
-      { venueId, label: 'Bar',      type: 'BAR',      url: baseUrl, scanCount: 47, isActive: true },
-      { venueId, label: 'Rooftop',  type: 'OTHER',    url: baseUrl, scanCount: 38, isActive: true },
-      { venueId, label: 'Room 101', type: 'ROOM',     url: baseUrl, scanCount: 5,  isActive: true },
+      { venueId, label: 'Table 1', type: 'TABLE', url: baseUrl, scanCount: 24, isActive: true },
+      { venueId, label: 'Table 2', type: 'TABLE', url: baseUrl, scanCount: 18, isActive: true },
+      { venueId, label: 'Table 3', type: 'TABLE', url: baseUrl, scanCount: 31, isActive: true },
+      { venueId, label: 'Table 4', type: 'TABLE', url: baseUrl, scanCount: 12, isActive: true },
+      { venueId, label: 'Table 5', type: 'TABLE', url: baseUrl, scanCount: 9, isActive: true },
+      { venueId, label: 'Bar', type: 'BAR', url: baseUrl, scanCount: 47, isActive: true },
+      { venueId, label: 'Rooftop', type: 'OTHER', url: baseUrl, scanCount: 38, isActive: true },
+      { venueId, label: 'Room 101', type: 'ROOM', url: baseUrl, scanCount: 5, isActive: true },
     ]
   });
   console.log('✓ QR codes seeded');

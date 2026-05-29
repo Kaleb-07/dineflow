@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
 import {
   Save, Globe, Clock, Sparkles,
-  Upload, CheckCircle, Building2, Loader2
+  Upload, Building2, Loader2
 } from 'lucide-react';
 import api from '../lib/axios';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
+import { useToast } from '../components/Toast';
 
 // ── Constants ──────────────────────────────────────────
 const AMENITY_ICONS = [
@@ -46,9 +47,9 @@ interface Amenity { id?: number; name: string; icon: string }
 
 // ── Main Component ─────────────────────────────────────
 export default function VenuePage() {
+  const toast = useToast();
   const [tab, setTab] = useState<Tab>('info');
   const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
   const [uploadingCover, setUploadingCover] = useState(false);
   const [amenities, setAmenities] = useState<Amenity[]>([]);
@@ -121,8 +122,9 @@ export default function VenuePage() {
     try {
       await api.patch('/settings', { ...info, ...social, businessHours: hours });
       await api.post('/amenities/sync', amenities);
-      setSaved(true);
-      setTimeout(() => setSaved(false), 2500);
+      toast.saved('Venue profile');
+    } catch (err) {
+      toast.error('Failed to save profile', 'Please try again');
     } finally {
       setSaving(false);
     }
@@ -155,12 +157,10 @@ export default function VenuePage() {
         <Button onClick={save} disabled={saving} className="gap-2">
           {saving ? (
             <Loader2 size={15} className="animate-spin" />
-          ) : saved ? (
-            <CheckCircle size={15} className="text-green-400" />
           ) : (
             <Save size={15} />
           )}
-          {saved ? 'Saved!' : saving ? 'Saving…' : 'Save all'}
+          {saving ? 'Saving…' : 'Save all'}
         </Button>
       </div>
 
@@ -408,8 +408,8 @@ export default function VenuePage() {
       <div className="mt-8 flex items-center justify-between py-4 border-t border-gray-800">
         <p className="text-xs text-gray-600">Changes appear live in your guest menu after saving.</p>
         <Button onClick={save} disabled={saving}>
-          {saving ? <Loader2 size={15} className="animate-spin" /> : saved ? <CheckCircle size={15} /> : <Save size={15} />}
-          {saved ? 'Saved!' : saving ? 'Saving…' : 'Save changes'}
+          {saving ? <Loader2 size={15} className="animate-spin mr-2" /> : <Save size={15} className="mr-2" />}
+          {saving ? 'Saving…' : 'Save changes'}
         </Button>
       </div>
     </div>

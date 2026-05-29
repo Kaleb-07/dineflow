@@ -15,8 +15,12 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '../components/ui/dropdown-menu';
+import { useToast } from '../components/Toast';
+import { useConfirm } from '../components/ConfirmDialog';
 
 export default function MenuPage() {
+  const toast = useToast();
+  const confirm = useConfirm();
   const [categories, setCategories] = useState<Category[]>([]);
   const [items, setItems] = useState<MenuItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -38,41 +42,83 @@ export default function MenuPage() {
   useEffect(() => { load(); }, []);
 
   const deleteItem = async (id: number) => {
-    if (!confirm('Delete this item?')) return;
-    await api.delete(`/items/${id}`);
-    setItems(p => p.filter(i => i.id !== id));
+    const confirmed = await confirm({
+      title: 'Delete Menu Item',
+      message: 'Are you sure you want to permanently delete this item?',
+      confirmLabel: 'Delete',
+      isDestructive: true,
+    });
+    if (!confirmed) return;
+    try {
+      await api.delete(`/items/${id}`);
+      setItems(p => p.filter(i => i.id !== id));
+      toast.deleted('Menu item');
+    } catch {
+      toast.error('Failed to delete item', 'Please try again');
+    }
   };
 
   const deleteCat = async (id: number) => {
-    if (!confirm('Delete category and all its items?')) return;
-    await api.delete(`/categories/${id}`);
-    setCategories(p => p.filter(c => c.id !== id));
-    setItems(p => p.filter(i => i.categoryId !== id));
+    const confirmed = await confirm({
+      title: 'Delete Category',
+      message: 'Are you sure you want to delete this category and all of its menu items?',
+      confirmLabel: 'Delete All',
+      isDestructive: true,
+    });
+    if (!confirmed) return;
+    try {
+      await api.delete(`/categories/${id}`);
+      setCategories(p => p.filter(c => c.id !== id));
+      setItems(p => p.filter(i => i.categoryId !== id));
+      toast.deleted('Category');
+    } catch {
+      toast.error('Failed to delete category', 'Please try again');
+    }
   };
 
   const bulkDeleteItems = async (selectedItems: MenuItem[]) => {
-    if (!confirm(`Delete the ${selectedItems.length} selected item(s)?`)) return;
+    const confirmed = await confirm({
+      title: 'Delete Multiple Items',
+      message: `Are you sure you want to delete the ${selectedItems.length} selected item(s)?`,
+      confirmLabel: 'Delete Selected',
+      isDestructive: true,
+    });
+    if (!confirmed) return;
+    const id = toast.loading(`Deleting ${selectedItems.length} item(s)…`);
     try {
       await Promise.all(selectedItems.map(item => api.delete(`/items/${item.id}`)));
       const deletedIds = new Set(selectedItems.map(item => item.id));
       setItems(p => p.filter(i => !deletedIds.has(i.id)));
+      toast.dismiss(id);
+      toast.success(`${selectedItems.length} item(s) deleted`, 'Removed successfully');
     } catch (err) {
       console.error("Bulk delete items failed", err);
-      alert("Failed to delete some items.");
+      toast.dismiss(id);
+      toast.error('Failed to delete some items', 'Please try again');
       load();
     }
   };
 
   const bulkDeleteCategories = async (selectedCats: Category[]) => {
-    if (!confirm(`Delete the ${selectedCats.length} selected category(ies) and all of their items?`)) return;
+    const confirmed = await confirm({
+      title: 'Delete Multiple Categories',
+      message: `Are you sure you want to delete the ${selectedCats.length} selected category(ies) and all of their menu items?`,
+      confirmLabel: 'Delete All',
+      isDestructive: true,
+    });
+    if (!confirmed) return;
+    const id = toast.loading(`Deleting ${selectedCats.length} category(ies)…`);
     try {
       await Promise.all(selectedCats.map(cat => api.delete(`/categories/${cat.id}`)));
       const deletedIds = new Set(selectedCats.map(cat => cat.id));
       setCategories(p => p.filter(c => !deletedIds.has(c.id)));
       setItems(p => p.filter(i => !deletedIds.has(i.categoryId)));
+      toast.dismiss(id);
+      toast.success(`${selectedCats.length} category(ies) deleted`, 'Removed successfully');
     } catch (err) {
       console.error("Bulk delete categories failed", err);
-      alert("Failed to delete some categories.");
+      toast.dismiss(id);
+      toast.error('Failed to delete some categories', 'Please try again');
       load();
     }
   };
@@ -359,6 +405,7 @@ export default function MenuPage() {
               : [...p, item]
             );
             setItemModal(false);
+            editItem ? toast.updated('Menu item') : toast.created('Menu item');
           }}
         />
       )}
@@ -372,6 +419,7 @@ export default function MenuPage() {
               : [...p, cat]
             );
             setCatModal(false);
+            editCat ? toast.updated('Category') : toast.created('Category');
           }}
         />
       )}
