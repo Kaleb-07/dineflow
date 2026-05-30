@@ -451,9 +451,22 @@ function SocialLink({ href, icon, label }: { href: string; icon: string; label: 
   );
 }
 
+// Custom hook to listen to dataset changes on document.documentElement
+function useDatasetAttribute(attrName: string, defaultValue: string) {
+  const [val, setVal] = useState(() => document.documentElement.getAttribute(attrName) || defaultValue);
+  useEffect(() => {
+    const observer = new MutationObserver(() => {
+      setVal(document.documentElement.getAttribute(attrName) || defaultValue);
+    });
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: [attrName] });
+    return () => observer.disconnect();
+  }, [attrName, defaultValue]);
+  return val;
+}
+
 // ── ABOUT SHEET — 10 styles ────────────────────────────
 function AboutSheet({ venue, onClose }: { venue: Venue; onClose: () => void }) {
-  const style = document.documentElement.dataset.aboutStyle || 'hero-story';
+  const style = useDatasetAttribute('data-about-style', 'hero-story');
   const hasSocial  = !!(venue.facebook || venue.instagram || venue.twitter || venue.tiktok || venue.website);
   const hasHours   = !!venue.businessHours;
   const hasContact = !!(venue.phone || venue.email || venue.address);
@@ -728,7 +741,7 @@ function AboutSheet({ venue, onClose }: { venue: Venue; onClose: () => void }) {
 function ReviewsSheet({ reviews, avgRating, onLeaveReview, onClose }: {
   reviews: Review[]; avgRating: string | null; onLeaveReview: () => void; onClose: () => void
 }) {
-  const style = document.documentElement.dataset.reviewsStyle || 'spotlight';
+  const style = useDatasetAttribute('data-reviews-style', 'spotlight');
   const [cinIdx, setCinIdx] = useState(0);
 
   const LeaveBtn = () => (
@@ -935,7 +948,7 @@ function ReviewsSheet({ reviews, avgRating, onLeaveReview, onClose }: {
 
 // ── LOCATION MODAL — 10 styles ─────────────────────────
 function LocationModal({ venue, onClose }: { venue: Venue; onClose: () => void }) {
-  const style = document.documentElement.dataset.locationStyle || 'card-stack';
+  const style = useDatasetAttribute('data-location-style', 'card-stack');
   const fullAddress = [venue.address, venue.city, venue.country].filter(Boolean).join(', ');
   const mapUrl = `https://www.google.com/maps/search/${encodeURIComponent(fullAddress || venue.name)}`;
 

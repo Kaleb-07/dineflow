@@ -28,11 +28,10 @@ const GOOGLE_FONTS = [
   { name: 'DM Sans', category: 'Sans-serif', value: "'DM Sans', sans-serif" },
   { name: 'Manrope', category: 'Sans-serif', value: "'Manrope', sans-serif" },
   { name: 'Inter', category: 'Sans-serif', value: "'Inter', sans-serif" },
-  { name: 'Outfit', category: 'Sans-serif', value: "'Manrope', sans-serif" }, // fallbacks
+  { name: 'Outfit', category: 'Sans-serif', value: "'Outfit', sans-serif" },
   { name: 'Plus Jakarta Sans', category: 'Sans-serif', value: "'Plus Jakarta Sans', sans-serif" },
   { name: 'Work Sans', category: 'Sans-serif', value: "'Work Sans', sans-serif" },
   { name: 'Poppins', category: 'Sans-serif', value: "'Poppins', sans-serif" },
-  { name: 'Manrope', category: 'Sans-serif', value: "'Manrope', sans-serif" },
   
   // Display
   { name: 'Bebas Neue', category: 'Display', value: "'Bebas Neue', sans-serif" },
@@ -47,7 +46,8 @@ const GOOGLE_FONTS = [
 export default function ThemePage() {
   const toast = useToast();
   const { venue, setTheme: setStoreTheme } = useStore();
-  const iframeRef = useRef<HTMLIFrameElement>(null);
+  const mobileIframeRef = useRef<HTMLIFrameElement>(null);
+  const desktopIframeRef = useRef<HTMLIFrameElement>(null);
   
   const [theme, setTheme] = useState<Partial<Theme>>({
     bgColor: '#0d1f1a', accentColor: '#c9a84c', cardColor: '#122219', textColor: '#e8e0d0',
@@ -73,20 +73,28 @@ export default function ThemePage() {
   const [fontCategory, setFontCategory] = useState<string>('All');
   const [activeTab, setActiveTab] = useState<'general' | 'menu' | 'about' | 'reviews' | 'location' | 'animations'>('general');
 
+  // Derive active iframe ref based on current viewMode
+  const iframeRef = viewMode === 'mobile' ? mobileIframeRef : desktopIframeRef;
+
+  // Send a tab-switch message to whichever iframe is currently active
+  const sendTabMessage = (tab: string) => {
+    iframeRef.current?.contentWindow?.postMessage({ type: 'SET_PREVIEW_TAB', tab }, '*');
+  };
+
   // Sync iframe preview with current visual editor category tab
   useEffect(() => {
-    const iframe = iframeRef.current;
-    if (!iframe || !iframe.contentWindow) return;
-    const targetTab = 
+    const targetTab =
       activeTab === 'about' ? 'about' :
       activeTab === 'reviews' ? 'reviews' :
       activeTab === 'location' ? 'location' : 'menu';
-    
-    const t = setTimeout(() => {
-      iframe.contentWindow?.postMessage({ type: 'SET_PREVIEW_TAB', tab: targetTab }, '*');
-    }, 150);
-    return () => clearTimeout(t);
-  }, [activeTab]);
+
+    // Send at increasing intervals to handle slow iframe loads
+    const t1 = setTimeout(() => sendTabMessage(targetTab), 200);
+    const t2 = setTimeout(() => sendTabMessage(targetTab), 800);
+    const t3 = setTimeout(() => sendTabMessage(targetTab), 2000);
+    return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab, viewMode]);
 
   useEffect(() => {
     api.get('/settings').then(({ data }) => {
@@ -102,10 +110,10 @@ export default function ThemePage() {
   const themeRef = useRef(theme);
   useEffect(() => { themeRef.current = theme; }, [theme]);
 
-  const applyToIframe = () => {
+  const applyToOneIframe = (iframeEl: HTMLIFrameElement | null) => {
+    if (!iframeEl?.contentWindow) return;
     try {
-      if (!iframeRef.current?.contentWindow) return;
-      const iframeDoc = iframeRef.current.contentWindow.document;
+      const iframeDoc = iframeEl.contentWindow.document;
       const root = iframeDoc.documentElement;
       const t = themeRef.current;
 
@@ -160,15 +168,22 @@ export default function ThemePage() {
     }
   };
 
+  // Apply to both iframes so switching views is always up-to-date
+  const applyToIframe = () => {
+    applyToOneIframe(mobileIframeRef.current);
+    applyToOneIframe(desktopIframeRef.current);
+  };
+
   // Re-apply on every theme change
   useEffect(() => {
     applyToIframe();
     // Also re-apply a bit later in case the iframe's own applyTheme fires after us
-    const t1 = setTimeout(applyToIframe, 150);
-    const t2 = setTimeout(applyToIframe, 600);
-    const t3 = setTimeout(applyToIframe, 1500);
+    const t1 = setTimeout(applyToIframe, 200);
+    const t2 = setTimeout(applyToIframe, 700);
+    const t3 = setTimeout(applyToIframe, 1800);
     return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
-  }, [theme]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [theme, viewMode]);
 
   const update = (patch: Partial<Theme>) => {
     const next = { ...theme, ...patch };
@@ -220,26 +235,27 @@ export default function ThemePage() {
           </div>
         </div>
 
-        {/* Dynamic sub-page categories navigation */}
-        <div className="flex border-b border-gray-800 mb-5 overflow-x-auto gap-1.5 scrollbar-none">
+        {/* Dynamic sub-page categories navigation — 2 rows × 3 cols so labels never truncate */}
+        <div className="grid grid-cols-3 gap-1 mb-5">
           {[
-            { id: 'general',    label: '🎨 Style & Colors' },
-            { id: 'menu',       label: '🍔 Menu Page' },
-            { id: 'about',      label: '🏔 About' },
-            { id: 'reviews',    label: '💬 Reviews' },
-            { id: 'location',   label: '📍 Location' },
-            { id: 'animations', label: '🎬 Animations' },
+            { id: 'general',    label: 'Style & Colors', icon: '🎨' },
+            { id: 'menu',       label: 'Menu Page',       icon: '🍔' },
+            { id: 'about',      label: 'About',           icon: '🏔' },
+            { id: 'reviews',    label: 'Reviews',         icon: '💬' },
+            { id: 'location',   label: 'Location',        icon: '📍' },
+            { id: 'animations', label: 'Animations',      icon: '🎬' },
           ].map(tab => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as any)}
-              className={`px-3 py-2 border-b-2 text-xs font-semibold whitespace-nowrap transition-all ${
+              className={`flex flex-col items-center gap-0.5 px-2 py-2 rounded-lg text-[11px] font-semibold transition-all ${
                 activeTab === tab.id
-                  ? 'border-amber-500 text-amber-400 font-bold'
-                  : 'border-transparent text-gray-400 hover:text-white'
+                  ? 'bg-amber-500/15 text-amber-400 ring-1 ring-amber-500/40'
+                  : 'text-gray-400 hover:bg-gray-800 hover:text-white'
               }`}
             >
-              {tab.label}
+              <span className="text-base leading-none">{tab.icon}</span>
+              <span className="leading-tight text-center whitespace-nowrap">{tab.label}</span>
             </button>
           ))}
         </div>
@@ -702,11 +718,19 @@ export default function ThemePage() {
               <div className="w-[280px] h-[560px] bg-gray-950 rounded-[2rem] shadow-2xl overflow-hidden border-[10px] border-gray-900 relative">
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-24 h-4 bg-gray-900 rounded-b-lg z-10" />
                 <iframe
-                  ref={iframeRef}
+                  ref={mobileIframeRef}
                   src={`/menu/${venue?.slug}`}
                   className="w-full h-full"
                   style={{ transform: 'scale(0.75)', transformOrigin: 'top left', width: '133.33%', height: '133.33%' }}
                   title="Guest Menu Preview"
+                  onLoad={() => {
+                    // Re-inject theme + tab after iframe finishes loading
+                    setTimeout(() => {
+                      applyToIframe();
+                      const targetTab = activeTab === 'about' ? 'about' : activeTab === 'reviews' ? 'reviews' : activeTab === 'location' ? 'location' : 'menu';
+                      sendTabMessage(targetTab);
+                    }, 100);
+                  }}
                 />
               </div>
             ) : (
@@ -724,10 +748,17 @@ export default function ThemePage() {
                   </div>
                 </div>
                 <iframe
-                  ref={iframeRef}
+                  ref={desktopIframeRef}
                   src={`/menu/${venue?.slug}`}
                   className="w-full flex-1"
                   title="Guest Menu Preview"
+                  onLoad={() => {
+                    setTimeout(() => {
+                      applyToIframe();
+                      const targetTab = activeTab === 'about' ? 'about' : activeTab === 'reviews' ? 'reviews' : activeTab === 'location' ? 'location' : 'menu';
+                      sendTabMessage(targetTab);
+                    }, 100);
+                  }}
                 />
               </div>
             )}
