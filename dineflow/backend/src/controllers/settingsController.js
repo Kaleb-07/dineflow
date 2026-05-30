@@ -53,7 +53,9 @@ const updateTheme = async (req, res) => {
       animateItems, animateHover, hoverStyle, hoverSpeed,
       animatePrice, animateCategories, animationSpeed,
       // Page animations
-      entranceStyle, priceFx, categoryFx, animSpeed
+      entranceStyle, priceFx, categoryFx, animSpeed,
+      // Custom page styles
+      aboutStyle, reviewsStyle, locationStyle
     } = req.body;
 
     const theme = await prisma.theme.upsert({
@@ -70,7 +72,9 @@ const updateTheme = async (req, res) => {
         animateItems, animateHover, hoverStyle, hoverSpeed,
         animatePrice, animateCategories, animationSpeed,
         // Page animations
-        entranceStyle, priceFx, categoryFx, animSpeed
+        entranceStyle, priceFx, categoryFx, animSpeed,
+        // Custom page styles
+        aboutStyle, reviewsStyle, locationStyle
       },
       create: {
         venueId: req.user.venueId,
@@ -85,7 +89,9 @@ const updateTheme = async (req, res) => {
         animateItems, animateHover, hoverStyle, hoverSpeed,
         animatePrice, animateCategories, animationSpeed,
         // Page animations
-        entranceStyle, priceFx, categoryFx, animSpeed
+        entranceStyle, priceFx, categoryFx, animSpeed,
+        // Custom page styles
+        aboutStyle, reviewsStyle, locationStyle
       }
     });
     res.json(theme);

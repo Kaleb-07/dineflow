@@ -1,0 +1,149 @@
+/* ────────────────────────────────────────────────────────
+   DineFlow — Page Styles for About, Reviews, and Find Us
+   ──────────────────────────────────────────────────────── */
+
+/* ═══════════════════════════════════════════════════════
+   ABOUT STYLES
+   ═══════════════════════════════════════════════════════ */
+
+/* Split Screen */
+[data-about-style="split-screen"] .about-sheet-content {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: 24px;
+}
+
+/* Magazine Drop Cap & Layout */
+[data-about-style="magazine"] p::first-letter {
+  font-family: var(--brand-font-display);
+  font-size: 3.5rem;
+  float: left;
+  line-height: 0.8;
+  margin-top: 0.15em;
+  margin-right: 0.1em;
+  color: var(--brand-accent);
+  font-weight: bold;
+}
+
+/* Cinematic Full Bleed */
+[data-about-style="cinematic"] {
+  backdrop-filter: blur(10px);
+}
+
+/* Luxury Ornate Details */
+[data-about-style="luxury"] .about-divider {
+  position: relative;
+  height: 1px;
+  background: linear-gradient(to right, transparent, var(--brand-accent), transparent);
+  margin: 24px 0;
+}
+[data-about-style="luxury"] .about-divider::after {
+  content: '✦';
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--brand-bg);
+  padding: 0 8px;
+  color: var(--brand-accent);
+  font-size: 10px;
+}
+
+/* Polaroid Card Effect */
+[data-about-style="polaroid"] .polaroid-photo {
+  background: #fdfdfd;
+  padding: 10px 10px 24px;
+  border-radius: 2px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+  transform: rotate(-2deg);
+  transition: transform 0.3s ease;
+}
+[data-about-style="polaroid"] .polaroid-photo:hover {
+  transform: rotate(1deg) scale(1.03);
+}
+
+/* ═══════════════════════════════════════════════════════
+   REVIEWS STYLES
+   ═══════════════════════════════════════════════════════ */
+
+/* Spotlight Review Card Glow */
+[data-reviews-style="spotlight"] .featured-review-card {
+  border: 1px solid var(--brand-accent);
+  box-shadow: 0 4px 20px color-mix(in srgb, var(--brand-accent) 15%, transparent);
+}
+
+/* Bubble style chat tails */
+[data-reviews-style="bubble"] .review-bubble-left {
+  position: relative;
+}
+[data-reviews-style="bubble"] .review-bubble-right {
+  position: relative;
+}
+
+/* Podium Placement */
+[data-reviews-style="podium"] .podium-1st {
+  transform: translateY(-8px);
+  box-shadow: 0 6px 20px color-mix(in srgb, var(--brand-accent) 15%, transparent);
+}
+
+/* Cinematic reviews slider transition */
+[data-reviews-style="cinematic"] .review-slide-box {
+  animation: fadeIn 0.4s ease-out;
+}
+
+/* Stacked cards depth effect */
+[data-reviews-style="cards"] .review-card-item {
+  transform: translate3d(0, 0, 0);
+  transition: transform 0.3s ease;
+}
+[data-reviews-style="cards"] .review-card-item:hover {
+  transform: translateY(-4px) scale(1.01);
+}
+
+/* ═══════════════════════════════════════════════════════
+   LOCATION STYLES
+   ═══════════════════════════════════════════════════════ */
+
+/* Glassmorphism overlays */
+[data-location-style="glassmorphism"] .location-glass {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+}
+
+/* Luxury Gold Filigree */
+[data-location-style="luxury"] .luxury-location-container {
+  border: 1px solid color-mix(in srgb, var(--brand-accent) 30%, transparent);
+  box-shadow: inset 0 0 15px color-mix(in srgb, var(--brand-accent) 8%, transparent);
+  padding: 24px;
+}
+
+/* Neon glow */
+[data-location-style="neon"] .neon-border {
+  border: 1px solid var(--brand-accent);
+  box-shadow: 0 0 15px color-mix(in srgb, var(--brand-accent) 25%, transparent),
+              inset 0 0 15px color-mix(in srgb, var(--brand-accent) 15%, transparent);
+  text-shadow: 0 0 8px color-mix(in srgb, var(--brand-accent) 30%, transparent);
+}
+
+/* Directions path line */
+[data-location-style="directions"] .direction-step {
+  position: relative;
+}
+[data-location-style="directions"] .direction-step:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  left: 22px;
+  top: 40px;
+  bottom: -20px;
+  width: 2px;
+  background: color-mix(in srgb, var(--brand-accent) 30%, transparent);
+  z-index: 0;
+}
+
+/* Keyframes */
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.98); }
+  to { opacity: 1; transform: scale(1); }
+}

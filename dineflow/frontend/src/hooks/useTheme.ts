@@ -38,6 +38,10 @@ const defaults: Partial<Theme> = {
   priceFx:           'shimmer',
   categoryFx:        'crossfade',
   animSpeed:         5, // 1-10 scale, 5 is normal
+  // Per-page visual style defaults
+  aboutStyle:    'hero-story',
+  reviewsStyle:  'spotlight',
+  locationStyle: 'card-stack',
 };
 
 export function applyTheme(theme: Partial<Theme>) {
@@ -106,6 +110,11 @@ export function applyTheme(theme: Partial<Theme>) {
   r.dataset.entrance   = t.entranceStyle ?? (t.animateItems       ? 'fade-up'   : 'none');
   r.dataset.priceFx    = t.priceFx       ?? (t.animatePrice      ? 'shimmer'   : 'none');
   r.dataset.categoryFx = t.categoryFx    ?? (t.animateCategories ? 'crossfade' : 'none');
+
+  // Per-page visual styles
+  r.dataset.aboutStyle    = t.aboutStyle    || 'hero-story';
+  r.dataset.reviewsStyle  = t.reviewsStyle  || 'spotlight';
+  r.dataset.locationStyle = t.locationStyle || 'card-stack';
 }
 
 export function useTheme(theme?: Partial<Theme> | null) {

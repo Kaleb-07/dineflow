@@ -67,6 +67,10 @@ export interface Theme {
   priceFx?: string        // 11 price effects
   categoryFx?: string     // 12 category transitions
   animSpeed?: number      // unified speed control 1-10
+  // Per-page visual styles (10 variants each)
+  aboutStyle?:    string  // About page layout
+  reviewsStyle?:  string  // Reviews page layout
+  locationStyle?: string  // Find Us page layout
 }
 
 export interface Amenity {

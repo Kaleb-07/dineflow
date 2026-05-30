@@ -138,6 +138,11 @@ model Theme {
   categoryFx        String  @default("crossfade") // 12 category transitions
   animSpeed         Int     @default(5)           // unified speed control 1-10
 
+  // Per-page visual style (10 variants each)
+  aboutStyle    String  @default("hero-story")  // About page layout
+  reviewsStyle  String  @default("spotlight")   // Reviews page layout
+  locationStyle String  @default("card-stack")  // Find Us page layout
+
   updatedAt    DateTime @updatedAt
 }
 

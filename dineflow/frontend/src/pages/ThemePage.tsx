@@ -61,6 +61,8 @@ export default function ThemePage() {
     animateCategories: false, animationSpeed: 5,
     // Page animation defaults — MUST be set so applyToIframe doesn't default to 'none'
     entranceStyle: 'none', priceFx: 'none', categoryFx: 'crossfade', animSpeed: 5,
+    // Per-page visual style defaults
+    aboutStyle: 'hero-story', reviewsStyle: 'spotlight', locationStyle: 'card-stack',
   });
   
   const [saving,  setSaving]  = useState(false);
@@ -69,6 +71,22 @@ export default function ThemePage() {
   const [viewMode, setViewMode] = useState<'mobile' | 'desktop'>('mobile');
   const [fontSearch, setFontSearch] = useState('');
   const [fontCategory, setFontCategory] = useState<string>('All');
+  const [activeTab, setActiveTab] = useState<'general' | 'menu' | 'about' | 'reviews' | 'location' | 'animations'>('general');
+
+  // Sync iframe preview with current visual editor category tab
+  useEffect(() => {
+    const iframe = iframeRef.current;
+    if (!iframe || !iframe.contentWindow) return;
+    const targetTab = 
+      activeTab === 'about' ? 'about' :
+      activeTab === 'reviews' ? 'reviews' :
+      activeTab === 'location' ? 'location' : 'menu';
+    
+    const t = setTimeout(() => {
+      iframe.contentWindow?.postMessage({ type: 'SET_PREVIEW_TAB', tab: targetTab }, '*');
+    }, 150);
+    return () => clearTimeout(t);
+  }, [activeTab]);
 
   useEffect(() => {
     api.get('/settings').then(({ data }) => {
@@ -132,6 +150,11 @@ export default function ThemePage() {
       root.dataset.entrance   = t.entranceStyle ?? (t.animateItems      ? 'fade-up'   : 'none');
       root.dataset.priceFx    = t.priceFx       ?? (t.animatePrice     ? 'shimmer'   : 'none');
       root.dataset.categoryFx = t.categoryFx    ?? (t.animateCategories? 'crossfade' : 'none');
+
+      // Per-page visual styles
+      root.dataset.aboutStyle    = t.aboutStyle    || 'hero-story';
+      root.dataset.reviewsStyle  = t.reviewsStyle  || 'spotlight';
+      root.dataset.locationStyle = t.locationStyle || 'card-stack';
     } catch (_) {
       // Iframe not ready yet
     }
@@ -190,303 +213,441 @@ export default function ThemePage() {
     <div className="flex gap-6 h-[calc(100vh-120px)]">
       {/* ── Left: Controls ── */}
       <div className="w-[420px] flex-shrink-0 overflow-y-auto pr-2">
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between mb-4">
           <div>
             <h1 className="text-xl font-semibold text-white">Branding</h1>
             <p className="text-gray-400 text-sm mt-0.5">Customize your menu appearance</p>
           </div>
         </div>
 
+        {/* Dynamic sub-page categories navigation */}
+        <div className="flex border-b border-gray-800 mb-5 overflow-x-auto gap-1.5 scrollbar-none">
+          {[
+            { id: 'general',    label: '🎨 Style & Colors' },
+            { id: 'menu',       label: '🍔 Menu Page' },
+            { id: 'about',      label: '🏔 About' },
+            { id: 'reviews',    label: '💬 Reviews' },
+            { id: 'location',   label: '📍 Location' },
+            { id: 'animations', label: '🎬 Animations' },
+          ].map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id as any)}
+              className={`px-3 py-2 border-b-2 text-xs font-semibold whitespace-nowrap transition-all ${
+                activeTab === tab.id
+                  ? 'border-amber-500 text-amber-400 font-bold'
+                  : 'border-transparent text-gray-400 hover:text-white'
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
         <div className="space-y-4">
-          {/* Presets */}
-          <Section title="Quick presets">
-            <div className="flex flex-wrap gap-2">
-              {Object.keys(PRESETS).map(name => (
-                <button key={name} onClick={() => applyPreset(name)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
-                    active === name
-                      ? 'bg-amber-500/15 border-amber-500/40 text-amber-400'
-                      : 'bg-gray-800 border-gray-700 text-gray-400 hover:text-white'
-                  }`}>
-                  {name}
-                </button>
-              ))}
-            </div>
-          </Section>
+          {/* ── Tab: Style & Colors ── */}
+          {activeTab === 'general' && (
+            <>
+              {/* Presets */}
+              <Section title="Quick presets">
+                <div className="flex flex-wrap gap-2">
+                  {Object.keys(PRESETS).map(name => (
+                    <button key={name} onClick={() => applyPreset(name)}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
+                        active === name
+                          ? 'bg-amber-500/15 border-amber-500/40 text-amber-400'
+                          : 'bg-gray-800 border-gray-700 text-gray-400 hover:text-white'
+                      }`}>
+                      {name}
+                    </button>
+                  ))}
+                </div>
+              </Section>
 
-          {/* Test Toast Notifications */}
-          <Section title="Test Notification System">
-            <div className="grid grid-cols-2 gap-2">
-              <button
-                onClick={() => toast.success('Changes Saved', 'Theme settings have been successfully published!')}
-                className="px-3 py-2 bg-green-500/10 hover:bg-green-500/20 border border-green-500/20 hover:border-green-500/40 text-green-400 rounded-lg text-xs font-semibold transition-all cursor-pointer">
-                ✅ Success
-              </button>
-              <button
-                onClick={() => toast.error('Error Occurred', 'Failed to connect to database server.')}
-                className="px-3 py-2 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 hover:border-red-500/40 text-red-400 rounded-lg text-xs font-semibold transition-all cursor-pointer">
-                ❌ Error
-              </button>
-              <button
-                onClick={() => toast.warning('Storage Limit', 'Your QR code scanning limit is at 90%.')}
-                className="px-3 py-2 bg-yellow-500/10 hover:bg-yellow-500/20 border border-yellow-500/20 hover:border-yellow-500/40 text-yellow-400 rounded-lg text-xs font-semibold transition-all cursor-pointer">
-                ⚠️ Warning
-              </button>
-              <button
-                onClick={() => toast.info('New Update', 'Version 2.4.0 is now live with enhanced animations.')}
-                className="px-3 py-2 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20 hover:border-blue-500/40 text-blue-400 rounded-lg text-xs font-semibold transition-all cursor-pointer">
-                ℹ️ Info
-              </button>
-              <button
-                onClick={() => {
-                  const id = toast.loading('Uploading assets...');
-                  setTimeout(() => {
-                    toast.dismiss(id);
-                    toast.success('Upload complete!', 'All custom branding assets uploaded successfully.');
-                  }, 2000);
-                }}
-                className="px-3 py-2 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/20 hover:border-amber-500/40 text-amber-400 rounded-lg text-xs font-semibold transition-all col-span-2 cursor-pointer">
-                ⏳ Simulated Loading (2s)
-              </button>
-            </div>
-          </Section>
+              {/* Test Toast Notifications */}
+              <Section title="Test Notification System">
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    onClick={() => toast.success('Changes Saved', 'Theme settings have been successfully published!')}
+                    className="px-3 py-2 bg-green-500/10 hover:bg-green-500/20 border border-green-500/20 hover:border-green-500/40 text-green-400 rounded-lg text-xs font-semibold transition-all cursor-pointer">
+                    ✅ Success
+                  </button>
+                  <button
+                    onClick={() => toast.error('Error Occurred', 'Failed to connect to database server.')}
+                    className="px-3 py-2 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 hover:border-red-500/40 text-red-400 rounded-lg text-xs font-semibold transition-all cursor-pointer">
+                    ❌ Error
+                  </button>
+                  <button
+                    onClick={() => toast.warning('Storage Limit', 'Your QR code scanning limit is at 90%.')}
+                    className="px-3 py-2 bg-yellow-500/10 hover:bg-yellow-500/20 border border-yellow-500/20 hover:border-yellow-500/40 text-yellow-400 rounded-lg text-xs font-semibold transition-all cursor-pointer">
+                    ⚠️ Warning
+                  </button>
+                  <button
+                    onClick={() => toast.info('New Update', 'Version 2.4.0 is now live with enhanced animations.')}
+                    className="px-3 py-2 bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/20 hover:border-blue-500/40 text-blue-400 rounded-lg text-xs font-semibold transition-all cursor-pointer">
+                    ℹ️ Info
+                  </button>
+                  <button
+                    onClick={() => {
+                      const id = toast.loading('Uploading assets...');
+                      setTimeout(() => {
+                        toast.dismiss(id);
+                        toast.success('Upload complete!', 'All custom branding assets uploaded successfully.');
+                      }, 2000);
+                    }}
+                    className="px-3 py-2 bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/20 hover:border-amber-500/40 text-amber-400 rounded-lg text-xs font-semibold transition-all col-span-2 cursor-pointer">
+                    ⏳ Simulated Loading (2s)
+                  </button>
+                </div>
+              </Section>
 
-          {/* Card Style */}
-          <Section title="Card style">
-            <div className="grid grid-cols-2 gap-2">
-              {([
-                { value: 'default', label: 'Classic', desc: 'Image left, text right' },
-                { value: 'compact', label: 'Compact', desc: 'No image, inline' },
-                { value: 'imageTop', label: 'Image top', desc: 'Photo above text' },
-                { value: 'minimal', label: 'Minimal', desc: 'Borderless list' },
-                { value: 'bold', label: 'Bold', desc: 'Accent background' },
-              ] as const).map(style => (
-                <button key={style.value}
-                  onClick={() => update({ cardStyle: style.value })}
-                  className={`p-3 rounded-lg border text-left transition-all ${
-                    theme.cardStyle === style.value
-                      ? 'bg-amber-500/10 border-amber-500/40'
-                      : 'bg-gray-800 border-gray-700 hover:border-gray-600'
-                  }`}>
-                  <div className="text-xs font-medium text-white mb-0.5">{style.label}</div>
-                  <div className="text-[10px] text-gray-500">{style.desc}</div>
-                  {/* Mini preview */}
-                  <div className="mt-2 h-8 rounded border border-gray-700 bg-gray-900 flex items-center gap-1 px-1.5">
-                    {style.value !== 'compact' && style.value !== 'minimal' && (
-                      <div className="w-5 h-5 rounded bg-gray-700 flex-shrink-0" />
-                    )}
-                    <div className="flex-1 min-w-0">
-                      <div className="h-1.5 w-full bg-gray-700 rounded mb-0.5" />
-                      <div className="h-1 w-2/3 bg-gray-800 rounded" />
+              {/* Colors */}
+              <Section title="Colors">
+                <div className="grid grid-cols-2 gap-4">
+                  {[
+                    { label: 'Background',      key: 'bgColor'      },
+                    { label: 'Accent / brand',  key: 'accentColor'  },
+                    { label: 'Card background', key: 'cardColor'    },
+                    { label: 'Text color',      key: 'textColor'    },
+                  ].map(({ label, key }) => (
+                    <div key={key} className="flex items-center justify-between">
+                      <span className="text-sm text-gray-300">{label}</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-gray-500 font-mono">
+                          {(theme as any)[key]}
+                        </span>
+                        <input type="color"
+                          value={(theme as any)[key] || '#000000'}
+                          onChange={e => update({ [key]: e.target.value } as any)}
+                          className="w-8 h-8 rounded-lg border border-gray-700 cursor-pointer bg-transparent"
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </Section>
+
+              {/* Typography */}
+              <Section title="Typography">
+                <div className="space-y-3">
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      placeholder="Search fonts..."
+                      value={fontSearch}
+                      onChange={e => setFontSearch(e.target.value)}
+                      className="flex-1 bg-gray-800 border border-gray-700 text-white text-xs rounded-lg px-3 py-2 outline-none focus:border-amber-500"
+                    />
+                    <select
+                      value={fontCategory}
+                      onChange={e => setFontCategory(e.target.value)}
+                      className="bg-gray-800 border border-gray-700 text-white text-xs rounded-lg px-3 py-2 outline-none focus:border-amber-500">
+                      <option>All</option>
+                      <option>Serif</option>
+                      <option>Sans-serif</option>
+                      <option>Display</option>
+                      <option>Handwriting</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="text-xs text-gray-400 uppercase tracking-wider mb-2 block">Heading font</label>
+                    <div className="max-h-32 overflow-y-auto border border-gray-700 rounded-lg bg-gray-800">
+                      {filteredFonts.map(f => (
+                        <button key={f.value}
+                          onClick={() => update({ fontDisplay: f.value })}
+                          className={`w-full text-left px-3 py-2 text-sm border-b border-gray-700 last:border-0 transition-colors ${
+                            theme.fontDisplay === f.value
+                              ? 'bg-amber-500/10 text-amber-400'
+                              : 'text-gray-300 hover:bg-gray-700'
+                          }`}
+                          style={{ fontFamily: f.value }}>
+                          {f.name}
+                        </button>
+                      ))}
                     </div>
                   </div>
-                </button>
-              ))}
-            </div>
-          </Section>
 
-          {/* Colors */}
-          <Section title="Colors">
-            <div className="grid grid-cols-2 gap-4">
-              {[
-                { label: 'Background',      key: 'bgColor'      },
-                { label: 'Accent / brand',  key: 'accentColor'  },
-                { label: 'Card background', key: 'cardColor'    },
-                { label: 'Text color',      key: 'textColor'    },
-              ].map(({ label, key }) => (
-                <div key={key} className="flex items-center justify-between">
-                  <span className="text-sm text-gray-300">{label}</span>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs text-gray-500 font-mono">
-                      {(theme as any)[key]}
-                    </span>
-                    <input type="color"
-                      value={(theme as any)[key] || '#000000'}
-                      onChange={e => update({ [key]: e.target.value } as any)}
-                      className="w-8 h-8 rounded-lg border border-gray-700 cursor-pointer bg-transparent"
-                    />
+                  <div>
+                    <label className="text-xs text-gray-400 uppercase tracking-wider mb-2 block">Body font</label>
+                    <div className="max-h-32 overflow-y-auto border border-gray-700 rounded-lg bg-gray-800">
+                      {filteredFonts.map(f => (
+                        <button key={f.value}
+                          onClick={() => update({ fontBody: f.value })}
+                          className={`w-full text-left px-3 py-2 text-sm border-b border-gray-700 last:border-0 transition-colors ${
+                            theme.fontBody === f.value
+                              ? 'bg-amber-500/10 text-amber-400'
+                              : 'text-gray-300 hover:bg-gray-700'
+                          }`}
+                          style={{ fontFamily: f.value }}>
+                          {f.name}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="bg-gray-800 border border-gray-700 rounded-lg p-3">
+                    <div className="text-sm font-semibold mb-1" style={{ fontFamily: theme.fontDisplay }}>
+                      Bella Vista Café
+                    </div>
+                    <div className="text-xs text-gray-400" style={{ fontFamily: theme.fontBody }}>
+                      Authentic Ethiopian cuisine with modern flair
+                    </div>
                   </div>
                 </div>
-              ))}
-            </div>
-          </Section>
+              </Section>
 
-          {/* Google Fonts Picker */}
-          <Section title="Typography">
-            <div className="space-y-3">
-              {/* Search & Filter */}
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  placeholder="Search fonts..."
-                  value={fontSearch}
-                  onChange={e => setFontSearch(e.target.value)}
-                  className="flex-1 bg-gray-800 border border-gray-700 text-white text-xs rounded-lg px-3 py-2 outline-none focus:border-amber-500"
-                />
-                <select
-                  value={fontCategory}
-                  onChange={e => setFontCategory(e.target.value)}
-                  className="bg-gray-800 border border-gray-700 text-white text-xs rounded-lg px-3 py-2 outline-none focus:border-amber-500">
-                  <option>All</option>
-                  <option>Serif</option>
-                  <option>Sans-serif</option>
-                  <option>Display</option>
-                  <option>Handwriting</option>
-                </select>
-              </div>
+              {/* Shape & Spacing */}
+              <Section title="Shape & spacing">
+                {[
+                  { label: 'Card corner radius', key: 'borderRadius', min: 0,  max: 24, unit: 'px' },
+                  { label: 'Card padding',       key: 'cardPadding',  min: 4,  max: 20, unit: 'px' },
+                  { label: 'Item gap',           key: 'itemGap',      min: 2,  max: 16, unit: 'px' },
+                ].map(({ label, key, min, max, unit }) => (
+                  <div key={key} className="mb-3 last:mb-0">
+                    <div className="flex justify-between mb-1">
+                      <label className="text-xs text-gray-400 uppercase tracking-wider">{label}</label>
+                      <span className="text-xs text-gray-500">{(theme as any)[key]}{unit}</span>
+                    </div>
+                    <input type="range" min={min} max={max}
+                      value={(theme as any)[key] || 0}
+                      onChange={e => update({ [key]: Number(e.target.value) } as any)}
+                      className="w-full accent-amber-500"
+                    />
+                  </div>
+                ))}
+              </Section>
+            </>
+          )}
 
-              {/* Heading Font */}
-              <div>
-                <label className="text-xs text-gray-400 uppercase tracking-wider mb-2 block">Heading font</label>
-                <div className="max-h-32 overflow-y-auto border border-gray-700 rounded-lg bg-gray-800">
-                  {filteredFonts.map(f => (
-                    <button key={f.value}
-                      onClick={() => update({ fontDisplay: f.value })}
-                      className={`w-full text-left px-3 py-2 text-sm border-b border-gray-700 last:border-0 transition-colors ${
-                        theme.fontDisplay === f.value
-                          ? 'bg-amber-500/10 text-amber-400'
-                          : 'text-gray-300 hover:bg-gray-700'
-                      }`}
-                      style={{ fontFamily: f.value }}>
-                      {f.name}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Body Font */}
-              <div>
-                <label className="text-xs text-gray-400 uppercase tracking-wider mb-2 block">Body font</label>
-                <div className="max-h-32 overflow-y-auto border border-gray-700 rounded-lg bg-gray-800">
-                  {filteredFonts.map(f => (
-                    <button key={f.value}
-                      onClick={() => update({ fontBody: f.value })}
-                      className={`w-full text-left px-3 py-2 text-sm border-b border-gray-700 last:border-0 transition-colors ${
-                        theme.fontBody === f.value
-                          ? 'bg-amber-500/10 text-amber-400'
-                          : 'text-gray-300 hover:bg-gray-700'
-                      }`}
-                      style={{ fontFamily: f.value }}>
-                      {f.name}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Font Preview */}
-              <div className="bg-gray-800 border border-gray-700 rounded-lg p-3">
-                <div className="text-sm font-semibold mb-1" style={{ fontFamily: theme.fontDisplay }}>
-                  Bella Vista Café
-                </div>
-                <div className="text-xs text-gray-400" style={{ fontFamily: theme.fontBody }}>
-                  Authentic Ethiopian cuisine with modern flair
-                </div>
-              </div>
-            </div>
-          </Section>
-
-          {/* Category Navigation Style */}
-          <Section title="Category navigation">
-            <div className="grid grid-cols-2 gap-2">
-              {([
-                { value: 'pills', label: 'Pills', icon: '💊' },
-                { value: 'tabs', label: 'Tabs', icon: '📑' },
-                { value: 'dropdown', label: 'Dropdown', icon: '📋' },
-                { value: 'icons', label: 'Icons', icon: '🎨' },
-                { value: 'polygon', label: 'Polygon', icon: '⬢' },
-              ] as const).map(style => (
-                <button key={style.value}
-                  onClick={() => update({ categoryStyle: style.value })}
-                  className={`p-3 rounded-lg border text-center transition-all ${
-                    theme.categoryStyle === style.value
-                      ? 'bg-amber-500/10 border-amber-500/40 text-amber-400'
-                      : 'bg-gray-800 border-gray-700 text-gray-400 hover:text-white'
-                  }`}>
-                  <div className="text-xl mb-1">{style.icon}</div>
-                  <div className="text-xs font-medium">{style.label}</div>
-                </button>
-              ))}
-            </div>
-
-            {/* Polygon shape selector - only visible when polygon is selected */}
-            {theme.categoryStyle === 'polygon' && (
-              <div className="mt-3 pt-3 border-t border-gray-800">
-                <label className="text-xs text-gray-400 uppercase tracking-wider mb-2 block">Polygon shape</label>
-                <div className="grid grid-cols-3 gap-2">
+          {/* ── Tab: Menu Page ── */}
+          {activeTab === 'menu' && (
+            <>
+              {/* Card Style */}
+              <Section title="Card style">
+                <div className="grid grid-cols-2 gap-2">
                   {([
-                    { value: 'hexagon', label: 'Hexagon', icon: '⬢' },
-                    { value: 'diamond', label: 'Diamond', icon: '◆' },
-                    { value: 'chevron', label: 'Chevron', icon: '›' },
-                    { value: 'octagon', label: 'Octagon', icon: '⯃' },
-                    { value: 'pentagon', label: 'Pentagon', icon: '⬟' },
-                  ] as const).map(shape => (
-                    <button key={shape.value}
-                      onClick={() => update({ polygonVariant: shape.value })}
-                      className={`p-2 rounded-lg border text-center transition-all ${
-                        (theme.polygonVariant || 'hexagon') === shape.value
+                    { value: 'default', label: 'Classic', desc: 'Image left, text right' },
+                    { value: 'compact', label: 'Compact', desc: 'No image, inline' },
+                    { value: 'imageTop', label: 'Image top', desc: 'Photo above text' },
+                    { value: 'minimal', label: 'Minimal', desc: 'Borderless list' },
+                    { value: 'bold', label: 'Bold', desc: 'Accent background' },
+                  ] as const).map(style => (
+                    <button key={style.value}
+                      onClick={() => update({ cardStyle: style.value })}
+                      className={`p-3 rounded-lg border text-left transition-all ${
+                        theme.cardStyle === style.value
+                          ? 'bg-amber-500/10 border-amber-500/40'
+                          : 'bg-gray-800 border-gray-700 hover:border-gray-600'
+                      }`}>
+                      <div className="text-xs font-medium text-white mb-0.5">{style.label}</div>
+                      <div className="text-[10px] text-gray-500">{style.desc}</div>
+                      <div className="mt-2 h-8 rounded border border-gray-700 bg-gray-900 flex items-center gap-1 px-1.5">
+                        {style.value !== 'compact' && style.value !== 'minimal' && (
+                          <div className="w-5 h-5 rounded bg-gray-700 flex-shrink-0" />
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <div className="h-1.5 w-full bg-gray-700 rounded mb-0.5" />
+                          <div className="h-1 w-2/3 bg-gray-800 rounded" />
+                        </div>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </Section>
+
+              {/* Category Navigation */}
+              <Section title="Category navigation">
+                <div className="grid grid-cols-2 gap-2">
+                  {([
+                    { value: 'pills', label: 'Pills', icon: '💊' },
+                    { value: 'tabs', label: 'Tabs', icon: '📑' },
+                    { value: 'dropdown', label: 'Dropdown', icon: '📋' },
+                    { value: 'icons', label: 'Icons', icon: '🎨' },
+                    { value: 'polygon', label: 'Polygon', icon: '⬢' },
+                  ] as const).map(style => (
+                    <button key={style.value}
+                      onClick={() => update({ categoryStyle: style.value })}
+                      className={`p-3 rounded-lg border text-center transition-all ${
+                        theme.categoryStyle === style.value
                           ? 'bg-amber-500/10 border-amber-500/40 text-amber-400'
                           : 'bg-gray-800 border-gray-700 text-gray-400 hover:text-white'
                       }`}>
-                      <div className="text-lg mb-0.5">{shape.icon}</div>
-                      <div className="text-[10px] font-medium">{shape.label}</div>
+                      <div className="text-xl mb-1">{style.icon}</div>
+                      <div className="text-xs font-medium">{style.label}</div>
                     </button>
                   ))}
                 </div>
+
+                {theme.categoryStyle === 'polygon' && (
+                  <div className="mt-3 pt-3 border-t border-gray-800">
+                    <label className="text-xs text-gray-400 uppercase tracking-wider mb-2 block">Polygon shape</label>
+                    <div className="grid grid-cols-3 gap-2">
+                      {([
+                        { value: 'hexagon', label: 'Hexagon', icon: '⬢' },
+                        { value: 'diamond', label: 'Diamond', icon: '◆' },
+                        { value: 'chevron', label: 'Chevron', icon: '›' },
+                        { value: 'octagon', label: 'Octagon', icon: '⯃' },
+                        { value: 'pentagon', label: 'Pentagon', icon: '⬟' },
+                      ] as const).map(shape => (
+                        <button key={shape.value}
+                          onClick={() => update({ polygonVariant: shape.value })}
+                          className={`p-2 rounded-lg border text-center transition-all ${
+                            (theme.polygonVariant || 'hexagon') === shape.value
+                              ? 'bg-amber-500/10 border-amber-500/40 text-amber-400'
+                              : 'bg-gray-800 border-gray-700 text-gray-400 hover:text-white'
+                          }`}>
+                          <div className="text-lg mb-0.5">{shape.icon}</div>
+                          <div className="text-[10px] font-medium">{shape.label}</div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </Section>
+
+              {/* Feature Toggles */}
+              <Section title="Show / hide features">
+                {[
+                  { label: 'Item images',      key: 'showImages'   },
+                  { label: 'Prices',           key: 'showPrice'    },
+                  { label: 'Meal-time tabs',   key: 'showMealTabs' },
+                  { label: 'Descriptions',     key: 'showDesc'     },
+                  { label: 'Allergen info',    key: 'showAllergens' },
+                  { label: 'Feature badges',   key: 'showBadges'   },
+                ].map(({ label, key }) => (
+                  <div key={key} className="flex items-center justify-between py-2 border-b border-gray-800 last:border-0">
+                    <span className="text-sm text-gray-300">{label}</span>
+                    <div
+                      onClick={() => update({ [key]: !(theme as any)[key] } as any)}
+                      className={`w-10 h-5 rounded-full cursor-pointer relative transition-colors ${
+                        (theme as any)[key] ? 'bg-amber-500' : 'bg-gray-700'
+                      }`}>
+                      <div className={`absolute top-0.5 w-4 h-4 bg-white rounded-full transition-transform ${
+                        (theme as any)[key] ? 'translate-x-5' : 'translate-x-0.5'
+                      }`} />
+                    </div>
+                  </div>
+                ))}
+              </Section>
+            </>
+          )}
+
+          {/* ── Tab: About Page ── */}
+          {activeTab === 'about' && (
+            <Section title="About page style">
+              <p className="text-xs text-gray-500 mb-3">Layout when guests tap the About tab.</p>
+              <div className="grid grid-cols-2 gap-2">
+                {([
+                  { value: 'hero-story',   label: 'Hero Story',    desc: 'Cover photo + story',      icon: '🏔' },
+                  { value: 'magazine',     label: 'Magazine',      desc: 'Editorial two-column',     icon: '📰' },
+                  { value: 'timeline',     label: 'Timeline',      desc: 'Story milestones',         icon: '🕐' },
+                  { value: 'minimal-card', label: 'Minimal Card',  desc: 'Clean card grid',          icon: '🃏' },
+                  { value: 'cinematic',    label: 'Cinematic',     desc: 'Full-bleed immersive',     icon: '🎬' },
+                  { value: 'split-screen', label: 'Split Screen',  desc: 'Image / content split',   icon: '◧' },
+                  { value: 'editorial',    label: 'Editorial',     desc: 'Large typography',         icon: '✍️' },
+                  { value: 'mosaic',       label: 'Mosaic',        desc: 'Photo grid + details',    icon: '🖼' },
+                  { value: 'luxury',       label: 'Luxury',        desc: 'Gold-accented serif',      icon: '👑' },
+                  { value: 'polaroid',     label: 'Polaroid',      desc: 'Stacked photo cards',      icon: '📷' },
+                ] as const).map(s => (
+                  <button key={s.value}
+                    onClick={() => update({ aboutStyle: s.value })}
+                    className={`p-3 rounded-lg border text-left transition-all ${
+                      (theme.aboutStyle || 'hero-story') === s.value
+                        ? 'bg-amber-500/10 border-amber-500/40'
+                        : 'bg-gray-800 border-gray-700 hover:border-gray-600'
+                    }`}>
+                    <div className="flex items-center gap-1.5 mb-0.5">
+                      <span className="text-base">{s.icon}</span>
+                      <span className="text-xs font-medium text-white">{s.label}</span>
+                    </div>
+                    <div className="text-[10px] text-gray-500 pl-6">{s.desc}</div>
+                  </button>
+                ))}
               </div>
-            )}
-          </Section>
+            </Section>
+          )}
 
-          {/* Shape & spacing */}
-          <Section title="Shape & spacing">
-            {[
-              { label: 'Card corner radius', key: 'borderRadius', min: 0,  max: 24, unit: 'px' },
-              { label: 'Card padding',       key: 'cardPadding',  min: 4,  max: 20, unit: 'px' },
-              { label: 'Item gap',           key: 'itemGap',      min: 2,  max: 16, unit: 'px' },
-            ].map(({ label, key, min, max, unit }) => (
-              <div key={key} className="mb-3 last:mb-0">
-                <div className="flex justify-between mb-1">
-                  <label className="text-xs text-gray-400 uppercase tracking-wider">{label}</label>
-                  <span className="text-xs text-gray-500">{(theme as any)[key]}{unit}</span>
-                </div>
-                <input type="range" min={min} max={max}
-                  value={(theme as any)[key] || 0}
-                  onChange={e => update({ [key]: Number(e.target.value) } as any)}
-                  className="w-full accent-amber-500"
-                />
+          {/* ── Tab: Reviews Page ── */}
+          {activeTab === 'reviews' && (
+            <Section title="Reviews page style">
+              <p className="text-xs text-gray-500 mb-3">Layout for the guest Reviews tab.</p>
+              <div className="grid grid-cols-2 gap-2">
+                {([
+                  { value: 'spotlight', label: 'Spotlight', desc: 'Featured + list',            icon: '🔦' },
+                  { value: 'masonry',   label: 'Masonry',   desc: 'Multi-column grid',           icon: '🧱' },
+                  { value: 'wall',      label: 'Wall',      desc: 'Dense compact wall',          icon: '📋' },
+                  { value: 'timeline',  label: 'Timeline',  desc: 'Chronological feed',          icon: '📅' },
+                  { value: 'magazine',  label: 'Magazine',  desc: 'Editorial big quote',         icon: '❝' },
+                  { value: 'bubble',    label: 'Bubble',    desc: 'Chat bubble layout',          icon: '💬' },
+                  { value: 'podium',    label: 'Podium',    desc: 'Top 3 highlighted',           icon: '🏆' },
+                  { value: 'minimal',   label: 'Minimal',   desc: 'Ultra-clean list',            icon: '☰' },
+                  { value: 'cinematic', label: 'Cinematic', desc: 'Full-screen cards',           icon: '🎞' },
+                  { value: 'cards',     label: 'Cards',     desc: 'Floating card deck',         icon: '🗂' },
+                ] as const).map(s => (
+                  <button key={s.value}
+                    onClick={() => update({ reviewsStyle: s.value })}
+                    className={`p-3 rounded-lg border text-left transition-all ${
+                      (theme.reviewsStyle || 'spotlight') === s.value
+                        ? 'bg-amber-500/10 border-amber-500/40'
+                        : 'bg-gray-800 border-gray-700 hover:border-gray-600'
+                    }`}>
+                    <div className="flex items-center gap-1.5 mb-0.5">
+                      <span className="text-base">{s.icon}</span>
+                      <span className="text-xs font-medium text-white">{s.label}</span>
+                    </div>
+                    <div className="text-[10px] text-gray-500 pl-6">{s.desc}</div>
+                  </button>
+                ))}
               </div>
-            ))}
-          </Section>
+            </Section>
+          )}
 
-          {/* Hover animations - Beautiful custom component */}
-          <HoverSection theme={theme} update={update} />
-
-          {/* Page animations - 35 total styles (12 entrance + 11 price + 12 category) */}
-          <AnimationsSection theme={theme} update={update} />
-
-          {/* Feature toggles */}
-          <Section title="Show / hide features">
-            {[
-              { label: 'Item images',      key: 'showImages'   },
-              { label: 'Prices',           key: 'showPrice'    },
-              { label: 'Meal-time tabs',   key: 'showMealTabs' },
-              { label: 'Descriptions',     key: 'showDesc'     },
-              { label: 'Allergen info',    key: 'showAllergens' },
-              { label: 'Feature badges',   key: 'showBadges'   },
-            ].map(({ label, key }) => (
-              <div key={key} className="flex items-center justify-between py-2 border-b border-gray-800 last:border-0">
-                <span className="text-sm text-gray-300">{label}</span>
-                <div
-                  onClick={() => update({ [key]: !(theme as any)[key] } as any)}
-                  className={`w-10 h-5 rounded-full cursor-pointer relative transition-colors ${
-                    (theme as any)[key] ? 'bg-amber-500' : 'bg-gray-700'
-                  }`}>
-                  <div className={`absolute top-0.5 w-4 h-4 bg-white rounded-full transition-transform ${
-                    (theme as any)[key] ? 'translate-x-5' : 'translate-x-0.5'
-                  }`} />
-                </div>
+          {/* ── Tab: Find Us Page ── */}
+          {activeTab === 'location' && (
+            <Section title="Find Us page style">
+              <p className="text-xs text-gray-500 mb-3">Layout for the guest Find Us tab.</p>
+              <div className="grid grid-cols-2 gap-2">
+                {([
+                  { value: 'card-stack',    label: 'Card Stack',   desc: 'Stacked info cards',         icon: '🗂' },
+                  { value: 'split',         label: 'Split',        desc: 'Map + details beside',       icon: '◫' },
+                  { value: 'hero-map',      label: 'Hero Map',     desc: 'Large map hero overlay',     icon: '🗺' },
+                  { value: 'compact',       label: 'Compact',      desc: 'Tight inline list',          icon: '☰' },
+                  { value: 'contact-card',  label: 'Contact Card', desc: 'Business card style',        icon: '💼' },
+                  { value: 'glassmorphism', label: 'Glass',        desc: 'Translucent glass cards',    icon: '🔮' },
+                  { value: 'minimal',       label: 'Minimal',      desc: 'Large-text clean',           icon: '◻' },
+                  { value: 'luxury',        label: 'Luxury',       desc: 'Gold-trimmed layout',        icon: '✨' },
+                  { value: 'directions',    label: 'Directions',   desc: 'Journey step-by-step',       icon: '🧭' },
+                  { value: 'neon',          label: 'Neon',         desc: 'Vibrant accent style',       icon: '💡' },
+                ] as const).map(s => (
+                  <button key={s.value}
+                    onClick={() => update({ locationStyle: s.value })}
+                    className={`p-3 rounded-lg border text-left transition-all ${
+                      (theme.locationStyle || 'card-stack') === s.value
+                        ? 'bg-amber-500/10 border-amber-500/40'
+                        : 'bg-gray-800 border-gray-700 hover:border-gray-600'
+                    }`}>
+                    <div className="flex items-center gap-1.5 mb-0.5">
+                      <span className="text-base">{s.icon}</span>
+                      <span className="text-xs font-medium text-white">{s.label}</span>
+                    </div>
+                    <div className="text-[10px] text-gray-500 pl-6">{s.desc}</div>
+                  </button>
+                ))}
               </div>
-            ))}
-          </Section>
+            </Section>
+          )}
+
+          {/* ── Tab: Animations ── */}
+          {activeTab === 'animations' && (
+            <>
+              {/* Hover animations */}
+              <HoverSection theme={theme} update={update} />
+
+              {/* Page animations */}
+              <AnimationsSection theme={theme} update={update} />
+            </>
+          )}
 
 
 
