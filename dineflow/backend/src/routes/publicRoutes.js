@@ -1,7 +1,7 @@
 const router = require('express').Router();
 const prisma = require('../lib/prisma');
 
-// GET /api/public/:slug — everything the guest menu needs in one call
+// GET /api/public/:slug — everything the guest menu needs in one call only
 router.get('/:slug', async (req, res) => {
   try {
     const venue = await prisma.venue.findUnique({
