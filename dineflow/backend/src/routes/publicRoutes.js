@@ -65,7 +65,7 @@ router.patch('/qr/:id/scan', async (req, res) => {
     });
     res.json({ ok: true });
   } catch {
-    res.json({ ok: true }); // silent fail — never block guest menu
+    res.json({ ok: true }); // silent fail — never block guest menus
   }
 });
 
