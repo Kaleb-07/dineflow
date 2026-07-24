@@ -15,7 +15,7 @@ router.get('/', auth, async (req, res) => {
   }
 });
 
-// PATCH — toggle visibility
+// PATCH — the toggle visibilitys
 router.patch('/:id', auth, async (req, res) => {
   try {
     const review = await prisma.review.update({
