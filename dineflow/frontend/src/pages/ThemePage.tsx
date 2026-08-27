@@ -38,7 +38,7 @@ const GOOGLE_FONTS = [
   { name: 'Righteous', category: 'Display', value: "'Righteous', sans-serif" },
   { name: 'Oswald', category: 'Display', value: "'Oswald', sans-serif" },
   
-  // Handwriting
+  // The Handwriting
   { name: 'Dancing Script', category: 'Handwriting', value: "'Dancing Script', cursive" },
   { name: 'Pacifico', category: 'Handwriting', value: "'Pacifico', cursive" },
 ];
