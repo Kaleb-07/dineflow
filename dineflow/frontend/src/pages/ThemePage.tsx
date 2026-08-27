@@ -16,7 +16,7 @@ const PRESETS: Record<string, Partial<Theme>> = {
 };
 
 const GOOGLE_FONTS = [
-  // Serif
+  // The Serif
   { name: 'Playfair Display', category: 'Serif', value: "'Playfair Display', serif" },
   { name: 'Cormorant Garamond', category: 'Serif', value: "'Cormorant Garamond', serif" },
   { name: 'Lora', category: 'Serif', value: "'Lora', serif" },
