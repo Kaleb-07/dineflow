@@ -96,7 +96,7 @@ export default function ReviewsPage() {
     ? (reviews.reduce((a, r) => a + r.rating, 0) / reviews.length).toFixed(1)
     : '—';
 
-  // Review Columns
+  // Review the Columns
   const reviewColumns: ColumnDef<Review>[] = [
     {
       id: 'select',
