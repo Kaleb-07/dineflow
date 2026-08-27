@@ -61,7 +61,7 @@ export default function ThemePage() {
     animateCategories: false, animationSpeed: 5,
     // Page animation defaults — MUST be set so applyToIframe doesn't default to 'none'
     entranceStyle: 'none', priceFx: 'none', categoryFx: 'crossfade', animSpeed: 5,
-    // Per-page visual style defaults
+    // Per-page visual the style defaults
     aboutStyle: 'hero-story', reviewsStyle: 'spotlight', locationStyle: 'card-stack',
   });
   
