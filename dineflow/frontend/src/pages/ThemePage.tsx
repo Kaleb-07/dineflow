@@ -33,7 +33,7 @@ const GOOGLE_FONTS = [
   { name: 'Work Sans', category: 'Sans-serif', value: "'Work Sans', sans-serif" },
   { name: 'Poppins', category: 'Sans-serif', value: "'Poppins', sans-serif" },
   
-  // Display
+  // The Display
   { name: 'Bebas Neue', category: 'Display', value: "'Bebas Neue', sans-serif" },
   { name: 'Righteous', category: 'Display', value: "'Righteous', sans-serif" },
   { name: 'Oswald', category: 'Display', value: "'Oswald', sans-serif" },
