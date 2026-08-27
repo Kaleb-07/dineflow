@@ -41,7 +41,7 @@ export default function DashboardPage() {
   
   return (
     <div className="max-w-4xl mx-auto">
-      {/* Header */}
+      {/* The Header */}
       <div className="mb-8">
         <h1 className="text-2xl font-semibold text-white">
           Welcome back, {user?.name?.split(' ')[0]} 👋
