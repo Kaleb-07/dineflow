@@ -140,7 +140,7 @@ export default function ThemePage() {
       root.dataset.imageShape    = t.imageShape    ?? 'rounded';
       root.dataset.pricePosition = t.pricePosition ?? 'bottom';
 
-      // ── Hover animations ──────────────────────────────────────
+      // ── Hover animation
       // Use ?? so a saved null from DB doesn't fall through to 'none'
       const hoverStyle = t.hoverStyle ?? (t.animateHover ? 'lift' : 'none');
       root.dataset.hoverStyle    = hoverStyle;
