@@ -49,7 +49,7 @@ export default function DashboardPage() {
         <p className="text-gray-400 mt-1">{venue?.name}</p>
       </div>
       
-      {/* Stats */}
+      {/* The Stats */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
         {cards.map(({ label, value, icon: Icon, to, color, bg }) => (
           <Link key={label} to={to}
