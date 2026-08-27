@@ -63,7 +63,7 @@ export default function DashboardPage() {
         ))}
       </div>
       
-      {/* Guest menu link */}
+      {/* Guest The menu link */}
       <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-5 mb-6">
         <div className="text-amber-400 font-medium mb-1">Your guest menu is live</div>
         <div className="text-gray-400 text-sm mb-3">
