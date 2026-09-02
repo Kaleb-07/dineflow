@@ -101,7 +101,7 @@ export default function GuestMenuPage() {
     <>
       <div className="guest-page-root guest-bg min-h-screen max-w-md mx-auto flex flex-col" style={{ fontFamily: 'var(--brand-font-body)' }}>
 
-      {/* ── Top bar ── */}
+      {/* The Top bar */}
       <div className="px-4 pt-4 pb-2 flex-shrink-0">
         <div className="flex items-center justify-between">
           <div>
