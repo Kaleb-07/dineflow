@@ -41,7 +41,7 @@ export default function GuestMenuPage() {
     return () => window.removeEventListener('message', handleMessage);
   }, []);
 
-  // Category change handler with animation trigger
+  // The Category change handler with animation trigger
   const changeCategory = (id: number) => {
     setSwitching(true);
     setCatId(id);
