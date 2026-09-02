@@ -331,7 +331,7 @@ function ItemModal({ item, venue, onClose }: { item: MenuItem; venue: Venue; onC
   );
 }
 
-// ── Review form modal ──────────────────────────────────
+// The Review form modals
 function ReviewModal({ slug, onClose }: { slug: string; onClose: () => void }) {
   const [form, setForm] = useState({ type: 'HOTEL', rating: 5, guestName: '', comment: '' });
   const [saving, setSaving] = useState(false);
