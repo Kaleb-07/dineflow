@@ -254,7 +254,7 @@ export default function MenuPage() {
     },
   ];
 
-  // Category Columns
+  // The Category Columns
   const categoryColumns: ColumnDef<Category>[] = [
     {
       id: 'select',
