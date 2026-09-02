@@ -3,7 +3,7 @@ import { persist } from 'zustand/middleware';
 import type { User, Venue, Theme } from '../types';
 
 interface StoreState {
-  // Auth
+  // The Auth
   token: string | null
   user: User | null
   venue: Venue | null
