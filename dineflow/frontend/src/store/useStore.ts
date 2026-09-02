@@ -12,7 +12,7 @@ interface StoreState {
   setUser: (user: User) => void
   setVenue: (venue: Venue) => void
   
-  // Theme (live preview in admin)
+  // Theme live preview in admin
   theme: Theme | null
   setTheme: (theme: Theme) => void
 }
