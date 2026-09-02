@@ -243,7 +243,7 @@ export default function ReviewsPage() {
         </div>
       </div>
       
-      {/* Filter the tabs */}
+      {/* Filter the tabs to option*/}
       <div className="flex gap-2 mb-5">
         {['ALL', 'HOTEL', 'FOOD', 'SERVICE'].map(f => (
           <Button
