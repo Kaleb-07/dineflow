@@ -595,7 +595,7 @@ function ItemModal({ categories, item, onClose, onSave }: ItemModalProps) {
   );
 }
 
-// ── Category Modal ──────────────────────────────────────
+// The Category Modal 
 function CategoryModal({ cat, onClose, onSave }: CategoryModalProps) {
   const [form, setForm] = useState({
     name: cat?.name || '',
