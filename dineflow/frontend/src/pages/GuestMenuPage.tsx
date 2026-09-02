@@ -270,7 +270,7 @@ export default function GuestMenuPage() {
   );
 }
 
-// ── Item detail modal ──────────────────────────────────
+// Item detail modals
 function ItemModal({ item, venue, onClose }: { item: MenuItem; venue: Venue; onClose: () => void }) {
   const [selected, setSelected] = useState<Variant | null>(
     item.variants.find(v => v.isDefault) || item.variants[0] || null
