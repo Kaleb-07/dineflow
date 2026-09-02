@@ -128,7 +128,7 @@ export default function GuestMenuPage() {
         </div>
       )}
 
-      {/* ── Food / Drink toggle ── */}
+      {/* ── Food or Drink toggle ── */}
       <div className="mx-4 mt-3 flex rounded-full p-0.5 flex-shrink-0"
         style={{ background: 'color-mix(in srgb, var(--brand-accent) 10%, transparent)', border: '1px solid color-mix(in srgb, var(--brand-accent) 20%, transparent)' }}>
         {(['FOOD','DRINK'] as MenuType[]).map(t => (
