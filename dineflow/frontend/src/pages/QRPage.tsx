@@ -293,7 +293,7 @@ export default function QRPage() {
         </div>
       </div>
 
-      {/* Guest menu URL info */}
+      {/* Guest the menu URL info */}
       <div className="bg-gray-900 border border-gray-800 rounded-xl px-4 py-3 mb-5 flex items-center justify-between gap-3">
         <div>
           <div className="text-xs text-gray-500 uppercase tracking-wider mb-0.5">Guest menu URL</div>
