@@ -643,7 +643,7 @@ function CategoryModal({ cat, onClose, onSave }: CategoryModalProps) {
   );
 }
 
-// ── Shared components ───────────────────────────────────
+// The Shared components
 const input = 'w-full bg-gray-800 border border-gray-700 text-white text-sm rounded-lg px-3 py-2 outline-none focus:border-amber-500 transition-colors';
 
 function Modal({ title, onClose, children }: {
