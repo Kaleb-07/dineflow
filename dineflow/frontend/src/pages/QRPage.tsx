@@ -30,8 +30,7 @@ interface QR {
 
 const TYPES = ['TABLE','ROOM','BAR','TAKEAWAY','OTHER'] as const;
 
-// Self-contained component to render QR code on a canvas.
-// Ensures rendering works perfectly even during table pagination, sorting, and filtering.
+// Self-contained component to render QR code on a canvas and Ensures rendering works perfectly even during table pagination, sorting, and filtering.
 function QRCanvas({ url }: { url: string }) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
