@@ -447,7 +447,7 @@ interface CategoryModalProps {
   onSave: (cat: Category) => void;
 }
 
-// ── Item Modal ──────────────────────────────────────────
+// Item Modal
 function ItemModal({ categories, item, onClose, onSave }: ItemModalProps) {
   const [form, setForm] = useState({
     name:        item?.name        || '',
